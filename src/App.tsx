@@ -890,7 +890,7 @@ function SupremeCourtCaseMatrix({
                               <span className="vote-matrix__mobile-copy">{compactScoreLabel}</span>
                             </span>
                           </span>
-                          <span>
+                          <span className="vote-matrix__person-detail">
                             <span className="vote-matrix__desktop-copy">{detailLabel}</span>
                             <span className="vote-matrix__mobile-copy">{compactDetailLabel}</span>
                           </span>
