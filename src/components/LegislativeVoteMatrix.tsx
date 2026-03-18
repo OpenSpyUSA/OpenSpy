@@ -1,5 +1,9 @@
 import { Avatar } from './Avatar'
 import {
+  compareLegislativeRollCallsByRecency,
+  formatRollCallMatrixDateLabel,
+} from '../legislativeRollCallFormat'
+import {
   formatAgeLabel,
   getCompactAgeValue,
   getCompactLastName,
@@ -10,28 +14,6 @@ import type {
   LegislativeTrumpRollCall,
   LegislativeVotePosition,
 } from '../types'
-
-const rollCallDateFormatter = new Intl.DateTimeFormat('en-US', {
-  day: 'numeric',
-  month: 'short',
-  timeZone: 'UTC',
-  year: '2-digit',
-})
-
-const HOUSE_MONTH_INDEX: Record<string, number> = {
-  Apr: 3,
-  Aug: 7,
-  Dec: 11,
-  Feb: 1,
-  Jan: 0,
-  Jul: 6,
-  Jun: 5,
-  Mar: 2,
-  May: 4,
-  Nov: 10,
-  Oct: 9,
-  Sep: 8,
-}
 
 const CATEGORY_SHORT_LABELS: Record<string, string> = {
   appropriations: 'Funds',
@@ -48,37 +30,6 @@ const CATEGORY_SHORT_LABELS: Record<string, string> = {
   trade: 'Trade',
   'veto-override': 'Veto',
   'war-powers': 'War',
-}
-
-function parseRollCallTimestamp(value: string, fallbackIndex: number) {
-  const houseMatch = value.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/)
-
-  if (houseMatch) {
-    const [, dayText, monthText, yearText] = houseMatch
-    const monthIndex = HOUSE_MONTH_INDEX[monthText]
-
-    if (monthIndex != null) {
-      return Date.UTC(Number(yearText), monthIndex, Number(dayText))
-    }
-  }
-
-  const parsed = Date.parse(value)
-
-  if (!Number.isNaN(parsed)) {
-    return parsed
-  }
-
-  return Number.MAX_SAFE_INTEGER - fallbackIndex
-}
-
-function formatRollCallDateLabel(value: string) {
-  const timestamp = parseRollCallTimestamp(value, 0)
-
-  if (!Number.isFinite(timestamp) || timestamp === Number.MAX_SAFE_INTEGER) {
-    return value
-  }
-
-  return rollCallDateFormatter.format(new Date(timestamp))
 }
 
 function getVotePositionLabel(position: LegislativeVotePosition) {
@@ -192,9 +143,10 @@ export function LegislativeVoteMatrix({
     .map((event, index) => ({
       event,
       index,
-      sortValue: parseRollCallTimestamp(event.date, index),
     }))
-    .sort((left, right) => right.sortValue - left.sortValue || left.index - right.index)
+    .sort((left, right) =>
+      compareLegislativeRollCallsByRecency(left.event, right.event, left.index, right.index),
+    )
     .map(({ event }) => event)
 
   return (
@@ -253,13 +205,13 @@ export function LegislativeVoteMatrix({
                           event.trumpOutcome ? ` vote-matrix__event-link--${event.trumpOutcome}` : ''
                         }${isSelected ? ' is-selected' : ''}`}
                         onClick={() => onOpenRollCall(event.id)}
-                        title={`${event.label} • ${formatRollCallDateLabel(event.date)} • ${getRollCallOutcomeLabel(event.trumpOutcome)}${
+                        title={`${event.label} • ${formatRollCallMatrixDateLabel(event)} • ${getRollCallOutcomeLabel(event.trumpOutcome)}${
                           countsLabel ? ` • ${countsLabel}` : ''
                         } • ${weightLabel}`}
                         type="button"
                       >
                         <span className="vote-matrix__event-date">
-                          {formatRollCallDateLabel(event.date)}
+                          {formatRollCallMatrixDateLabel(event)}
                         </span>
                         <span className="vote-matrix__event-category">
                           {getCategoryShortLabel(event.category)}

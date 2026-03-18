@@ -11,6 +11,10 @@ import { IndependentAgencyDirectory } from './components/IndependentAgencyDirect
 import { HOUSE_VACANCIES } from './houseVacancies'
 import { compareIndependentAgenciesByImportance } from './independentAgencyCatalog'
 import { LegislativeVoteMatrix } from './components/LegislativeVoteMatrix'
+import {
+  formatRollCallRecordedLine,
+  formatRollCallReferenceLine,
+} from './legislativeRollCallFormat'
 import { LegislativeMap } from './components/LegislativeMap'
 import './App.css'
 import {
@@ -71,28 +75,6 @@ function formatCaseDate(value: string) {
   return caseDateFormatter.format(new Date(`${value}T00:00:00Z`))
 }
 
-const rollCallDateFormatter = new Intl.DateTimeFormat('en-US', {
-  day: 'numeric',
-  month: 'short',
-  timeZone: 'UTC',
-  year: 'numeric',
-})
-
-const HOUSE_MONTH_INDEX: Record<string, number> = {
-  Apr: 3,
-  Aug: 7,
-  Dec: 11,
-  Feb: 1,
-  Jan: 0,
-  Jul: 6,
-  Jun: 5,
-  Mar: 2,
-  May: 4,
-  Nov: 10,
-  Oct: 9,
-  Sep: 8,
-}
-
 function getJusticeShortName(name: string) {
   const cleaned = name.replace(/,?\s+(Jr\.|Sr\.|II|III|IV)$/i, '').trim()
   const parts = cleaned.split(/\s+/)
@@ -119,37 +101,6 @@ function getTrumpCaseTypeLabel(type: SupremeCourtCase['type']) {
     case 'procedural':
       return 'Procedural'
   }
-}
-
-function parseRollCallTimestamp(value: string, fallbackIndex = 0) {
-  const houseMatch = value.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/)
-
-  if (houseMatch) {
-    const [, dayText, monthText, yearText] = houseMatch
-    const monthIndex = HOUSE_MONTH_INDEX[monthText]
-
-    if (monthIndex != null) {
-      return Date.UTC(Number(yearText), monthIndex, Number(dayText))
-    }
-  }
-
-  const parsed = Date.parse(value)
-
-  if (!Number.isNaN(parsed)) {
-    return parsed
-  }
-
-  return Number.MAX_SAFE_INTEGER - fallbackIndex
-}
-
-function formatRollCallDate(value: string) {
-  const timestamp = parseRollCallTimestamp(value)
-
-  if (!Number.isFinite(timestamp) || timestamp === Number.MAX_SAFE_INTEGER) {
-    return value
-  }
-
-  return rollCallDateFormatter.format(new Date(timestamp))
 }
 
 function formatRollCallCategory(category: string) {
@@ -1043,6 +994,8 @@ function DetailPanel({
     const voteTotals = formatRollCallVoteTotals(rollCall)
     const outcomeLabel = formatRollCallOutcome(rollCall.trumpOutcome)
     const narrative = describeLegislativeRollCall(rollCall)
+    const referenceLine = formatRollCallReferenceLine(rollCall)
+    const recordedLine = formatRollCallRecordedLine(rollCall)
 
     return (
       <aside className="detail-panel detail-panel--filled">
@@ -1055,7 +1008,10 @@ function DetailPanel({
             <div className="detail-header__name-row">
               <h2>{rollCall.label}</h2>
             </div>
-            <p className="detail-title">{formatRollCallDate(rollCall.date)}</p>
+            {referenceLine ? <p className="detail-title">{referenceLine}</p> : null}
+            {recordedLine ? (
+              <p className={referenceLine ? 'detail-subtitle' : 'detail-title'}>{recordedLine}</p>
+            ) : null}
           </div>
         </div>
 

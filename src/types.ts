@@ -62,14 +62,19 @@ export interface SupremeCourtCase {
 }
 
 export interface LegislativeTrumpRollCall {
+  actionTime?: string
+  billNumber?: string
   category: string
   chamber: 'house' | 'senate'
+  congress?: number
   date: string
   id: string
   label: string
   nayTotal?: number
   proTrumpCast: string
   question: string
+  rollCallNumber?: number
+  session?: string
   sourceUrl: string
   title: string
   trumpOutcome?: 'anti' | 'pro'

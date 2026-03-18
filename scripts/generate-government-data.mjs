@@ -2751,8 +2751,34 @@ function buildSenateRollCallPageUrl(congress, session, voteNumber) {
   ).padStart(5, '0')}.htm`
 }
 
+function formatLegislationNumber(value) {
+  const cleaned = value.replace(/\./g, ' ').replace(/\s+/g, ' ').trim()
+
+  if (!cleaned) {
+    return ''
+  }
+
+  const tokens = cleaned.split(' ')
+  const numberIndex = tokens.findIndex((token) => /\d/.test(token))
+
+  if (numberIndex <= 0) {
+    return cleaned
+  }
+
+  const prefix = tokens
+    .slice(0, numberIndex)
+    .map((token) => (/^[A-Za-z]+$/.test(token) ? `${token.toUpperCase()}.` : token))
+
+  return [...prefix, ...tokens.slice(numberIndex)].join(' ')
+}
+
 function parseHouseVoteXml(xml) {
+  const congress = Number(xml.match(/<congress>(\d+)<\/congress>/)?.[1] ?? Number.NaN)
+  const session = xml.match(/<session>([^<]+)<\/session>/)?.[1]?.trim() ?? ''
   const date = xml.match(/<action-date>([^<]+)<\/action-date>/)?.[1]?.trim() ?? ''
+  const actionTime = xml.match(/<action-time(?: [^>]*)?>([^<]+)<\/action-time>/)?.[1]?.trim() ?? ''
+  const rollCallNumber = Number(xml.match(/<rollcall-num>(\d+)<\/rollcall-num>/)?.[1] ?? Number.NaN)
+  const billNumber = formatLegislationNumber(xml.match(/<legis-num>([^<]+)<\/legis-num>/)?.[1]?.trim() ?? '')
   const question = xml.match(/<vote-question>([^<]+)<\/vote-question>/)?.[1]?.trim() ?? ''
   const resultText = xml.match(/<vote-result>([^<]+)<\/vote-result>/)?.[1]?.trim() ?? ''
   const title = xml.match(/<vote-desc>([^<]+)<\/vote-desc>/)?.[1]?.trim() ?? ''
@@ -2766,10 +2792,29 @@ function parseHouseVoteXml(xml) {
     entries.set(match[1], match[2].trim())
   }
 
-  return { date, entries, nayTotal, question, resultText, title, yeaTotal }
+  return {
+    actionTime,
+    billNumber: billNumber || undefined,
+    congress: Number.isFinite(congress) ? congress : undefined,
+    date,
+    entries,
+    nayTotal,
+    question,
+    resultText,
+    rollCallNumber: Number.isFinite(rollCallNumber) ? rollCallNumber : undefined,
+    session: session || undefined,
+    title,
+    yeaTotal,
+  }
 }
 
 function parseSenateVoteXml(xml) {
+  const congress = Number(xml.match(/<congress>(\d+)<\/congress>/)?.[1] ?? Number.NaN)
+  const session = xml.match(/<session>([^<]+)<\/session>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
+  const rollCallNumber = Number(xml.match(/<vote_number>(\d+)<\/vote_number>/)?.[1] ?? Number.NaN)
+  const billNumber = formatLegislationNumber(
+    xml.match(/<document_name>([\s\S]*?)<\/document_name>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? '',
+  )
   const date = xml.match(/<vote_date>([^<]+)<\/vote_date>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
   const question = xml.match(/<question>([\s\S]*?)<\/question>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
   const resultText =
@@ -2792,7 +2837,19 @@ function parseSenateVoteXml(xml) {
     })
   }
 
-  return { date, entries, nayTotal, question, resultText, title, yeaTotal }
+  return {
+    billNumber: billNumber || undefined,
+    congress: Number.isFinite(congress) ? congress : undefined,
+    date,
+    entries,
+    nayTotal,
+    question,
+    resultText,
+    rollCallNumber: Number.isFinite(rollCallNumber) ? rollCallNumber : undefined,
+    session: session || undefined,
+    title,
+    yeaTotal,
+  }
 }
 
 function buildLegislativeTrumpLabel(score) {
@@ -2934,10 +2991,15 @@ async function buildSelectedLegislativeRollCallSnapshots() {
 
       return {
         ...event,
+        actionTime: parsed.actionTime,
+        billNumber: parsed.billNumber,
+        congress: parsed.congress,
         date: parsed.date,
         entries: parsed.entries,
         nayTotal: parsed.nayTotal,
         question: parsed.question,
+        rollCallNumber: parsed.rollCallNumber,
+        session: parsed.session,
         sourceUrl,
         title: parsed.title,
         trumpOutcome: deriveTrumpRollCallOutcome(
@@ -2957,10 +3019,14 @@ async function buildSelectedLegislativeRollCallSnapshots() {
 
     return {
       ...event,
+      billNumber: parsed.billNumber,
+      congress: parsed.congress,
       date: parsed.date,
       entries: parsed.entries,
       nayTotal: parsed.nayTotal,
       question: parsed.question,
+      rollCallNumber: parsed.rollCallNumber,
+      session: parsed.session,
       sourceUrl,
       title: parsed.title,
       trumpOutcome: deriveTrumpRollCallOutcome(
@@ -3107,14 +3173,19 @@ async function buildTrumpRelationshipContext(senators, representatives) {
       houseCandidateCount: houseTrumpRollCallPool.length,
       houseSelectedCount: selectedHouseCount,
       selectedEvents: snapshots.map((snapshot) => ({
+        actionTime: snapshot.actionTime,
+        billNumber: snapshot.billNumber,
         category: snapshot.category,
         chamber: snapshot.chamber,
+        congress: snapshot.congress,
         date: snapshot.date,
         id: snapshot.id,
         label: snapshot.label,
         nayTotal: snapshot.nayTotal,
         proTrumpCast: snapshot.proTrumpCast,
         question: snapshot.question,
+        rollCallNumber: snapshot.rollCallNumber,
+        session: snapshot.session,
         sourceUrl: snapshot.sourceUrl,
         title: snapshot.title,
         trumpOutcome: snapshot.trumpOutcome,

@@ -2182,6 +2182,12 @@
   color: var(--ink);
 }
 
+.detail-subtitle {
+  margin: 0;
+  font-size: 0.96rem;
+  color: var(--ink-soft);
+}
+
 .detail-tags {
   display: flex;
   flex-wrap: wrap;
