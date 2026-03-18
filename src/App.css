@@ -2568,12 +2568,15 @@
   }
 
   .vote-matrix__corner {
-    min-width: 124px;
+    width: max-content;
+    min-width: 0;
     padding: 7px 8px;
   }
 
   .vote-matrix__person-button {
-    min-width: 124px;
+    width: max-content;
+    min-width: 0;
+    max-width: 100%;
     grid-template-columns: 20px minmax(0, 1fr);
     gap: 5px;
     padding: 4px 5px;
