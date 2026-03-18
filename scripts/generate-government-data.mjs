@@ -747,6 +747,81 @@ const INDEPENDENT_AGENCY_PROFILE_OVERRIDES = new Map([
   ],
 ])
 
+const INDEPENDENT_AGENCY_IMAGE_OVERRIDES = new Map([
+  [
+    'Corporation for National and Community Service',
+    '/portraits/independent-agencies/jennifer-tahmasebi.jpg',
+  ],
+  [
+    'Defense Nuclear Facilities Safety Board',
+    '/portraits/independent-agencies/patricia-l-lee.jpg',
+  ],
+  [
+    'Export-Import Bank of the United States',
+    '/portraits/independent-agencies/john-jovanovic.png',
+  ],
+  ['Farm Credit Administration', '/portraits/independent-agencies/jeffery-s-hall.png'],
+  [
+    'Federal Deposit Insurance Corporation',
+    '/portraits/independent-agencies/travis-hill.jpg',
+  ],
+  ['Federal Election Commission', '/portraits/independent-agencies/shana-m-broussard.png'],
+  [
+    'Federal Maritime Commission',
+    '/portraits/independent-agencies/laura-dibella.jpg',
+  ],
+  [
+    'Federal Mediation and Conciliation Service',
+    '/portraits/independent-agencies/anna-davis.jpg',
+  ],
+  [
+    'Federal Mine Safety and Health Review Commission',
+    '/portraits/independent-agencies/marco-m-rajkovich.jpg',
+  ],
+  [
+    'National Foundation on the Arts and the Humanities',
+    '/portraits/independent-agencies/mary-anne-carter.png',
+  ],
+  [
+    'National Labor Relations Board',
+    '/portraits/independent-agencies/marvin-e-kaplan.webp',
+  ],
+  ['National Mediation Board', '/portraits/independent-agencies/loren-sweatt.jpg'],
+  [
+    'National Railroad Passenger Corporation (AMTRAK)',
+    '/portraits/independent-agencies/roger-harris.jpg',
+  ],
+  ['National Science Foundation', '/portraits/independent-agencies/brian-stone.jpg'],
+  ['Nuclear Regulatory Commission', '/portraits/independent-agencies/ho-nieh.jpg'],
+  ['Occupational Safety and Health Review Commission', '/portraits/independent-agencies/jonathan-snare.jpg'],
+  ['Office of Government Ethics', '/portraits/independent-agencies/eric-ueland.jpg'],
+  [
+    'Overseas Private Investment Corporation',
+    '/portraits/independent-agencies/benjamin-black.png',
+  ],
+  ['Peace Corps', '/portraits/independent-agencies/paul-shea.jpg'],
+  [
+    'Postal Regulatory Commission',
+    '/portraits/independent-agencies/michael-m-kubayanda.jpg',
+  ],
+  ['Railroad Retirement Board', '/portraits/independent-agencies/erhard-r-chorle.png'],
+  ['Selective Service System', '/portraits/independent-agencies/craig-t-brown.jpg'],
+  ['Tennessee Valley Authority', '/portraits/independent-agencies/don-moul.jpg'],
+  ['Trade and Development Agency', '/portraits/independent-agencies/thomas-r-hardy.jpg'],
+  [
+    'United States Agency for Global Media',
+    '/portraits/independent-agencies/michael-rigas.jpg',
+  ],
+  [
+    'United States Commission on Civil Rights',
+    '/portraits/independent-agencies/rochelle-garza.webp',
+  ],
+  [
+    'United States International Trade Commission',
+    '/portraits/independent-agencies/amy-a-karpel.jpg',
+  ],
+])
+
 const INDEPENDENT_AGENCY_SERVICE_OVERRIDES = new Map([
   [
     'Central Intelligence Agency',
@@ -1477,6 +1552,7 @@ async function buildIndependentAgencyHeads() {
       ...(INDEPENDENT_AGENCY_SERVICE_OVERRIDES.get(item.name) ?? {}),
       ...(INDEPENDENT_AGENCY_PROFILE_OVERRIDES.get(item.name) ?? {}),
     }
+    const imageUrl = INDEPENDENT_AGENCY_IMAGE_OVERRIDES.get(item.name) ?? override.imageUrl
     const seed = await fetchIndependentAgencyProfileSeed(item).catch(() => ({}))
     const name = override.name ?? seed.name
 
@@ -1489,6 +1565,7 @@ async function buildIndependentAgencyHeads() {
         return {
           ...clonePerson(cachedMatch),
           department: item.name,
+          imageUrl: imageUrl ?? cachedMatch.imageUrl,
           sortOrder: 30 + index,
           subtitle: item.name,
         }
@@ -1522,7 +1599,7 @@ async function buildIndependentAgencyHeads() {
         override.id ??
         INDEPENDENT_AGENCY_ID_OVERRIDES.get(item.name) ??
         `executive-${slugify(name)}-${slugify(item.name)}`,
-      imageUrl: override.imageUrl,
+      imageUrl,
       name,
       salaryNote: EXECUTIVE_SALARY_NOTE,
       sectionId: 'independent-agencies',
@@ -3909,28 +3986,10 @@ async function mapWithConcurrency(items, concurrency, mapper) {
 }
 
 async function enrichPeopleWithXUrls(people) {
+  const skipExternalXFetch = process.env.SKIP_X_FETCH === '1'
   const enrichedPeople = await mapWithConcurrency(people, 10, async (person) => {
     if (manualXUrlSuppressions.has(person.name)) {
       return person
-    }
-
-    const urlsToCheck = [...new Set([person.website, person.sourceUrl].filter(Boolean))]
-
-    for (const url of urlsToCheck) {
-      const html = await fetchOptionalText(url)
-
-      if (!html) {
-        continue
-      }
-
-      const bestXUrl = chooseBestXUrl(person, extractXCandidates(html))
-
-      if (bestXUrl) {
-        return {
-          ...person,
-          xUrl: bestXUrl,
-        }
-      }
     }
 
     const override = manualXUrlOverrides.get(person.name)
@@ -3942,6 +4001,27 @@ async function enrichPeopleWithXUrls(people) {
       return {
         ...person,
         xUrl: override,
+      }
+    }
+
+    if (!skipExternalXFetch) {
+      const urlsToCheck = [...new Set([person.website, person.sourceUrl].filter(Boolean))]
+
+      for (const url of urlsToCheck) {
+        const html = await fetchOptionalText(url)
+
+        if (!html) {
+          continue
+        }
+
+        const bestXUrl = chooseBestXUrl(person, extractXCandidates(html))
+
+        if (bestXUrl) {
+          return {
+            ...person,
+            xUrl: bestXUrl,
+          }
+        }
       }
     }
 
