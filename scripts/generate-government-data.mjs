@@ -758,14 +758,14 @@ const INDEPENDENT_AGENCY_IMAGE_OVERRIDES = new Map([
   ],
   [
     'Export-Import Bank of the United States',
-    '/portraits/independent-agencies/john-jovanovic.png',
+    '/portraits/independent-agencies/john-jovanovic.jpg',
   ],
-  ['Farm Credit Administration', '/portraits/independent-agencies/jeffery-s-hall.png'],
+  ['Farm Credit Administration', '/portraits/independent-agencies/jeffery-s-hall.jpg'],
   [
     'Federal Deposit Insurance Corporation',
     '/portraits/independent-agencies/travis-hill.jpg',
   ],
-  ['Federal Election Commission', '/portraits/independent-agencies/shana-m-broussard.png'],
+  ['Federal Election Commission', '/portraits/independent-agencies/shana-m-broussard.jpg'],
   [
     'Federal Maritime Commission',
     '/portraits/independent-agencies/laura-dibella.jpg',
@@ -780,7 +780,7 @@ const INDEPENDENT_AGENCY_IMAGE_OVERRIDES = new Map([
   ],
   [
     'National Foundation on the Arts and the Humanities',
-    '/portraits/independent-agencies/mary-anne-carter.png',
+    '/portraits/independent-agencies/mary-anne-carter.jpg',
   ],
   [
     'National Labor Relations Board',
@@ -797,14 +797,14 @@ const INDEPENDENT_AGENCY_IMAGE_OVERRIDES = new Map([
   ['Office of Government Ethics', '/portraits/independent-agencies/eric-ueland.jpg'],
   [
     'Overseas Private Investment Corporation',
-    '/portraits/independent-agencies/benjamin-black.png',
+    '/portraits/independent-agencies/benjamin-black.jpg',
   ],
   ['Peace Corps', '/portraits/independent-agencies/paul-shea.jpg'],
   [
     'Postal Regulatory Commission',
     '/portraits/independent-agencies/michael-m-kubayanda.jpg',
   ],
-  ['Railroad Retirement Board', '/portraits/independent-agencies/erhard-r-chorle.png'],
+  ['Railroad Retirement Board', '/portraits/independent-agencies/erhard-r-chorle.jpg'],
   ['Selective Service System', '/portraits/independent-agencies/craig-t-brown.jpg'],
   ['Tennessee Valley Authority', '/portraits/independent-agencies/don-moul.jpg'],
   ['Trade and Development Agency', '/portraits/independent-agencies/thomas-r-hardy.jpg'],
