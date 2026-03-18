@@ -359,6 +359,13 @@ const houseCandidateExtras = [
     label: 'No Sanctuary for Criminals Act recommit motion',
     proTrumpCast: 'Nay',
   }),
+  house('house-kates-law-recommit', 2017, 343, 'immigration', {
+    label: "Kate's Law recommit motion",
+    proTrumpCast: 'Nay',
+  }),
+  house('house-kates-law-passage', 2017, 344, 'immigration', {
+    label: "Kate's Law passage",
+  }),
   house('house-tax-cuts-go-to-conference', 2017, 653, 'taxes', {
     label: 'Tax Cuts and Jobs Act motion to go to conference',
   }),
@@ -376,6 +383,12 @@ const houseCandidateExtras = [
   house('house-tax-cuts-senate-rule', 2017, 698, 'taxes', {
     label: 'Tax Cuts and Jobs Act Senate-amendment rule adoption',
   }),
+  house('house-2018-medicaid-rule-pq', 2018, 273, 'health-care', {
+    label: 'IMD CARE Act rule previous question',
+  }),
+  house('house-2018-medicaid-rule', 2018, 274, 'health-care', {
+    label: 'IMD CARE Act rule adoption',
+  }),
   house('house-2018-medicaid-recommit', 2018, 275, 'health-care', {
     label: 'IMD CARE Act recommit motion',
     proTrumpCast: 'Nay',
@@ -387,11 +400,41 @@ const houseCandidateExtras = [
     label: 'Border Security and Immigration Reform Act recommit motion',
     proTrumpCast: 'Nay',
   }),
+  house('house-2025-hr1-recommit', 2025, 144, 'reconciliation', {
+    label: 'One Big Beautiful Bill Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  house('house-2025-save-sba-recommit', 2025, 152, 'immigration', {
+    label: 'Save SBA from Sanctuary Cities Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  house('house-2025-rescissions-recommit', 2025, 167, 'rescissions', {
+    label: 'Rescissions Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  house('house-2025-dc-immigration-rule-pq', 2025, 160, 'immigration', {
+    label: 'D.C. Federal Immigration Compliance Act rule previous question',
+  }),
+  house('house-2025-dc-immigration-rule', 2025, 161, 'immigration', {
+    label: 'D.C. Federal Immigration Compliance Act rule adoption',
+  }),
+  house('house-2025-dc-immigration-recommit', 2025, 170, 'immigration', {
+    label: 'D.C. Federal Immigration Compliance Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  house('house-2025-kayla-hamilton-recommit', 2025, 339, 'immigration', {
+    label: 'Kayla Hamilton Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
   house('house-2025-cr-rule-pq', 2025, 272, 'appropriations', {
     label: 'FY2026 continuing appropriations rule previous question',
   }),
   house('house-2025-cr-rule', 2025, 273, 'appropriations', {
     label: 'FY2026 continuing appropriations rule adoption',
+  }),
+  house('house-2025-cr-recommit', 2025, 280, 'appropriations', {
+    label: 'FY2026 continuing appropriations recommit motion',
+    proTrumpCast: 'Nay',
   }),
   house('house-2025-cr-passage', 2025, 281, 'appropriations', {
     label: 'Continuing Appropriations and Extensions Act, 2026 House passage',
@@ -413,6 +456,10 @@ const houseCandidateExtras = [
   }),
   house('house-2026-consolidated-senate-concur', 2026, 53, 'appropriations', {
     label: 'Consolidated Appropriations Act, 2026 final House concurrence',
+  }),
+  house('house-2026-dhs-recommit', 2026, 86, 'appropriations', {
+    label: 'FY2026 DHS appropriations recommit motion',
+    proTrumpCast: 'Nay',
   }),
 ]
 
