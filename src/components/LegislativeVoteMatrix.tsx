@@ -282,9 +282,13 @@ export function LegislativeVoteMatrix({
               const scoreLabel = formatCompactTrumpScore(person.trumpScore)
               const compactScoreLabel = person.trumpScore.toFixed(1)
               const sinceLabel = getLegislativeSinceLabel(person)
-              const compactAgeLabel = getCompactAgeValue(ageLabel)
-              const compactSinceLabel = getCompactSinceValue(sinceLabel)
               const detailLabel = [ageLabel, sinceLabel]
+                .filter(Boolean)
+                .join(' • ')
+              const compactDetailLabel = [
+                getCompactAgeValue(ageLabel),
+                getCompactSinceValue(sinceLabel),
+              ]
                 .filter(Boolean)
                 .join(' • ')
 
@@ -309,17 +313,12 @@ export function LegislativeVoteMatrix({
                           </strong>
                           <span className="vote-matrix__score">
                             <span className="vote-matrix__desktop-copy">{scoreLabel}</span>
+                            <span className="vote-matrix__mobile-copy">{compactScoreLabel}</span>
                           </span>
                         </span>
                         <span className="vote-matrix__person-detail">
                           <span className="vote-matrix__desktop-copy">{detailLabel}</span>
-                          <span className="vote-matrix__mobile-copy vote-matrix__person-detail-mobile">
-                            <span className="vote-matrix__person-detail-left">{compactAgeLabel}</span>
-                            <span className="vote-matrix__person-detail-right">
-                              {compactSinceLabel ? <span>{compactSinceLabel}</span> : null}
-                              <span className="vote-matrix__score-chip">{compactScoreLabel}</span>
-                            </span>
-                          </span>
+                          <span className="vote-matrix__mobile-copy">{compactDetailLabel}</span>
                         </span>
                       </span>
                     </button>
