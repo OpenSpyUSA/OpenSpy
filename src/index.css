@@ -1,0 +1,81 @@
+:root {
+  --paper: #f5f5f7;
+  --paper-deep: #ececf0;
+  --paper-elevated: rgba(255, 255, 255, 0.76);
+  --ink: #1d1d1f;
+  --ink-soft: #6e6e73;
+  --line: rgba(29, 29, 31, 0.1);
+  --line-strong: rgba(29, 29, 31, 0.16);
+  --shadow-soft: 0 22px 48px rgba(15, 23, 42, 0.08);
+  --shadow-float: 0 34px 80px rgba(15, 23, 42, 0.12);
+  --display:
+    'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --sans:
+    'SF Pro Text', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
+    Helvetica, Arial, sans-serif;
+  --democratic: #3478f6;
+  --republican: #ff5a52;
+  --independent: #38a169;
+  --nonpartisan: #8e8e93;
+
+  font-family: var(--sans);
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top center, rgba(88, 86, 214, 0.08), transparent 18%),
+    radial-gradient(circle at 18% 18%, rgba(52, 120, 246, 0.1), transparent 22%),
+    radial-gradient(circle at 82% 10%, rgba(255, 90, 82, 0.08), transparent 20%),
+    linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 36%, #efeff4 100%);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100svh;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.56), rgba(255, 255, 255, 0.12)),
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.65), transparent 54%);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+#root {
+  min-height: 100svh;
+  position: relative;
+  z-index: 1;
+}

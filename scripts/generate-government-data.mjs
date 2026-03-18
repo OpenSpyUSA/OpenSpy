@@ -1,0 +1,4575 @@
+import { execFileSync } from 'node:child_process'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import {
+  houseTrumpRollCallPool,
+  senateTrumpRollCallPool,
+} from './legislativeTrumpRollCalls.mjs'
+import {
+  getLegislativeRollCallWeight,
+  LEGISLATIVE_WEIGHTING_NOTE,
+} from './legislativeTrumpWeights.mjs'
+import { manualCareerHistoryById } from './manualCareerHistory.mjs'
+import { manualDepartmentBudgetsByDepartment } from './manualDepartmentBudgets.mjs'
+import { manualIndependentAgencyBudgetsByDepartment } from './manualIndependentAgencyBudgets.mjs'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const outPath = resolve(__dirname, '../public/data/governmentData.json')
+
+const REQUEST_HEADERS = {
+  accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+  'accept-language': 'en-US,en;q=0.9',
+  'cache-control': 'no-cache',
+  pragma: 'no-cache',
+  'user-agent':
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
+}
+
+function loadPreviousDataset() {
+  if (!existsSync(outPath)) {
+    return null
+  }
+
+  try {
+    return JSON.parse(readFileSync(outPath, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+const previousDataset = loadPreviousDataset()
+const previousPeople = previousDataset?.people ?? []
+const previousPeopleById = new Map(previousPeople.map((person) => [person.id, person]))
+const previousPeopleByWebsite = new Map(
+  previousPeople.filter((person) => person.website).map((person) => [person.website, person]),
+)
+const previousHouseImageBySeat = new Map(
+  previousPeople
+    .filter((person) => person.sectionId === 'house' && person.stateCode && person.district)
+    .map((person) => [`${person.stateCode}|${person.district}`, person.imageUrl])
+    .filter((entry) => entry[1]),
+)
+
+function clonePerson(person) {
+  return {
+    ...person,
+    agencyBudgetAmount: person.agencyBudgetAmount,
+    agencyBudgetLabel: person.agencyBudgetLabel,
+    agencyBudgetNote: person.agencyBudgetNote,
+    agencyBudgetSourceLabel: person.agencyBudgetSourceLabel,
+    agencyBudgetSourceUrl: person.agencyBudgetSourceUrl,
+    agencyFundingModel: person.agencyFundingModel,
+    birthDate: person.birthDate,
+    birthYear: person.birthYear,
+    careerHistory: person.careerHistory ? person.careerHistory.map((entry) => ({ ...entry })) : undefined,
+    committees: person.committees ? [...person.committees] : undefined,
+    education: person.education ? person.education.map((entry) => ({ ...entry })) : undefined,
+    departmentBudgetDiscretionaryAmount: person.departmentBudgetDiscretionaryAmount,
+    departmentBudgetDiscretionaryLabel: person.departmentBudgetDiscretionaryLabel,
+    departmentBudgetNote: person.departmentBudgetNote,
+    departmentBudgetSourceLabel: person.departmentBudgetSourceLabel,
+    departmentBudgetSourceUrl: person.departmentBudgetSourceUrl,
+    departmentBudgetTotalAmount: person.departmentBudgetTotalAmount,
+    departmentBudgetTotalLabel: person.departmentBudgetTotalLabel,
+    highestDegree: person.highestDegree,
+    highestEducationField: person.highestEducationField,
+    highestEducationSchool: person.highestEducationSchool,
+    liabilities: person.liabilities ? person.liabilities.map((entry) => ({ ...entry })) : undefined,
+    recentTrades: person.recentTrades ? person.recentTrades.map((entry) => ({ ...entry })) : undefined,
+    trumpEvidence: person.trumpEvidence ? [...person.trumpEvidence] : undefined,
+    topHoldings: person.topHoldings ? person.topHoldings.map((entry) => ({ ...entry })) : undefined,
+  }
+}
+
+function applyManualCareerHistoryOverrides(people) {
+  return people.map((person) =>
+    manualCareerHistoryById[person.id]
+      ? {
+          ...person,
+          careerHistory: manualCareerHistoryById[person.id].map((entry) => ({ ...entry })),
+        }
+      : person,
+  )
+}
+
+const SOURCES = [
+  {
+    label: 'The White House Cabinet',
+    url: 'https://www.whitehouse.gov/administration/the-cabinet/',
+  },
+  {
+    label: "OGE Officials' Individual Disclosures Search Collection",
+    url: 'https://www.oge.gov/Web/OGE.nsf/Officials%20Individual%20Disclosures%20Search%20Collection?OpenForm=',
+  },
+  {
+    label: 'U.S. Senate Current Members XML',
+    url: 'https://www.senate.gov/general/contact_information/senators_cfm.xml',
+  },
+  {
+    label: 'Senate eFD Search',
+    url: 'https://efdsearch.senate.gov/search/home/',
+  },
+  {
+    label: 'U.S. House Representatives',
+    url: 'https://www.house.gov/representatives',
+  },
+  {
+    label: 'House Financial Disclosure Search',
+    url: 'https://disclosures-clerk.house.gov/FinancialDisclosure/ViewSearch',
+  },
+  {
+    label: 'President Compensation Statute',
+    url: 'https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title3-section102&num=0&edition=prelim',
+  },
+  {
+    label: 'OPM 2026 Senior Political Pay Freeze Guidance',
+    url: 'https://www.opm.gov/policy-data-oversight/pay-leave/salaries-wages/2026/executive-senior-level/freeze-for-certain-senior-political-officials/',
+  },
+  {
+    label: 'Current House Salaries',
+    url: 'https://www.house.gov/doing-business-with-the-house/current-house-salaries',
+  },
+  {
+    label: '2026 Executive Schedule rates',
+    url: 'https://www.whitehouse.gov/briefing-room/presidential-actions/2025/12/23/adjustments-of-certain-rates-of-pay/',
+  },
+  {
+    label: 'Senate Salaries Since 1789',
+    url: 'https://www.senate.gov/legislative/common/generic/Salaries.htm',
+  },
+  {
+    label: 'Judicial Compensation',
+    url: 'https://www.uscourts.gov/judges-judgeships/judicial-compensation',
+  },
+  {
+    label: 'House Roll Call 17 (Second Trump Impeachment)',
+    url: 'https://clerk.house.gov/Votes/202117',
+  },
+  {
+    label: 'House Roll Calls 10 and 11 (Electoral Vote Objections)',
+    url: 'https://clerk.house.gov/Votes/202110',
+  },
+  {
+    label: 'Supreme Court Current Members',
+    url: 'https://www.supremecourt.gov/about/biographies.aspx',
+  },
+  {
+    label: 'Federal Judicial Financial Disclosure Reports',
+    url: 'https://pub.jefs.uscourts.gov/',
+  },
+  {
+    label: 'Trump v. United States opinion',
+    url: 'https://www.supremecourt.gov/opinions/23pdf/23-939_e2pg.pdf',
+  },
+  {
+    label: 'Trump v. CASA, Inc. opinion',
+    url: 'https://www.supremecourt.gov/opinions/24pdf/24a884_8n59.pdf',
+  },
+  {
+    label: 'Learning Resources, Inc. v. Trump opinion',
+    url: 'https://www.supremecourt.gov/opinions/25pdf/24-1287_4gcj.pdf',
+  },
+  {
+    label: 'Senate Roll Call Vote 59 (Second Trump Impeachment Trial)',
+    url: 'https://www.senate.gov/legislative/LIS/roll_call_votes/vote1171/vote_117_1_00059.htm',
+  },
+  {
+    label: 'Senate Roll Call Votes 1 and 2 (Electoral Vote Objections)',
+    url: 'https://www.senate.gov/legislative/LIS/roll_call_votes/vote1171/vote_117_1_00001.htm',
+  },
+  {
+    label: 'Federal Reserve Board leadership',
+    url: 'https://www.federalreserve.gov/aboutthefed/bios/board/powell.htm',
+  },
+  {
+    label: 'SEC commissioners',
+    url: 'https://www.sec.gov/about/commissioners/paul-s-atkins',
+  },
+  {
+    label: 'FTC commissioners and staff',
+    url: 'https://www.ftc.gov/about-ftc/commissioners-staff/andrew-n-ferguson',
+  },
+  {
+    label: 'FCC leadership',
+    url: 'https://www.fcc.gov/about/leadership/brendan-carr',
+  },
+  {
+    label: 'CFTC chair',
+    url: 'https://www.cftc.gov/About/Commissioners/MichaelSelig/index.htm',
+  },
+  {
+    label: 'Wikidata person records',
+    url: 'https://www.wikidata.org/',
+  },
+  {
+    label: 'Wikipedia biographies (fallback)',
+    url: 'https://en.wikipedia.org/',
+  },
+]
+
+const STATE_NAMES = {
+  AK: 'Alaska',
+  AL: 'Alabama',
+  AR: 'Arkansas',
+  AS: 'American Samoa',
+  AZ: 'Arizona',
+  CA: 'California',
+  CO: 'Colorado',
+  CT: 'Connecticut',
+  DC: 'District of Columbia',
+  DE: 'Delaware',
+  FL: 'Florida',
+  FM: 'Federated States of Micronesia',
+  GA: 'Georgia',
+  GU: 'Guam',
+  HI: 'Hawaii',
+  IA: 'Iowa',
+  ID: 'Idaho',
+  IL: 'Illinois',
+  IN: 'Indiana',
+  KS: 'Kansas',
+  KY: 'Kentucky',
+  LA: 'Louisiana',
+  MA: 'Massachusetts',
+  MD: 'Maryland',
+  ME: 'Maine',
+  MH: 'Marshall Islands',
+  MI: 'Michigan',
+  MN: 'Minnesota',
+  MO: 'Missouri',
+  MP: 'Northern Mariana Islands',
+  MS: 'Mississippi',
+  MT: 'Montana',
+  NC: 'North Carolina',
+  ND: 'North Dakota',
+  NE: 'Nebraska',
+  NH: 'New Hampshire',
+  NJ: 'New Jersey',
+  NM: 'New Mexico',
+  NV: 'Nevada',
+  NY: 'New York',
+  OH: 'Ohio',
+  OK: 'Oklahoma',
+  OR: 'Oregon',
+  PA: 'Pennsylvania',
+  PR: 'Puerto Rico',
+  PW: 'Palau',
+  RI: 'Rhode Island',
+  SC: 'South Carolina',
+  SD: 'South Dakota',
+  TN: 'Tennessee',
+  TX: 'Texas',
+  UT: 'Utah',
+  VA: 'Virginia',
+  VI: 'Virgin Islands',
+  VT: 'Vermont',
+  WA: 'Washington',
+  WI: 'Wisconsin',
+  WV: 'West Virginia',
+  WY: 'Wyoming',
+}
+
+const PARTY_DATA = {
+  D: { alignment: 'democratic', label: 'Democratic' },
+  I: { alignment: 'independent', label: 'Independent' },
+  R: { alignment: 'republican', label: 'Republican' },
+}
+
+const STATE_CODES_BY_NAME = Object.fromEntries(
+  Object.entries(STATE_NAMES).map(([code, name]) => [name, code]),
+)
+
+const CONGRESSIONAL_SALARY_NOTE =
+  'Members of Congress receive a statutory federal salary, with some leadership posts receiving additional compensation.'
+const CONGRESSIONAL_WEALTH_NOTE =
+  'Personal wealth varies widely. Congressional filings are public, but they disclose assets and liabilities mostly in ranges rather than as one exact net-worth number.'
+const EXECUTIVE_SALARY_NOTE =
+  'Senior executive branch pay is set by federal law and executive schedule rules; cabinet secretaries file annual financial disclosures.'
+const EXECUTIVE_WEALTH_NOTE =
+  'Public financial disclosures are required for senior executive officials, and those forms usually report assets and liabilities in ranges rather than as one exact net-worth figure.'
+const JUSTICE_SALARY_NOTE =
+  'Supreme Court compensation is set by law for the chief justice and associate justices, alongside annual financial disclosure requirements.'
+const JUSTICE_WEALTH_NOTE =
+  'Justices file public annual financial disclosures. These reports are more reliable than outside net-worth estimates, and ideological color-coding on this site is descriptive only.'
+const PRESIDENT_SALARY_SOURCE_URL =
+  'https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title3-section102&num=0&edition=prelim'
+const SENIOR_POLITICAL_PAY_FREEZE_SOURCE_URL =
+  'https://www.opm.gov/policy-data-oversight/pay-leave/salaries-wages/2026/executive-senior-level/freeze-for-certain-senior-political-officials/'
+const HOUSE_SALARY_SOURCE_URL = 'https://www.house.gov/doing-business-with-the-house/current-house-salaries'
+const SENATE_SALARY_SOURCE_URL = 'https://www.senate.gov/legislative/common/generic/Salaries.htm'
+const JUDICIAL_SALARY_SOURCE_URL =
+  'https://www.uscourts.gov/judges-judgeships/judicial-compensation'
+const EXECUTIVE_SCHEDULE_2026_SOURCE_URL =
+  'https://www.whitehouse.gov/briefing-room/presidential-actions/2025/12/23/adjustments-of-certain-rates-of-pay/'
+
+const houseSalaryOverrides = new Map([
+  [
+    'Mike Johnson',
+    {
+      amount: '$223,500',
+      note: 'Current House speaker salary is $223,500 per year.',
+    },
+  ],
+  [
+    'Steve Scalise',
+    {
+      amount: '$193,400',
+      note: 'Current House majority and minority leaders are paid $193,400 per year; this member currently holds one of those leadership posts.',
+    },
+  ],
+  [
+    'Hakeem Jeffries',
+    {
+      amount: '$193,400',
+      note: 'Current House majority and minority leaders are paid $193,400 per year; this member currently holds one of those leadership posts.',
+    },
+  ],
+])
+
+const senateLeadershipSalaryOverrides = new Map([
+  [
+    'Majority Leader',
+    {
+      amount: '$193,400',
+      note: 'Current Senate majority and minority leaders, along with the president pro tempore, are paid $193,400 per year.',
+    },
+  ],
+  [
+    'Democratic Leader Chair of the Conference',
+    {
+      amount: '$193,400',
+      note: 'Current Senate majority and minority leaders, along with the president pro tempore, are paid $193,400 per year.',
+    },
+  ],
+  [
+    'President Pro Tempore',
+    {
+      amount: '$193,400',
+      note: 'Current Senate majority and minority leaders, along with the president pro tempore, are paid $193,400 per year.',
+    },
+  ],
+])
+
+const independentAgencySalaryOverrides = new Map([
+  [
+    'Jerome H. Powell',
+    {
+      amount: '$250,600 official 2026 rate',
+      note:
+        'Federal law ties the Federal Reserve chair to Executive Schedule Level I; the official 2026 Level I rate is $250,600 before any separate payable limitations that may apply in a given year.',
+    },
+  ],
+  [
+    'Paul S. Atkins',
+    {
+      amount: '$209,600 official 2026 rate',
+      note:
+        'The SEC chair is an Executive Schedule Level III office; the official 2026 Level III rate is $209,600 before any separate payable limitations that may apply in a given year.',
+    },
+  ],
+  [
+    'Andrew N. Ferguson',
+    {
+      amount: '$209,600 official 2026 rate',
+      note:
+        'The FTC chair is an Executive Schedule Level III office; the official 2026 Level III rate is $209,600 before any separate payable limitations that may apply in a given year.',
+    },
+  ],
+  [
+    'Brendan Carr',
+    {
+      amount: '$209,600 official 2026 rate',
+      note:
+        'The FCC chair is an Executive Schedule Level III office; the official 2026 Level III rate is $209,600 before any separate payable limitations that may apply in a given year.',
+    },
+  ],
+  [
+    'Michael S. Selig',
+    {
+      amount: '$209,600 official 2026 rate',
+      note:
+        'The CFTC chair is an Executive Schedule Level III office; the official 2026 Level III rate is $209,600 before any separate payable limitations that may apply in a given year.',
+    },
+  ],
+])
+
+const SEC_DERIVED_HOLDING_ESTIMATES = new Map([
+  [
+    'house-earl-carter-georgia-1st|Ameris Bancorp (ABCB) [ST]',
+    {
+      derivedEstimate:
+        'Approx. 61,659 ABCB shares (0.4% of the class) from Ameris Bancorp\'s SEC proxy, as of March 10, 2025.',
+      derivedSourceLabel: 'SEC 2025 proxy ownership table',
+      derivedSourceUrl:
+        'https://www.sec.gov/Archives/edgar/data/92108/000095017025037709/abcb-def14a_20250428.htm',
+    },
+  ],
+  [
+    'house-j-hill-arkansas-2nd|Simmons First National Corporation (SFNC) [ST]',
+    {
+      derivedEstimate:
+        'Approx. 99,418 SFNC shares (0.4% of the class) from Simmons First\'s SEC proxy, as of March 10, 2025.',
+      derivedSourceLabel: 'SEC 2025 proxy ownership table',
+      derivedSourceUrl:
+        'https://www.sec.gov/Archives/edgar/data/90498/000155837025004380/sfnc-20250310xdef14a.htm',
+    },
+  ],
+  [
+    'senate-tim-sheehy|BAER - Bridger Aerospace Group Holdings Inc',
+    {
+      derivedEstimate:
+        'Approx. 9,444,018 BAER shares (42.9% of the class) from Bridger Aerospace\'s SEC proxy, as of April 24, 2025.',
+      derivedSourceLabel: 'SEC 2025 proxy ownership table',
+      derivedSourceUrl:
+        'https://www.sec.gov/Archives/edgar/data/1941536/000121390025036517/def14a0425_bridgeraero.htm',
+    },
+  ],
+])
+
+const INDEPENDENT_AGENCY_WIKIPEDIA_TITLE_OVERRIDES = new Map([
+  ['Commodity Futures Trading Commission', 'United States Commodity Futures Trading Commission'],
+  ['Corporation for National and Community Service', 'AmeriCorps'],
+  ['Environmental Protection Agency', 'United States Environmental Protection Agency'],
+  ['Equal Employment Opportunity Commission', 'United States Equal Employment Opportunity Commission'],
+  ['Federal Mediation and Conciliation Service', 'Federal Mediation and Conciliation Service (United States)'],
+  ['Federal Reserve System', 'Federal Reserve'],
+  ['Merit Systems Protection Board', 'United States Merit Systems Protection Board'],
+  ['National Aeronautics and Space Administration', 'NASA'],
+  ['National Railroad Passenger Corporation (AMTRAK)', 'Amtrak'],
+  ['Office of Government Ethics', 'United States Office of Government Ethics'],
+  ['Office of Personnel Management', 'United States Office of Personnel Management'],
+  ['Office of the Director of National Intelligence', 'Office of the Director of National Intelligence'],
+  ['Overseas Private Investment Corporation', 'U.S. International Development Finance Corporation'],
+  ['Securities and Exchange Commission', 'United States Securities and Exchange Commission'],
+  ['Trade and Development Agency', 'United States Trade and Development Agency'],
+  ['Consumer Product Safety Commission', 'United States Consumer Product Safety Commission'],
+  ['United States International Trade Commission', 'U.S. International Trade Commission'],
+])
+
+const INDEPENDENT_AGENCY_PROFILE_OVERRIDES = new Map([
+  [
+    'Commodity Futures Trading Commission',
+    {
+      alignment: 'republican',
+      alignmentLabel: 'Republican',
+      appointedBy: 'Donald J. Trump',
+      description:
+        'Michael S. Selig is chairman of the Commodity Futures Trading Commission, the independent regulator for U.S. derivatives markets including futures, swaps, and options.',
+      id: 'executive-michael-s-selig',
+      imageUrl: 'https://www.cftc.gov/sites/default/files/2026-02/Selig%20Headshot_0.jpg',
+      name: 'Michael S. Selig',
+      roleSinceYear: '2025',
+      sourceUrl: 'https://www.cftc.gov/About/Commissioners/MichaelSelig/index.htm',
+      title: 'Chair of the Commodity Futures Trading Commission',
+      website: 'https://www.cftc.gov/',
+    },
+  ],
+  [
+    'Federal Communications Commission',
+    {
+      alignment: 'republican',
+      alignmentLabel: 'Republican',
+      appointedBy: 'Donald J. Trump',
+      description:
+        'Brendan Carr is chairman of the Federal Communications Commission, the independent regulator for interstate and international communications by radio, television, wire, satellite, and broadband.',
+      id: 'executive-brendan-carr',
+      imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Brendan_Carr%2C_official_portrait_2025.jpg/330px-Brendan_Carr%2C_official_portrait_2025.jpg',
+      name: 'Brendan Carr',
+      roleSinceYear: '2025',
+      sourceUrl: 'https://www.fcc.gov/about/leadership/brendan-carr',
+      title: 'Chair of the Federal Communications Commission',
+      website: 'https://www.fcc.gov/',
+    },
+  ],
+  [
+    'Federal Housing Finance Agency',
+    {
+      title: 'Director of the Federal Housing Finance Agency',
+    },
+  ],
+  [
+    'Federal Reserve System',
+    {
+      alignment: 'nonpartisan',
+      alignmentLabel: 'Nonpartisan',
+      appointmentNote:
+        'Trump elevated Powell to the chair in 2018, and Biden reappointed him to another four-year term as chair in 2022.',
+      appointedBy: 'Donald J. Trump',
+      description:
+        'Jerome H. Powell is chair of the Board of Governors of the Federal Reserve System, the independent central bank that sets monetary policy and supervises major parts of the banking system.',
+      id: 'executive-jerome-h-powell',
+      imageUrl:
+        'https://www.federalreserve.gov/aboutthefed/images/Powell_Jerome_Aug_16_22-674_8x10_rdax_130x162s.jpg',
+      name: 'Jerome H. Powell',
+      roleSinceYear: '2018',
+      sourceUrl: 'https://www.federalreserve.gov/aboutthefed/bios/board/powell.htm',
+      title: 'Chair of the Federal Reserve Board',
+      website: 'https://www.federalreserve.gov/',
+      wikidataId: 'Q6182718',
+    },
+  ],
+  [
+    'Federal Trade Commission',
+    {
+      alignment: 'republican',
+      alignmentLabel: 'Republican',
+      appointedBy: 'Donald J. Trump',
+      description:
+        'Andrew N. Ferguson is chairman of the Federal Trade Commission, the independent agency focused on competition policy and consumer protection enforcement.',
+      id: 'executive-andrew-n-ferguson',
+      imageUrl:
+        'https://www.ftc.gov/system/files/styles/square_sm/private/ftc_gov/images/Commissioner-Andrew-N-Ferguson-headshot.jpg?h=fa4f33d7&itok=8yGU-ymX',
+      name: 'Andrew N. Ferguson',
+      roleSinceYear: '2025',
+      sourceUrl: 'https://www.ftc.gov/about-ftc/commissioners-staff/andrew-n-ferguson',
+      title: 'Chair of the Federal Trade Commission',
+      website: 'https://www.ftc.gov/',
+    },
+  ],
+  [
+    'National Archives and Records Administration',
+    {
+      alignment: 'republican',
+      alignmentLabel: 'Republican',
+      description:
+        'Marco Rubio is serving as acting archivist of the United States, overseeing the National Archives, federal records policy, and the preservation of key national documents.',
+      id: 'executive-marco-rubio-national-archives-and-records-administration',
+      name: 'Marco Rubio',
+      sourceUrl: 'https://www.archives.gov/about/organization/senior-staff',
+      title: 'Acting Archivist of the United States',
+      website: 'https://www.archives.gov/',
+    },
+  ],
+  [
+    'National Foundation on the Arts and the Humanities',
+    {
+      alignment: 'republican',
+      alignmentLabel: 'Republican',
+      description:
+        'Mary Anne Carter is profiled here as the current chair of the National Endowment for the Arts, one of the central grant-making leadership posts housed within the National Foundation on the Arts and the Humanities umbrella.',
+      id: 'executive-mary-anne-carter-national-foundation-on-the-arts-and-the-humanities',
+      name: 'Mary Anne Carter',
+      sourceUrl: 'https://www.arts.gov/about/nea-chairman',
+      title: 'Chair of the National Endowment for the Arts',
+      website: 'https://www.arts.gov/',
+    },
+  ],
+  [
+    'United States Postal Service',
+    {
+      title: 'Postmaster General of the United States Postal Service',
+    },
+  ],
+  [
+    'Equal Employment Opportunity Commission',
+    {
+      title: 'Acting Chair of the Equal Employment Opportunity Commission',
+    },
+  ],
+  [
+    'Federal Mine Safety and Health Review Commission',
+    {
+      title: 'Chairman of the Federal Mine Safety and Health Review Commission',
+    },
+  ],
+  [
+    'Federal Mediation and Conciliation Service',
+    {
+      title: 'Acting Director of the Federal Mediation and Conciliation Service',
+    },
+  ],
+  [
+    'National Labor Relations Board',
+    {
+      description:
+        'Marvin E. Kaplan is chairman of the National Labor Relations Board, the independent labor-law board that handles union representation disputes and unfair-labor-practice cases.',
+      id: 'executive-marvin-e-kaplan-national-labor-relations-board',
+      name: 'Marvin E. Kaplan',
+      sourceUrl:
+        'https://www.nlrb.gov/about-nlrb/who-we-are/board/marvin-e-kaplan-chairman',
+      title: 'Chairman of the National Labor Relations Board',
+      website: 'https://www.nlrb.gov/',
+    },
+  ],
+  [
+    'United States Commission on Civil Rights',
+    {
+      title: 'Chair of the United States Commission on Civil Rights',
+    },
+  ],
+  [
+    'Administrative Conference of the United States',
+    {
+      title: 'Chairman of the Administrative Conference of the United States',
+    },
+  ],
+  [
+    'Federal Election Commission',
+    {
+      title: 'Chair of the Federal Election Commission',
+    },
+  ],
+  [
+    'Federal Retirement Thrift Investment Board',
+    {
+      title: 'Executive Director of the Federal Retirement Thrift Investment Board',
+    },
+  ],
+  [
+    'General Services Administration',
+    {
+      title: 'Acting Administrator of the General Services Administration',
+    },
+  ],
+  [
+    'National Science Foundation',
+    {
+      description:
+        'Brian Stone is performing the duties of the NSF director, helping lead the federal science-funding agency while the director position remains unfilled.',
+      id: 'executive-brian-stone-national-science-foundation',
+      name: 'Brian Stone',
+      sourceUrl: 'https://new.nsf.gov/about/leadership/brian-stone',
+      title: 'Performing the duties of Director of the National Science Foundation',
+      website: 'https://new.nsf.gov/',
+    },
+  ],
+  [
+    'National Capital Planning Commission',
+    {
+      title: 'Chair of the National Capital Planning Commission',
+    },
+  ],
+  [
+    'Central Intelligence Agency',
+    {
+      title: 'Director of the Central Intelligence Agency',
+    },
+  ],
+  [
+    'Consumer Product Safety Commission',
+    {
+      title: 'Acting Chairman of the Consumer Product Safety Commission',
+    },
+  ],
+  [
+    'Office of the Director of National Intelligence',
+    {
+      description:
+        'Tulsi Gabbard serves as director of national intelligence, coordinating the U.S. intelligence community and delivering intelligence support to the president and national-security policymakers.',
+      id: 'executive-tulsi-gabbard-office-of-the-director-of-national-intelligence',
+      name: 'Tulsi Gabbard',
+      sourceUrl:
+        'https://www.dni.gov/index.php/who-we-are/leadership/director-national-intelligence',
+      title: 'Director of National Intelligence',
+      website: 'https://www.dni.gov/',
+    },
+  ],
+  [
+    'Corporation for National and Community Service',
+    {
+      title: 'Interim Agency Head of the Corporation for National and Community Service',
+    },
+  ],
+  [
+    'Pension Benefit Guaranty Corporation',
+    {
+      title: 'Director of the Pension Benefit Guaranty Corporation',
+    },
+  ],
+  [
+    'Postal Regulatory Commission',
+    {
+      description:
+        'Michael M. Kubayanda is chairman of the Postal Regulatory Commission, the independent regulator that reviews U.S. Postal Service rates, service standards, and related compliance matters.',
+      id: 'executive-michael-m-kubayanda-postal-regulatory-commission',
+      name: 'Michael M. Kubayanda',
+      sourceUrl: 'https://www.prc.gov/commissioner/michael-kubayanda',
+      title: 'Chairman of the Postal Regulatory Commission',
+      website: 'https://www.prc.gov/',
+    },
+  ],
+  [
+    'Securities and Exchange Commission',
+    {
+      alignment: 'republican',
+      alignmentLabel: 'Republican',
+      appointedBy: 'Donald J. Trump',
+      description:
+        'Paul S. Atkins is chair of the Securities and Exchange Commission, the independent regulator that oversees U.S. securities markets, public-company disclosure, and broker-dealers.',
+      id: 'executive-paul-s-atkins',
+      imageUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/SEC_Commissioner_Paul_Atkins.jpg/330px-SEC_Commissioner_Paul_Atkins.jpg',
+      name: 'Paul S. Atkins',
+      roleSinceYear: '2025',
+      sourceUrl: 'https://www.sec.gov/about/commissioners/paul-s-atkins',
+      title: 'Chair of the Securities and Exchange Commission',
+      website: 'https://www.sec.gov/',
+      wikidataId: 'Q7158251',
+    },
+  ],
+  [
+    'Small Business Administration',
+    {
+      title: 'Administrator of the Small Business Administration',
+    },
+  ],
+  [
+    'Trade and Development Agency',
+    {
+      description:
+        'Thomas R. Hardy is serving as acting director of the U.S. Trade and Development Agency, the export-promotion agency that backs project preparation and infrastructure partnerships abroad.',
+      id: 'executive-thomas-r-hardy-trade-and-development-agency',
+      name: 'Thomas R. Hardy',
+      sourceUrl: 'https://www.ustda.gov/leadership/thomas-r-hardy/',
+      title: 'Acting Director of the U.S. Trade and Development Agency',
+      website: 'https://www.ustda.gov/',
+    },
+  ],
+  [
+    'United States Agency for International Development',
+    {
+      title: 'Administrator (acting) of the United States Agency for International Development',
+    },
+  ],
+  [
+    'Defense Nuclear Facilities Safety Board',
+    {
+      description:
+        'Patricia L. Lee is profiled here as the current sitting board member of the Defense Nuclear Facilities Safety Board, which has been operating without its full complement of members.',
+      id: 'executive-patricia-l-lee-defense-nuclear-facilities-safety-board',
+      name: 'Patricia L. Lee',
+      sourceUrl: 'https://www.dnfsb.gov/about/who-we-are/our-board-members',
+      title: 'Board Member of the Defense Nuclear Facilities Safety Board',
+      website: 'https://www.dnfsb.gov/',
+    },
+  ],
+])
+
+const INDEPENDENT_AGENCY_SERVICE_OVERRIDES = new Map([
+  [
+    'Central Intelligence Agency',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Consumer Financial Protection Bureau',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Environmental Protection Agency',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Equal Employment Opportunity Commission',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Federal Deposit Insurance Corporation',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2026',
+    },
+  ],
+  [
+    'Federal Housing Finance Agency',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'General Services Administration',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Aeronautics and Space Administration',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Archives and Records Administration',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Capital Planning Commission',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Labor Relations Board',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Transportation Safety Board',
+    {
+      appointedBy: 'Joe Biden',
+      roleSinceYear: '2021',
+    },
+  ],
+  [
+    'Nuclear Regulatory Commission',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2026',
+    },
+  ],
+  [
+    'Office of Personnel Management',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Office of the Director of National Intelligence',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Postal Regulatory Commission',
+    {
+      appointedBy: 'Joe Biden',
+      roleSinceYear: '2021',
+    },
+  ],
+  [
+    'Small Business Administration',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Social Security Administration',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'United States Agency for International Development',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'United States Office of Special Counsel',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'United States Postal Service',
+    {
+      appointedBy: 'USPS Board of Governors',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Export-Import Bank of the United States',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Farm Credit Administration',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Credit Union Administration',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'United States International Trade Commission',
+    {
+      appointedBy: 'Joe Biden',
+      roleSinceYear: '2024',
+    },
+  ],
+  [
+    'Federal Maritime Commission',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Railroad Passenger Corporation (AMTRAK)',
+    {
+      appointedBy: 'Amtrak Board of Directors',
+      roleSinceYear: '2022',
+    },
+  ],
+  [
+    'Surface Transportation Board',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Tennessee Valley Authority',
+    {
+      appointedBy: 'TVA Board of Directors',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Federal Labor Relations Authority',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Federal Mine Safety and Health Review Commission',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Federal Mediation and Conciliation Service',
+    {
+      appointedBy: 'FMCS succession',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Mediation Board',
+    {
+      appointedBy: 'National Mediation Board',
+      roleSinceYear: '2024',
+    },
+  ],
+  [
+    'Occupational Safety and Health Review Commission',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'United States Commission on Civil Rights',
+    {
+      appointedBy: 'Joe Biden',
+      roleSinceYear: '2023',
+    },
+  ],
+  [
+    'Administrative Conference of the United States',
+    {
+      appointedBy: 'Joe Biden',
+      roleSinceYear: '2022',
+    },
+  ],
+  [
+    'Federal Election Commission',
+    {
+      appointedBy: 'Federal Election Commission',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Federal Retirement Thrift Investment Board',
+    {
+      appointedBy: 'Joe Biden',
+      roleSinceYear: '2022',
+    },
+  ],
+  [
+    'Merit Systems Protection Board',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Office of Government Ethics',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Foundation on the Arts and the Humanities',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'National Science Foundation',
+    {
+      appointedBy: 'National Science Foundation succession',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Consumer Product Safety Commission',
+    {
+      appointedBy: 'Consumer Product Safety Commission',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Defense Nuclear Facilities Safety Board',
+    {
+      appointedBy: 'Joe Biden',
+      roleSinceYear: '2024',
+    },
+  ],
+  [
+    'Selective Service System',
+    {
+      appointedBy: 'Selective Service System succession',
+      roleSinceYear: '2021',
+    },
+  ],
+  [
+    'Corporation for National and Community Service',
+    {
+      appointedBy: 'AmeriCorps leadership',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Peace Corps',
+    {
+      appointedBy: 'Peace Corps leadership',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Pension Benefit Guaranty Corporation',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Railroad Retirement Board',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2019',
+    },
+  ],
+  [
+    'Inter-American Foundation',
+    {
+      appointedBy: 'Inter-American Foundation Board of Directors',
+      roleSinceYear: '2022',
+    },
+  ],
+  [
+    'Overseas Private Investment Corporation',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'Trade and Development Agency',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'United States African Development Foundation',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2025',
+    },
+  ],
+  [
+    'United States Agency for Global Media',
+    {
+      appointedBy: 'Donald J. Trump',
+      roleSinceYear: '2026',
+    },
+  ],
+])
+
+const INDEPENDENT_AGENCY_ID_OVERRIDES = new Map([
+  ['Commodity Futures Trading Commission', 'executive-michael-s-selig'],
+  ['Federal Communications Commission', 'executive-brendan-carr'],
+  ['Federal Reserve System', 'executive-jerome-h-powell'],
+  ['Federal Trade Commission', 'executive-andrew-n-ferguson'],
+  ['Securities and Exchange Commission', 'executive-paul-s-atkins'],
+])
+
+function cleanWikipediaInfoboxText(value) {
+  return stripTags(value.replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '').replace(/<link\b[^>]*>/gi, ''))
+    .replace(/\[\s*\d+\s*\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/\s+([,.;:)])/g, '$1')
+    .replace(/([(\[])\s+/g, '$1')
+    .trim()
+}
+
+function normalizeIndependentAgencyWebsite(rawUrl) {
+  if (!rawUrl) {
+    return null
+  }
+
+  const cleaned = decodeHtml(rawUrl)
+    .replace(/\s+/g, '')
+    .replace(/^\/\//, 'https://')
+    .replace(/^www\./i, 'https://www.')
+    .trim()
+
+  if (!cleaned) {
+    return null
+  }
+
+  if (/^https?:\/\//i.test(cleaned)) {
+    return cleaned
+  }
+
+  if (/^[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?:\/.*)?$/.test(cleaned)) {
+    return `https://${cleaned}`
+  }
+
+  return null
+}
+
+function extractBalancedHtmlTable(html, classFragment) {
+  const lowerHtml = html.toLowerCase()
+  const lowerFragment = classFragment.toLowerCase()
+  let searchStart = 0
+
+  while (true) {
+    const tableStart = lowerHtml.indexOf('<table', searchStart)
+
+    if (tableStart === -1) {
+      return null
+    }
+
+    const openTagEnd = lowerHtml.indexOf('>', tableStart)
+
+    if (openTagEnd === -1) {
+      return null
+    }
+
+    const openTag = lowerHtml.slice(tableStart, openTagEnd + 1)
+
+    if (!openTag.includes(lowerFragment)) {
+      searchStart = openTagEnd + 1
+      continue
+    }
+
+    const tableTagPattern = /<\/?table\b[^>]*>/gi
+    tableTagPattern.lastIndex = tableStart
+    let depth = 0
+    let match
+
+    while ((match = tableTagPattern.exec(html))) {
+      if (match[0].startsWith('</')) {
+        depth -= 1
+        if (depth === 0) {
+          return html.slice(tableStart, match.index + match[0].length)
+        }
+      } else {
+        depth += 1
+      }
+    }
+
+    return null
+  }
+}
+
+function extractIndependentAgencyInfoboxRows(html) {
+  const tableHtml = extractBalancedHtmlTable(html, 'infobox')
+
+  if (!tableHtml) {
+    return []
+  }
+
+  return [...tableHtml.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)]
+    .map((match) => match[1])
+    .map((rowHtml) => {
+      const keyMatch = rowHtml.match(/<th\b[^>]*>([\s\S]*?)<\/th>/i)
+      const valueMatch = rowHtml.match(/<td\b[^>]*>([\s\S]*?)<\/td>/i)
+
+      if (!keyMatch || !valueMatch) {
+        return null
+      }
+
+      const valueHtml = valueMatch[1]
+      const wikiLinks = [...valueHtml.matchAll(/<a\b[^>]*href="\/wiki\/([^"#?]+)"[^>]*>([\s\S]*?)<\/a>/gi)]
+        .map((linkMatch) => ({
+          text: cleanWikipediaInfoboxText(linkMatch[2]),
+          title: decodeURIComponent(linkMatch[1]).replace(/_/g, ' '),
+        }))
+        .filter((link) => link.text && !link.title.includes(':'))
+      const externalLinks = [
+        ...valueHtml.matchAll(/<a\b[^>]*href="((?:https?:)?\/\/[^"]+)"[^>]*>/gi),
+      ].map((linkMatch) => normalizeIndependentAgencyWebsite(linkMatch[1]))
+
+      return {
+        externalLinks: externalLinks.filter(Boolean),
+        key: cleanWikipediaInfoboxText(keyMatch[1]),
+        text: cleanWikipediaInfoboxText(valueHtml),
+        wikiLinks,
+      }
+    })
+    .filter(Boolean)
+}
+
+function isLikelyIndependentAgencyPersonLink(link) {
+  if (!link?.text) {
+    return false
+  }
+
+  const text = link.text.trim()
+
+  if (!text || text.length < 4) {
+    return false
+  }
+
+  if (
+    /agency|board|bureau|commission|committee|council|department|foundation|government|office|system|united states/i.test(
+      text,
+    )
+  ) {
+    return false
+  }
+
+  return text.split(/\s+/).length >= 2 || /[A-Z]\./.test(text)
+}
+
+function extractIndependentAgencyLeaderTitle(row, leaderName, nextLeaderName) {
+  const normalizedKey = row.key.toLowerCase()
+
+  if (
+    [
+      'administrator',
+      'president & ceo',
+      'president and chief executive officer',
+      'president and ceo',
+    ].includes(normalizedKey)
+  ) {
+    return row.key
+  }
+
+  const nameIndex = row.text.indexOf(leaderName)
+
+  if (nameIndex === -1) {
+    return row.key
+  }
+
+  let remainder = row.text.slice(nameIndex + leaderName.length)
+
+  if (nextLeaderName) {
+    const nextIndex = remainder.indexOf(nextLeaderName)
+    if (nextIndex !== -1) {
+      remainder = remainder.slice(0, nextIndex)
+    }
+  }
+
+  const parenMatch = remainder.match(/^\s*\(\s*([^()]+?)\s*\)/)
+
+  if (parenMatch?.[1]) {
+    return parenMatch[1].trim()
+  }
+
+  let cleanedRemainder = remainder
+    .replace(/\[\s*\d+\s*\]/g, ' ')
+    .replace(/^\s*[,;:–—-]+\s*/, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  for (const pattern of [
+    /\bVacant\b/i,
+    /\bTBA\b/i,
+    /\b[A-Z][a-z]+(?:\s+[A-Z]\.)?(?:\s+[A-Z][a-z]+){1,3},\s*(?:acting|chief|deputy|general counsel|commissioner|director|administrator|chair|chairman|chairwoman|ceo|vice)/i,
+  ]) {
+    const index = cleanedRemainder.search(pattern)
+
+    if (index > 0) {
+      cleanedRemainder = cleanedRemainder.slice(0, index).trim()
+    }
+  }
+
+  return cleanedRemainder || row.key
+}
+
+function expandIndependentAgencyTitle(rawTitle, agencyName) {
+  if (!rawTitle) {
+    return `Leader of the ${agencyName}`
+  }
+
+  const normalizedTitle = rawTitle.trim()
+
+  if (/of the /i.test(normalizedTitle) || normalizedTitle.includes(agencyName)) {
+    return normalizedTitle
+  }
+
+  return `${normalizedTitle} of the ${agencyName}`
+}
+
+function buildIndependentAgencyDescription(name, title, agencyName, typeLabel) {
+  const roleText = title ? `${title[0].toLowerCase()}${title.slice(1)}` : 'current leader'
+
+  return `${name} serves as ${roleText} and leads ${agencyName}, the ${typeLabel.toLowerCase()} in the executive branch.`.replace(
+    /\s+/g,
+    ' ',
+  )
+}
+
+function loadIndependentAgencyCatalogEntries() {
+  const catalogPath = resolve(__dirname, '../src/independentAgencyCatalog.ts')
+  const text = readFileSync(catalogPath, 'utf8')
+
+  return [...text.matchAll(/name:\s*'([^']+)'\s*,\s*typeLabel:\s*'([^']+)'/g)].map((match) => ({
+    name: match[1],
+    typeLabel: match[2],
+  }))
+}
+
+async function fetchJson(url) {
+  return JSON.parse(await fetchText(url))
+}
+
+async function resolveWikipediaTitleForIndependentAgency(agencyName) {
+  const override = INDEPENDENT_AGENCY_WIKIPEDIA_TITLE_OVERRIDES.get(agencyName)
+
+  if (override) {
+    return override
+  }
+
+  const params = new URLSearchParams({
+    action: 'query',
+    format: 'json',
+    list: 'search',
+    srlimit: '5',
+    srsearch: agencyName,
+  })
+  const payload = await fetchJson(`https://en.wikipedia.org/w/api.php?${params}`)
+  return payload.query?.search?.[0]?.title ?? null
+}
+
+async function resolveWikidataIdForWikipediaTitle(title) {
+  if (!title) {
+    return null
+  }
+
+  const params = new URLSearchParams({
+    action: 'query',
+    format: 'json',
+    prop: 'pageprops',
+    redirects: '1',
+    titles: title,
+  })
+  const payload = await fetchJson(`https://en.wikipedia.org/w/api.php?${params}`)
+  const page = Object.values(payload.query?.pages ?? {}).find((entry) => entry?.pageprops?.wikibase_item)
+  return page?.pageprops?.wikibase_item ?? null
+}
+
+async function fetchIndependentAgencyProfileSeed(item) {
+  const wikipediaTitle = await resolveWikipediaTitleForIndependentAgency(item.name)
+
+  if (!wikipediaTitle) {
+    return {}
+  }
+
+  const html = await fetchText(`https://en.wikipedia.org/wiki/${encodeURIComponent(wikipediaTitle.replace(/ /g, '_'))}`)
+  const rows = extractIndependentAgencyInfoboxRows(html)
+  const websiteRow = rows.find((row) => row.key.toLowerCase() === 'website') ?? null
+  const website =
+    websiteRow?.externalLinks.find((link) => !/\.onion/i.test(link)) ??
+    normalizeIndependentAgencyWebsite(websiteRow?.text)
+  const candidateRow =
+    rows.find((row) => /agency executive/i.test(row.key)) ??
+    rows.find((row) => /^board executive$/i.test(row.key)) ??
+    rows.find((row) => /^administrator$/i.test(row.key)) ??
+    rows.find((row) => /^president\s*&\s*ceo$/i.test(row.key)) ??
+    rows.find((row) => /^president and chief executive officer$/i.test(row.key)) ??
+    rows.find((row) => /^key people$/i.test(row.key)) ??
+    rows.find((row) => /director/i.test(row.key) && row.wikiLinks.some(isLikelyIndependentAgencyPersonLink)) ??
+    null
+
+  if (!candidateRow) {
+    return { website, wikipediaTitle }
+  }
+
+  const peopleLinks = candidateRow.wikiLinks.filter(isLikelyIndependentAgencyPersonLink)
+  const leaderLink = peopleLinks[0] ?? null
+
+  if (!leaderLink?.text) {
+    const textLead = candidateRow.text
+      .replace(/\[\s*\d+\s*\]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    if (!/^(Vacant|TBA)\b/i.test(textLead)) {
+      const fallbackName = textLead.match(/^([A-Z][A-Za-z'.-]+(?:\s+[A-Z][A-Za-z'.-]+){1,4})/)
+
+      if (fallbackName?.[1]) {
+        return {
+          name: fallbackName[1].trim(),
+          rawTitle: extractIndependentAgencyLeaderTitle(candidateRow, fallbackName[1].trim(), null),
+          website,
+          wikipediaTitle,
+          wikidataId: null,
+        }
+      }
+    }
+
+    return { website, wikipediaTitle }
+  }
+
+  const nextLeaderName = peopleLinks[1]?.text ?? null
+  const rawTitle = extractIndependentAgencyLeaderTitle(candidateRow, leaderLink.text, nextLeaderName)
+
+  return {
+    name: leaderLink.text,
+    rawTitle,
+    website,
+    wikipediaTitle,
+    wikidataId: await resolveWikidataIdForWikipediaTitle(leaderLink.title),
+  }
+}
+
+async function buildIndependentAgencyHeads() {
+  const catalogEntries = loadIndependentAgencyCatalogEntries()
+
+  return mapWithConcurrency(catalogEntries, 8, async (item, index) => {
+    const override = {
+      ...(INDEPENDENT_AGENCY_SERVICE_OVERRIDES.get(item.name) ?? {}),
+      ...(INDEPENDENT_AGENCY_PROFILE_OVERRIDES.get(item.name) ?? {}),
+    }
+    const seed = await fetchIndependentAgencyProfileSeed(item).catch(() => ({}))
+    const name = override.name ?? seed.name
+
+    if (!name) {
+      const cachedMatch = previousPeople.find(
+        (person) => person.sectionId === 'independent-agencies' && person.department === item.name,
+      )
+
+      if (cachedMatch) {
+        return {
+          ...clonePerson(cachedMatch),
+          department: item.name,
+          sortOrder: 30 + index,
+          subtitle: item.name,
+        }
+      }
+
+      throw new Error(`Unable to resolve independent-agency leader for ${item.name}`)
+    }
+
+    const rawTitle = override.title ?? expandIndependentAgencyTitle(seed.rawTitle, item.name)
+    const alignment = override.alignment ?? 'nonpartisan'
+    const alignmentLabel =
+      override.alignmentLabel ??
+      (alignment === 'republican'
+        ? 'Republican'
+        : alignment === 'democratic'
+          ? 'Democratic'
+          : alignment === 'independent'
+            ? 'Independent'
+            : 'Nonpartisan')
+
+    return {
+      alignment,
+      alignmentLabel,
+      appointmentNote: override.appointmentNote,
+      appointedBy: override.appointedBy,
+      branchId: 'executive',
+      department: item.name,
+      description:
+        override.description ?? buildIndependentAgencyDescription(name, rawTitle, item.name, item.typeLabel),
+      id:
+        override.id ??
+        INDEPENDENT_AGENCY_ID_OVERRIDES.get(item.name) ??
+        `executive-${slugify(name)}-${slugify(item.name)}`,
+      imageUrl: override.imageUrl,
+      name,
+      salaryNote: EXECUTIVE_SALARY_NOTE,
+      sectionId: 'independent-agencies',
+      sortOrder: 30 + index,
+      sourceUrl:
+        override.sourceUrl ?? override.website ?? seed.website ?? 'https://www.usgovernmentmanual.gov/',
+      subtitle: item.name,
+      title: rawTitle,
+      wealthNote: EXECUTIVE_WEALTH_NOTE,
+      website: override.website ?? seed.website ?? null,
+      wikidataId: override.wikidataId ?? seed.wikidataId ?? null,
+      roleSinceYear: override.roleSinceYear,
+    }
+  })
+}
+
+const executiveRoleMap = new Map([
+  [
+    'Secretary of State',
+    {
+      department: 'Department of State',
+      sortOrder: 10,
+      title: 'Secretary of State',
+    },
+  ],
+  [
+    'Secretary of the Treasury',
+    {
+      department: 'Department of the Treasury',
+      sortOrder: 11,
+      title: 'Secretary of the Treasury',
+    },
+  ],
+  [
+    'Secretary of War',
+    {
+      department: 'Department of Defense',
+      sortOrder: 12,
+      title: 'Secretary of Defense',
+    },
+  ],
+  [
+    'Attorney General',
+    {
+      department: 'Department of Justice',
+      sortOrder: 13,
+      title: 'Attorney General',
+    },
+  ],
+  [
+    'Secretary of the Interior',
+    {
+      department: 'Department of the Interior',
+      sortOrder: 14,
+      title: 'Secretary of the Interior',
+    },
+  ],
+  [
+    'Secretary of Agriculture',
+    {
+      department: 'Department of Agriculture',
+      sortOrder: 15,
+      title: 'Secretary of Agriculture',
+    },
+  ],
+  [
+    'Secretary of Commerce',
+    {
+      department: 'Department of Commerce',
+      sortOrder: 16,
+      title: 'Secretary of Commerce',
+    },
+  ],
+  [
+    'Secretary of Labor',
+    {
+      department: 'Department of Labor',
+      sortOrder: 17,
+      title: 'Secretary of Labor',
+    },
+  ],
+  [
+    'Secretary of Health and Human Services',
+    {
+      department: 'Department of Health and Human Services',
+      sortOrder: 18,
+      title: 'Secretary of Health and Human Services',
+    },
+  ],
+  [
+    'Secretary of Housing and Urban Development',
+    {
+      department: 'Department of Housing and Urban Development',
+      sortOrder: 19,
+      title: 'Secretary of Housing and Urban Development',
+    },
+  ],
+  [
+    'Secretary of Transportation',
+    {
+      department: 'Department of Transportation',
+      sortOrder: 20,
+      title: 'Secretary of Transportation',
+    },
+  ],
+  [
+    'Secretary of Energy',
+    {
+      department: 'Department of Energy',
+      sortOrder: 21,
+      title: 'Secretary of Energy',
+    },
+  ],
+  [
+    'Secretary of Education',
+    {
+      department: 'Department of Education',
+      sortOrder: 22,
+      title: 'Secretary of Education',
+    },
+  ],
+  [
+    'Secretary of Veterans Affairs',
+    {
+      department: 'Department of Veterans Affairs',
+      sortOrder: 23,
+      title: 'Secretary of Veterans Affairs',
+    },
+  ],
+  [
+    'Secretary of Homeland Security',
+    {
+      department: 'Department of Homeland Security',
+      sortOrder: 24,
+      title: 'Secretary of Homeland Security',
+    },
+  ],
+])
+
+const supremeCourtImageMap = {
+  'Amy Coney Barrett': 'https://www.supremecourt.gov/about/justice_pictures/Barrett_102535_w151.jpg',
+  'Brett M. Kavanaugh':
+    'https://www.supremecourt.gov/about/justice_pictures/Kavanaugh%2012221_005_crop.jpg',
+  'Clarence Thomas': 'https://www.supremecourt.gov/about/justice_pictures/Thomas_9366-024_Crop.jpg',
+  'Elena Kagan': 'https://www.supremecourt.gov/about/justice_pictures/Kagan_10713-017-Crop.jpg',
+  'John G. Roberts, Jr.':
+    'https://www.supremecourt.gov/about/justice_pictures/Roberts_8807-16_Crop.jpg',
+  'Ketanji Brown Jackson': 'https://www.supremecourt.gov/about/justice_pictures/KBJackson3.jpg',
+  'Neil M. Gorsuch': 'https://www.supremecourt.gov/about/justice_pictures/Gorsuch2.jpg',
+  'Samuel A. Alito, Jr.':
+    'https://www.supremecourt.gov/about/justice_pictures/Alito_9264-001-Crop.jpg',
+  'Sonia Sotomayor':
+    'https://www.supremecourt.gov/about/justice_pictures/Sotomayor_Official_2025.jpg',
+}
+
+const justices = [
+  {
+    alignment: 'republican',
+    alignmentLabel: 'Appointed by Republican president Bush',
+    description:
+      'John G. Roberts, Jr. has served as chief justice since 2005, leading the Supreme Court and presiding over the federal judiciary.',
+    id: 'judicial-john-g-roberts-jr',
+    name: 'John G. Roberts, Jr.',
+    sourceUrl: 'https://www.supremecourt.gov/about/biographies.aspx',
+    sortOrder: 1,
+    title: 'Chief Justice of the United States',
+  },
+  {
+    alignment: 'republican',
+    alignmentLabel: 'Appointed by Republican president Bush',
+    description:
+      'Clarence Thomas has served as an associate justice since 1991 after a career in the executive branch and on the U.S. Court of Appeals for the D.C. Circuit.',
+    id: 'judicial-clarence-thomas',
+    name: 'Clarence Thomas',
+    sourceUrl: 'https://www.supremecourt.gov/about/biographies.aspx',
+    sortOrder: 2,
+    title: 'Associate Justice',
+  },
+  {
+    alignment: 'republican',
+    alignmentLabel: 'Appointed by Republican president Bush',
+    description:
+      'Samuel A. Alito, Jr. joined the Court in 2006 after serving on the U.S. Court of Appeals for the Third Circuit and in the Justice Department.',
+    id: 'judicial-samuel-a-alito-jr',
+    name: 'Samuel A. Alito, Jr.',
+    sourceUrl: 'https://www.supremecourt.gov/about/biographies.aspx',
+    sortOrder: 3,
+    title: 'Associate Justice',
+  },
+  {
+    alignment: 'democratic',
+    alignmentLabel: 'Appointed by Democratic president Obama',
+    description:
+      'Sonia Sotomayor became the first Latina justice in 2009 after serving as a federal district judge and on the U.S. Court of Appeals for the Second Circuit.',
+    id: 'judicial-sonia-sotomayor',
+    name: 'Sonia Sotomayor',
+    sourceUrl: 'https://www.supremecourt.gov/about/biographies.aspx',
+    sortOrder: 4,
+    title: 'Associate Justice',
+  },
+  {
+    alignment: 'democratic',
+    alignmentLabel: 'Appointed by Democratic president Obama',
+    description:
+      'Elena Kagan joined the Court in 2010 following service as U.S. solicitor general, dean of Harvard Law School, and a White House policy adviser.',
+    id: 'judicial-elena-kagan',
+    name: 'Elena Kagan',
+    sourceUrl: 'https://www.supremecourt.gov/about/biographies.aspx',
+    sortOrder: 5,
+    title: 'Associate Justice',
+  },
+  {
+    alignment: 'republican',
+    alignmentLabel: 'Appointed by Republican president Trump',
+    description:
+      'Neil M. Gorsuch has served as an associate justice since 2017 after a decade on the U.S. Court of Appeals for the Tenth Circuit.',
+    id: 'judicial-neil-m-gorsuch',
+    name: 'Neil M. Gorsuch',
+    sourceUrl: 'https://www.supremecourt.gov/about/biographies.aspx',
+    sortOrder: 6,
+    title: 'Associate Justice',
+  },
+  {
+    alignment: 'republican',
+    alignmentLabel: 'Appointed by Republican president Trump',
+    description:
+      'Brett M. Kavanaugh joined the Court in 2018 after serving on the U.S. Court of Appeals for the D.C. Circuit and in multiple White House roles.',
+    id: 'judicial-brett-m-kavanaugh',
+    name: 'Brett M. Kavanaugh',
+    sourceUrl: 'https://www.supremecourt.gov/about/biographies.aspx',
+    sortOrder: 7,
+    title: 'Associate Justice',
+  },
+  {
+    alignment: 'republican',
+    alignmentLabel: 'Appointed by Republican president Trump',
+    description:
+      'Amy Coney Barrett became an associate justice in 2020 after serving on the U.S. Court of Appeals for the Seventh Circuit and teaching at Notre Dame Law School.',
+    id: 'judicial-amy-coney-barrett',
+    name: 'Amy Coney Barrett',
+    sourceUrl: 'https://www.supremecourt.gov/about/biographies.aspx',
+    sortOrder: 8,
+    title: 'Associate Justice',
+  },
+  {
+    alignment: 'democratic',
+    alignmentLabel: 'Appointed by Democratic president Biden',
+    description:
+      'Ketanji Brown Jackson joined the Court in 2022 after service as a district judge, appellate judge, public defender, and U.S. Sentencing Commission member.',
+    id: 'judicial-ketanji-brown-jackson',
+    name: 'Ketanji Brown Jackson',
+    sourceUrl: 'https://www.supremecourt.gov/about/biographies.aspx',
+    sortOrder: 9,
+    title: 'Associate Justice',
+  },
+].map((justice) => ({
+  ...justice,
+  branchId: 'judicial',
+  court: 'Supreme Court of the United States',
+  imageUrl: supremeCourtImageMap[justice.name],
+  salaryNote: JUSTICE_SALARY_NOTE,
+  sectionId: 'supreme-court',
+  subtitle: 'Supreme Court',
+  wealthNote: JUSTICE_WEALTH_NOTE,
+}))
+
+const supremeCourtTrumpPowerCases = [
+  {
+    caseName: 'Learning Resources, Inc. v. Trump',
+    date: '2026-02-20',
+    id: 'learning-resources-v-trump',
+    type: 'merits',
+    issue: 'Tariff power under IEEPA. The case asked whether Trump could use that emergency statute to impose broad tariffs.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Tariffs',
+    result: 'The Court held that IEEPA does not authorize the President to impose tariffs.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/25pdf/24-1287_4gcj.pdf',
+  },
+  {
+    caseName: 'Trump v. Illinois',
+    date: '2025-12-23',
+    id: 'trump-v-illinois',
+    type: 'order',
+    issue:
+      "National Guard federalization. The case asked whether Trump could keep the Guard federalized over Illinois's objection while litigation continued.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Military',
+    result: "The Court denied Trump's stay application.",
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/25a443.html',
+  },
+  {
+    caseName: 'Trump v. Slaughter',
+    date: '2025-09-22',
+    id: 'trump-v-slaughter',
+    type: 'order',
+    issue:
+      "FTC removal protections. The case asked whether statutory limits on removing FTC commissioners can block Trump's firing power.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Removal',
+    result: 'The Court granted a stay and granted certiorari before judgment.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/25a264_o759.pdf',
+  },
+  {
+    caseName: 'Trump v. Boyle',
+    date: '2025-07-23',
+    id: 'trump-v-boyle',
+    type: 'order',
+    issue:
+      'Removal power at the Consumer Product Safety Commission. The case asked whether Trump could remove a commissioner and keep her out during the appeal.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Removal',
+    result: "The Court granted Trump's stay, relying on Trump v. Wilcox.",
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/25a11_2cp3.pdf',
+  },
+  {
+    caseName: 'Trump v. CASA, Inc.',
+    date: '2025-06-27',
+    id: 'trump-v-casa',
+    type: 'order',
+    issue:
+      "Nationwide injunctions and Trump's citizenship order. The case asked how far lower courts could go in blocking the order before merits review.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Citizenship',
+    result:
+      'The Court narrowed universal-injunction relief and partly stayed lower-court orders, without deciding the citizenship merits.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a884_8n59.pdf',
+  },
+  {
+    caseName: 'Trump v. Wilcox',
+    date: '2025-05-22',
+    id: 'trump-v-wilcox',
+    type: 'order',
+    issue:
+      'Removal power over independent agencies. The case asked whether Trump could keep fired NLRB and MSPB officials out while the litigation proceeded.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Removal',
+    result: "The Court granted Trump's stay and let the removals remain in effect during the appeal.",
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a966_1b8e.pdf',
+  },
+  {
+    caseName: 'A.A.R.P. v. Trump',
+    date: '2025-04-19',
+    id: 'aarp-v-trump',
+    type: 'order',
+    issue:
+      "Alien Enemies Act removals. The case addressed emergency relief against deportations tied to Trump's March 2025 proclamation.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Deportation',
+    result:
+      'The Court temporarily barred the Government from removing the putative class until further order.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1007_22p3.pdf',
+  },
+  {
+    caseName: 'Trump v. J.G.G.',
+    date: '2025-04-07',
+    id: 'trump-v-jgg',
+    type: 'order',
+    issue:
+      "Alien Enemies Act removals. The case asked whether the district court could keep using a TRO to block deportations under Trump's March 2025 proclamation.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Deportation',
+    result:
+      'The Court vacated the district-court TROs and pushed the dispute back into the usual habeas track.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/24a931.html',
+  },
+  {
+    caseName: 'Trump v. United States',
+    date: '2024-07-01',
+    id: 'trump-v-united-states',
+    type: 'merits',
+    issue:
+      'Presidential immunity. The case asked how much criminal immunity a former President has for official acts.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Immunity',
+    result:
+      'The Court recognized absolute immunity for core constitutional powers and presumptive immunity for official acts.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/23pdf/23-939_e2pg.pdf',
+  },
+  {
+    caseName: 'Trump v. Thompson',
+    date: '2022-01-19',
+    id: 'trump-v-thompson',
+    type: 'order',
+    issue:
+      'January 6 records and executive privilege. The case asked whether Trump could block release of White House records to the House January 6 committee.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'anti',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Records',
+    result: "The Court denied Trump's stay application and left the D.C. Circuit ruling in place.",
+    sourceUrl: 'https://www.supremecourt.gov/opinions/21pdf/21a272_9p6b.pdf',
+  },
+  {
+    caseName: 'Trump v. New York',
+    date: '2020-12-18',
+    id: 'trump-v-new-york',
+    type: 'procedural',
+    issue:
+      'Apportionment base and undocumented immigrants. The case asked whether Trump could exclude certain undocumented immigrants from the census count used to apportion House seats.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Census',
+    result:
+      'The Court treated the case as too uncertain and not ripe, vacated the lower ruling, and remanded.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/20-366_2d93.pdf',
+  },
+  {
+    caseName: 'Trump v. Sierra Club',
+    date: '2020-07-31',
+    id: 'trump-v-sierra-club',
+    type: 'order',
+    issue:
+      'Border wall funding transfer. The case asked whether Trump could keep using diverted military funds for wall construction while the appeal continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Appropriations',
+    result:
+      'The Court denied a motion to lift its stay, leaving the administration free to keep using the funds while the case proceeded.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a60.html',
+  },
+  {
+    caseName: 'Trump v. Vance',
+    date: '2020-07-09',
+    id: 'trump-v-vance',
+    type: 'merits',
+    issue:
+      "State grand-jury subpoena. The case asked whether a sitting President had absolute immunity from a state prosecutor's subpoena for private records.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Records',
+    result: 'The Court rejected absolute immunity and allowed the subpoena fight to continue.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-635.html',
+  },
+  {
+    caseName: 'Trump v. Mazars USA, LLP',
+    date: '2020-07-09',
+    id: 'trump-v-mazars',
+    type: 'merits',
+    issue:
+      "Congressional subpoenas for Trump's financial records. The case asked whether House committees could demand those records from third parties.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Records',
+    result:
+      "The Court rejected Trump's categorical position and sent the dispute back under a new separation-of-powers test.",
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-715.html',
+  },
+  {
+    caseName: 'Department of Homeland Security v. Regents of the University of California',
+    date: '2020-06-18',
+    id: 'dhs-v-regents',
+    type: 'merits',
+    issue:
+      "DACA rescission. The case asked whether the administration's move to end DACA complied with the APA.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Deportation',
+    result:
+      'The Court held the rescission was arbitrary and capricious as explained and sent the case back.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/19pdf/18-587_5ifl.pdf',
+  },
+  {
+    caseName: 'Department of Commerce v. New York',
+    date: '2019-06-27',
+    id: 'department-of-commerce-v-new-york',
+    type: 'merits',
+    issue:
+      'Census citizenship question. The case asked whether the Trump administration could add a citizenship question to the 2020 census on the rationale it gave.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Census',
+    result:
+      "The Court said the administration's stated rationale was inadequate and sent the matter back.",
+    sourceUrl: 'https://www.supremecourt.gov/opinions/18pdf/18-966_bq7c.pdf',
+  },
+  {
+    caseName: 'Trump v. Hawaii',
+    date: '2018-06-26',
+    id: 'trump-v-hawaii',
+    type: 'merits',
+    issue:
+      'Travel ban and entry suspension. The case asked whether Trump could use federal immigration law to restrict entry from several countries.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'not_on_court',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Immigration',
+    result: 'The Court upheld the Proclamation and allowed the entry restrictions to take effect.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/17-965.html',
+  },
+  {
+    caseName: 'Trump v. Hawaii (2017 stay order)',
+    date: '2017-06-26',
+    id: 'trump-v-hawaii-2017-stay',
+    type: 'order',
+    issue:
+      'Travel-ban and refugee-suspension stay applications. The case asked whether Sections 2(c) and 6 of Executive Order 13780 could take effect while the litigation continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'pro',
+      'judicial-elena-kagan': 'pro',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'not_on_court',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Refugees',
+    result:
+      'The Court granted the Government applications in part, let core entry and refugee restrictions take effect against people without a qualifying U.S. connection, and set the case for argument.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/16-1540.html',
+  },
+  {
+    caseName: 'Trump v. International Refugee Assistance Project',
+    date: '2017-06-26',
+    id: 'trump-v-irap',
+    type: 'order',
+    issue:
+      'Travel-ban stay applications in the Fourth Circuit challenge. The case asked whether Section 2(c) of Executive Order 13780 could take effect while the litigation continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'pro',
+      'judicial-elena-kagan': 'pro',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'not_on_court',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Immigration',
+    result:
+      'The Court granted the Government applications in part, let the entry-suspension rules take effect against people without a qualifying U.S. connection, and set the case for argument.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/16-1436.html',
+  },
+]
+
+function slugify(value) {
+  return value
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function stripTags(value) {
+  return decodeHtml(value.replace(/<[^>]+>/g, ' '))
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function decodeHtml(value) {
+  return value
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#91;/g, '[')
+    .replace(/&#93;/g, ']')
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
+    .replace(/&#8211;/g, '–')
+    .replace(/&#8212;/g, '—')
+    .replace(/&#8216;/g, "'")
+    .replace(/&#8217;/g, "'")
+    .replace(/&#8230;/g, '...')
+    .replace(/&#039;/g, "'")
+    .replace(/<sup>(.*?)<\/sup>/g, '$1')
+}
+
+function extractTag(block, tag) {
+  const match = block.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`))
+  return match ? decodeHtml(match[1]).trim() : ''
+}
+
+function formatCommaName(name) {
+  if (!name.includes(',')) {
+    return name.trim()
+  }
+
+  const [last, first] = name.split(',').map((part) => part.trim())
+  return `${first} ${last}`.trim()
+}
+
+function sentenceCaseParty(code) {
+  return PARTY_DATA[code]?.label ?? 'Nonpartisan'
+}
+
+function alignmentFromParty(code) {
+  return PARTY_DATA[code]?.alignment ?? 'nonpartisan'
+}
+
+function congressPhotoUrl(bioguideId) {
+  if (!bioguideId) {
+    return undefined
+  }
+
+  const trimmed = bioguideId.trim()
+
+  if (!trimmed) {
+    return undefined
+  }
+
+  return `https://bioguide.congress.gov/bioguide/photo/${trimmed[0]}/${trimmed}.jpg`
+}
+
+const HOUSE_SECOND_IMPEACHMENT_VOTE_URL = 'https://clerk.house.gov/Votes/202117'
+const HOUSE_ELECTORAL_OBJECTION_VOTE_URLS = [
+  'https://clerk.house.gov/Votes/202110',
+  'https://clerk.house.gov/Votes/202111',
+]
+const SENATE_SECOND_IMPEACHMENT_VOTE_URL =
+  'https://www.senate.gov/legislative/LIS/roll_call_votes/vote1171/vote_117_1_00059.htm'
+const SENATE_ELECTORAL_OBJECTION_VOTE_URLS = [
+  'https://www.senate.gov/legislative/LIS/roll_call_votes/vote1171/vote_117_1_00001.htm',
+  'https://www.senate.gov/legislative/LIS/roll_call_votes/vote1171/vote_117_1_00002.htm',
+]
+
+const trumpManualOverrides = new Map([
+  [
+    'Donald J. Trump',
+    {
+      evidence: ['The score anchor for the project: Trump himself.'],
+      note: 'Trump is the reference point for the scale, so he is fixed at the maximum.',
+      score: 10,
+    },
+  ],
+  [
+    'J.D. Vance',
+    {
+      evidence: ['Current vice president.', 'Trump’s 2024 national running mate.'],
+      note: 'The vice presidency and 2024 running-mate status place Vance in Trump’s closest public political circle.',
+      score: 10,
+    },
+  ],
+  [
+    'Bernard Sanders',
+    {
+      evidence: [
+        'Independent senator who caucuses with Democrats.',
+        'Longtime national political opponent of Trump.',
+      ],
+      note: 'Sanders sits at the far-opposition end of the scale and outside Trump’s party coalition.',
+      score: 0,
+    },
+  ],
+  [
+    'Angus S. Jr. King',
+    {
+      evidence: [
+        'Independent senator who caucuses with Democrats.',
+        'Not part of Trump’s party coalition.',
+      ],
+      note: 'King is outside Trump’s coalition, but without the same direct national rivalry as Sanders.',
+      score: 1,
+    },
+  ],
+  [
+    'Jerome H. Powell',
+    {
+      evidence: [
+        'Trump elevated Powell to the Fed chair in 2017.',
+        'Biden later reappointed Powell to another term in 2022.',
+        'The Federal Reserve is structured to operate independently of the White House.',
+      ],
+      note:
+        'Powell has a direct Trump appointment history, but the Fed’s legal independence and his later Biden reappointment keep this in the middle range rather than near Trump’s inner circle.',
+      score: 5,
+    },
+  ],
+  [
+    'Paul S. Atkins',
+    {
+      evidence: ['Sworn in as SEC chair in 2025 after nomination by Trump.'],
+      note:
+        'Trump put Atkins at the top of the SEC, creating a direct institutional tie even though the SEC is an independent regulator rather than a cabinet department.',
+      score: 8,
+    },
+  ],
+  [
+    'Andrew N. Ferguson',
+    {
+      evidence: ['Trump designated Ferguson as FTC chairman on January 20, 2025.'],
+      note:
+        'Ferguson leads an independent regulator, but his current chairmanship still comes directly from Trump, which supports a high score.',
+      score: 8,
+    },
+  ],
+  [
+    'Brendan Carr',
+    {
+      evidence: [
+        'Trump designated Carr as FCC chairman in 2025.',
+        'Carr first joined the FCC after Trump elevated him in 2017.',
+      ],
+      note:
+        'Carr’s chairmanship and earlier elevation at the FCC both run through Trump, making this one of the stronger independent-agency ties.',
+      score: 9,
+    },
+  ],
+  [
+    'Michael S. Selig',
+    {
+      evidence: ['Sworn in as CFTC chairman in December 2025 after nomination by Trump.'],
+      note:
+        'Selig’s current leadership role at the CFTC comes directly from Trump’s nomination and Senate confirmation path, so the score stays high.',
+      score: 8,
+    },
+  ],
+])
+
+const houseLeadershipFacts = new Map([
+  ['Mike Johnson', { delta: 4, text: 'Speaker of the House.' }],
+  ['Steve Scalise', { delta: 3, text: 'House majority leader.' }],
+  ['Tom Emmer', { delta: 2, text: 'House majority whip.' }],
+  ['Lisa McClain', { delta: 2, text: 'House Republican conference chair.' }],
+  ['Hakeem Jeffries', { delta: 0, text: 'House Democratic leader.' }],
+  ['Katherine Clark', { delta: 0, text: 'House Democratic whip.' }],
+  ['Pete Aguilar', { delta: 0, text: 'House Democratic caucus chair.' }],
+])
+
+const legislativeManualEvidence = new Map([
+  ['Bennie Thompson', { delta: -1, text: 'Chaired the House January 6 committee.' }],
+  [
+    'Jamie Raskin',
+    { delta: -1, text: 'Served as lead House impeachment manager in Trump’s second impeachment trial.' },
+  ],
+  [
+    'Adam B. Schiff',
+    { delta: -1, text: 'Led the first House impeachment case against Trump while serving in the House.' },
+  ],
+  ['Pete Aguilar', { delta: -1, text: 'Served on the House January 6 committee.' }],
+])
+
+const supremeCourtTrumpFacts = new Map([
+  ['Neil M. Gorsuch', { note: 'Nominated to the Supreme Court by Trump in 2017.', score: 7 }],
+  ['Brett M. Kavanaugh', { note: 'Nominated to the Supreme Court by Trump in 2018.', score: 7 }],
+  ['Amy Coney Barrett', { note: 'Nominated to the Supreme Court by Trump in 2020.', score: 7 }],
+])
+
+const manualXUrlOverrides = new Map([
+  ['Donald J. Trump', 'https://x.com/realDonaldTrump'],
+  ['J.D. Vance', 'https://x.com/JDVance'],
+])
+
+const manualXUrlSuppressions = new Set(['Rochelle Garza'])
+
+const genericXHandles = new Set([
+  'whitehouse',
+  'potus',
+  'vp',
+  'senatedems',
+  'senategop',
+  'housegop',
+  'housedemocrats',
+  'gop',
+  'democrats',
+  'republicans',
+  'twitter',
+  'x',
+])
+
+function trumpLabelFromScore(score) {
+  if (score >= 9) {
+    return 'Trump inner circle'
+  }
+
+  if (score >= 7) {
+    return 'Strong Trump ally'
+  }
+
+  if (score >= 5) {
+    return 'Generally Trump-aligned'
+  }
+
+  if (score >= 3) {
+    return 'Mixed or arm’s length'
+  }
+
+  if (score >= 1) {
+    return 'Usually opposed'
+  }
+
+  return 'Clear opponent'
+}
+
+function clampTrumpScore(score) {
+  return Math.max(0, Math.min(10, Math.round((score + Number.EPSILON) * 100) / 100))
+}
+
+function clampTrumpScoreToSingleDecimal(score) {
+  return Math.max(0, Math.min(10, Math.round((score + Number.EPSILON) * 10) / 10))
+}
+
+function formatWeightedValue(value) {
+  return Number(value.toFixed(2)).toString()
+}
+
+function judicialTrumpLabelFromScore(score) {
+  if (score >= 9) {
+    return 'Very often pro-Trump in selected cases'
+  }
+
+  if (score >= 7) {
+    return 'Mostly pro-Trump in selected cases'
+  }
+
+  if (score >= 5) {
+    return 'Leans pro-Trump in selected cases'
+  }
+
+  if (score >= 3) {
+    return 'Mixed in selected cases'
+  }
+
+  if (score >= 1) {
+    return 'Usually not pro-Trump in selected cases'
+  }
+
+  return 'Never pro-Trump in selected cases'
+}
+
+function uniqueStrings(items) {
+  return [...new Set(items.filter(Boolean))]
+}
+
+function extractBioguideIdFromImageUrl(imageUrl) {
+  const match = imageUrl?.match(/\/photo\/[A-Z]\/([A-Z0-9]+)\.jpg$/)
+  return match ? match[1] : undefined
+}
+
+function normalizeNameMatch(value) {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\b(jr|jr\.|sr|sr\.|ii|iii|iv|v)\b/gi, ' ')
+    .replace(/[^a-zA-Z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+}
+
+function removeSingleLetterNameTokens(value) {
+  return value
+    .split(' ')
+    .filter((token) => token.length > 1)
+    .join(' ')
+}
+
+const FIRST_NAME_EQUIVALENTS = new Map(
+  [
+    ['bernie', ['bernard']],
+    ['bill', ['william']],
+    ['chuck', ['charles']],
+    ['chris', ['christopher']],
+    ['jack', ['john']],
+    ['jacky', ['jacklyn', 'jackie']],
+    ['jim', ['james']],
+    ['katie', ['katherine']],
+    ['maggie', ['margaret']],
+    ['thom', ['thomas']],
+    ['tim', ['timothy']],
+  ].flatMap(([key, values]) => [
+    [key, [key, ...values]],
+    ...values.map((value) => [value, [key, ...values]]),
+  ]),
+)
+
+function buildNormalizedNameTokens(value) {
+  return removeSingleLetterNameTokens(normalizeNameMatch(value))
+    .split(' ')
+    .filter(Boolean)
+}
+
+function getEquivalentFirstNames(value) {
+  return FIRST_NAME_EQUIVALENTS.get(value) ?? [value]
+}
+
+function firstNamesLikelyMatch(left, right) {
+  if (!left || !right) {
+    return false
+  }
+
+  if (left === right) {
+    return true
+  }
+
+  if ((left.startsWith(right) || right.startsWith(left)) && Math.min(left.length, right.length) >= 3) {
+    return true
+  }
+
+  const leftEquivalents = getEquivalentFirstNames(left)
+  const rightEquivalents = getEquivalentFirstNames(right)
+
+  return leftEquivalents.some((candidate) => rightEquivalents.includes(candidate))
+}
+
+function parseHouseVoteEntries(html) {
+  return [...html.matchAll(/<a href="\/Members\/([A-Z]\d{6})"[^>]*aria-label="[^"]+? Voted ([A-Za-z ]+)"/g)].map(
+    (match) => ({
+      bioguideId: match[1],
+      cast: match[2].trim(),
+    }),
+  )
+}
+
+function parseSenateVoteEntries(html) {
+  const normalized = decodeHtml(html)
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/?b>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+
+  return [
+    ...normalized.matchAll(
+      /([A-Za-zÀ-ÖØ-öø-ÿ'., -]+?) \(([A-Z])-([A-Z]{2})\),\s*(Guilty|Not Guilty|Yea|Nay|Present|Not Voting|Did Not Vote)/g,
+    ),
+  ].map((match) => ({
+    cast: match[4].trim(),
+    name: match[1].trim(),
+    partyCode: match[2],
+    stateCode: match[3],
+  }))
+}
+
+function findMatchingSenator(voteEntry, senators) {
+  const voteFirstName = buildNormalizedNameTokens(voteEntry.firstName ?? voteEntry.name)[0] ?? ''
+  const voteLastName = removeSingleLetterNameTokens(normalizeNameMatch(voteEntry.lastName ?? voteEntry.name))
+  const candidates = senators.filter((person) => person.stateCode === voteEntry.stateCode)
+
+  return (
+    candidates.find((person) => {
+      const tokens = buildNormalizedNameTokens(person.name)
+
+      if (tokens.length === 0) {
+        return false
+      }
+
+      const personFirstName = tokens[0]
+      const personLastOne = tokens.slice(-1).join(' ')
+      const personLastTwo = tokens.slice(-2).join(' ')
+      const surnameMatches =
+        personLastOne === voteLastName ||
+        personLastTwo === voteLastName ||
+        voteLastName.endsWith(` ${personLastOne}`) ||
+        personLastTwo.endsWith(` ${voteLastName}`)
+
+      return surnameMatches && firstNamesLikelyMatch(personFirstName, voteFirstName)
+    }) ?? null
+  )
+}
+
+async function fetchHouseVoteMap(url) {
+  const html = await fetchText(url)
+  return new Map(parseHouseVoteEntries(html).map((entry) => [entry.bioguideId, entry.cast]))
+}
+
+async function fetchSenateVoteEntriesForUrl(url) {
+  const html = await fetchText(url)
+  return parseSenateVoteEntries(html)
+}
+
+function buildHouseRollCallXmlUrl(year, rollNumber) {
+  return `https://clerk.house.gov/evs/${year}/roll${String(rollNumber).padStart(3, '0')}.xml`
+}
+
+function buildSenateRollCallXmlUrl(congress, session, voteNumber) {
+  return `https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${String(
+    voteNumber,
+  ).padStart(5, '0')}.xml`
+}
+
+function buildSenateRollCallPageUrl(congress, session, voteNumber) {
+  return `https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${String(
+    voteNumber,
+  ).padStart(5, '0')}.htm`
+}
+
+function parseHouseVoteXml(xml) {
+  const date = xml.match(/<action-date>([^<]+)<\/action-date>/)?.[1]?.trim() ?? ''
+  const question = xml.match(/<vote-question>([^<]+)<\/vote-question>/)?.[1]?.trim() ?? ''
+  const resultText = xml.match(/<vote-result>([^<]+)<\/vote-result>/)?.[1]?.trim() ?? ''
+  const title = xml.match(/<vote-desc>([^<]+)<\/vote-desc>/)?.[1]?.trim() ?? ''
+  const yeaTotal = Number(xml.match(/<totals-by-vote>[\s\S]*?<yea-total>(\d+)<\/yea-total>/)?.[1] ?? Number.NaN)
+  const nayTotal = Number(xml.match(/<totals-by-vote>[\s\S]*?<nay-total>(\d+)<\/nay-total>/)?.[1] ?? Number.NaN)
+  const entries = new Map()
+
+  for (const match of xml.matchAll(
+    /<recorded-vote><legislator[^>]+name-id="([A-Z]\d{6})"[\s\S]*?<\/legislator><vote>([^<]+)<\/vote><\/recorded-vote>/g,
+  )) {
+    entries.set(match[1], match[2].trim())
+  }
+
+  return { date, entries, nayTotal, question, resultText, title, yeaTotal }
+}
+
+function parseSenateVoteXml(xml) {
+  const date = xml.match(/<vote_date>([^<]+)<\/vote_date>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
+  const question = xml.match(/<question>([\s\S]*?)<\/question>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
+  const resultText =
+    xml.match(/<vote_result_text>([\s\S]*?)<\/vote_result_text>/)?.[1]?.replace(/\s+/g, ' ').trim() ??
+    xml.match(/<vote_result>([\s\S]*?)<\/vote_result>/)?.[1]?.replace(/\s+/g, ' ').trim() ??
+    ''
+  const title = xml.match(/<vote_title>([\s\S]*?)<\/vote_title>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
+  const yeaTotal = Number(xml.match(/<yeas>(\d+)<\/yeas>/)?.[1] ?? Number.NaN)
+  const nayTotal = Number(xml.match(/<nays>(\d+)<\/nays>/)?.[1] ?? Number.NaN)
+  const entries = []
+
+  for (const match of xml.matchAll(
+    /<member>[\s\S]*?<last_name>([^<]+)<\/last_name>[\s\S]*?<first_name>([^<]+)<\/first_name>[\s\S]*?<party>([^<]*)<\/party>[\s\S]*?<state>([^<]*)<\/state>[\s\S]*?<vote_cast>([^<]+)<\/vote_cast>[\s\S]*?<\/member>/g,
+  )) {
+    entries.push({
+      cast: match[5].trim(),
+      name: `${match[2].trim()} ${match[1].trim()}`.trim(),
+      partyCode: match[3].trim(),
+      stateCode: match[4].trim(),
+    })
+  }
+
+  return { date, entries, nayTotal, question, resultText, title, yeaTotal }
+}
+
+function buildLegislativeTrumpLabel(score) {
+  if (score >= 8) {
+    return 'Very often pro-Trump in selected votes'
+  }
+
+  if (score >= 6.5) {
+    return 'Mostly pro-Trump in selected votes'
+  }
+
+  if (score >= 4.5) {
+    return 'Mixed, slight pro-Trump lean'
+  }
+
+  if (score >= 2.5) {
+    return 'Mixed, slight anti-Trump lean'
+  }
+
+  if (score >= 0.5) {
+    return 'Usually not pro-Trump in selected votes'
+  }
+
+  return 'Never pro-Trump in selected votes'
+}
+
+function getLegislativeTrumpConfidence(sampleSize, selectedCount) {
+  if (sampleSize >= Math.ceil(selectedCount * 0.5)) {
+    return 'High'
+  }
+
+  if (sampleSize >= Math.ceil(selectedCount * 0.25)) {
+    return 'Medium'
+  }
+
+  return 'Low'
+}
+
+function isSkippedLegislativeCast(cast) {
+  return cast === 'Did Not Vote' || cast === 'Not Voting' || cast === 'Present'
+}
+
+function normalizeLegislativeCast(cast) {
+  const normalized = cast.trim().toLowerCase()
+
+  if (normalized === 'yea' || normalized === 'aye') {
+    return 'yea'
+  }
+
+  if (normalized === 'nay' || normalized === 'no') {
+    return 'nay'
+  }
+
+  return normalized
+}
+
+function getLegislativeCastSide(cast) {
+  const normalized = normalizeLegislativeCast(cast)
+
+  if (normalized === 'yea' || normalized === 'aye' || normalized === 'guilty') {
+    return 'affirmative'
+  }
+
+  if (normalized === 'nay' || normalized === 'no' || normalized === 'not guilty') {
+    return 'negative'
+  }
+
+  return null
+}
+
+function resolveWinningLegislativeSide(resultText, yeaTotal, nayTotal) {
+  const normalized = (resultText ?? '').replace(/\s+/g, ' ').trim().toLowerCase()
+  const negativePatterns = [
+    /\bnot guilty\b/,
+    /\bacquitted\b/,
+    /\bnot agreed(?: to)?\b/,
+    /\bnot adopted\b/,
+    /\bnot confirmed\b/,
+    /\bnot passed\b/,
+    /\bnot invoked\b/,
+    /\bnot sustained\b/,
+    /\brejected\b/,
+    /\bfailed\b/,
+    /\bdefeated\b/,
+  ]
+  const affirmativePatterns = [
+    /\bagreed(?: to)?\b/,
+    /\badopted\b/,
+    /\bconfirmed\b/,
+    /\bpassed\b/,
+    /\binvoked\b/,
+    /\bsustained\b/,
+    /\bguilty\b/,
+    /\bconvicted\b/,
+    /\bratified\b/,
+  ]
+
+  for (const pattern of negativePatterns) {
+    if (pattern.test(normalized)) {
+      return 'negative'
+    }
+  }
+
+  for (const pattern of affirmativePatterns) {
+    if (pattern.test(normalized)) {
+      return 'affirmative'
+    }
+  }
+
+  if (Number.isFinite(yeaTotal) && Number.isFinite(nayTotal) && yeaTotal !== nayTotal) {
+    return yeaTotal > nayTotal ? 'affirmative' : 'negative'
+  }
+
+  return null
+}
+
+function deriveTrumpRollCallOutcome(proTrumpCast, resultText, yeaTotal, nayTotal) {
+  const trumpSide = getLegislativeCastSide(proTrumpCast)
+  const winningSide = resolveWinningLegislativeSide(resultText, yeaTotal, nayTotal)
+
+  if (!trumpSide || !winningSide) {
+    return null
+  }
+
+  return trumpSide === winningSide ? 'pro' : 'anti'
+}
+
+async function buildSelectedLegislativeRollCallSnapshots() {
+  const selectedHouseRollCalls = houseTrumpRollCallPool.filter((item) => item.selected)
+  const selectedSenateRollCalls = senateTrumpRollCallPool.filter((item) => item.selected)
+  const selectedRollCalls = [...selectedHouseRollCalls, ...selectedSenateRollCalls]
+
+  const snapshots = await mapWithConcurrency(selectedRollCalls, 8, async (event) => {
+    if (event.chamber === 'house') {
+      const sourceUrl = buildHouseRollCallXmlUrl(event.year, event.rollNumber)
+      const xml = await fetchText(sourceUrl)
+      const parsed = parseHouseVoteXml(xml)
+
+      return {
+        ...event,
+        date: parsed.date,
+        entries: parsed.entries,
+        nayTotal: parsed.nayTotal,
+        question: parsed.question,
+        sourceUrl,
+        title: parsed.title,
+        trumpOutcome: deriveTrumpRollCallOutcome(
+          event.proTrumpCast,
+          parsed.resultText,
+          parsed.yeaTotal,
+          parsed.nayTotal,
+        ),
+        yeaTotal: parsed.yeaTotal,
+      }
+    }
+
+    const xmlUrl = buildSenateRollCallXmlUrl(event.congress, event.session, event.voteNumber)
+    const sourceUrl = buildSenateRollCallPageUrl(event.congress, event.session, event.voteNumber)
+    const xml = await fetchText(xmlUrl)
+    const parsed = parseSenateVoteXml(xml)
+
+    return {
+      ...event,
+      date: parsed.date,
+      entries: parsed.entries,
+      nayTotal: parsed.nayTotal,
+      question: parsed.question,
+      sourceUrl,
+      title: parsed.title,
+      trumpOutcome: deriveTrumpRollCallOutcome(
+        event.proTrumpCast,
+        parsed.resultText,
+        parsed.yeaTotal,
+        parsed.nayTotal,
+      ),
+      yeaTotal: parsed.yeaTotal,
+    }
+  })
+
+  return {
+    selectedHouseCount: selectedHouseRollCalls.length,
+    selectedSenateCount: selectedSenateRollCalls.length,
+    snapshots,
+  }
+}
+
+async function buildTrumpRelationshipContext(senators, representatives) {
+  const { selectedHouseCount, selectedSenateCount, snapshots } =
+    await buildSelectedLegislativeRollCallSnapshots()
+  const metricsByPersonId = new Map()
+  const allLegislators = [...senators, ...representatives]
+
+  for (const person of allLegislators) {
+    metricsByPersonId.set(person.id, {
+      antiVotes: 0,
+      availableEvents: person.sectionId === 'senate' ? selectedSenateCount : selectedHouseCount,
+      chamber: person.sectionId,
+      evidence: [],
+      missedCount: 0,
+      notInOfficeCount: 0,
+      proVotes: 0,
+      rollCallPositions: {},
+      sampleSize: 0,
+      weightedAntiVotes: 0,
+      weightedProVotes: 0,
+      weightedSampleSize: 0,
+    })
+  }
+
+  for (const snapshot of snapshots) {
+    if (snapshot.chamber === 'house') {
+      for (const person of representatives) {
+        const bioguideId = extractBioguideIdFromImageUrl(person.imageUrl)
+        const cast = bioguideId ? snapshot.entries.get(bioguideId) : undefined
+        const metrics = metricsByPersonId.get(person.id)
+
+        if (!metrics) {
+          continue
+        }
+
+        if (!cast) {
+          metrics.rollCallPositions[snapshot.id] = 'not_in_office'
+          metrics.notInOfficeCount += 1
+          continue
+        }
+
+        if (isSkippedLegislativeCast(cast)) {
+          metrics.rollCallPositions[snapshot.id] = 'missed'
+          metrics.missedCount += 1
+          continue
+        }
+
+        const isProTrump =
+          normalizeLegislativeCast(cast) === normalizeLegislativeCast(snapshot.proTrumpCast)
+        const weight = getLegislativeRollCallWeight(snapshot)
+
+        if (isProTrump) {
+          metrics.proVotes += 1
+          metrics.weightedProVotes += weight
+        } else {
+          metrics.antiVotes += 1
+          metrics.weightedAntiVotes += weight
+        }
+
+        metrics.sampleSize += 1
+        metrics.weightedSampleSize += weight
+        metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
+
+        if (snapshot.highlight && metrics.evidence.length < 4) {
+          metrics.evidence.push(
+            `${snapshot.label}: ${cast} (${isProTrump ? 'pro-Trump side' : 'not pro-Trump side'}).`,
+          )
+        }
+      }
+
+      continue
+    }
+
+    for (const person of senators) {
+      const metrics = metricsByPersonId.get(person.id)
+
+      if (!metrics) {
+        continue
+      }
+
+      const matchedEntry = snapshot.entries.find((entry) => {
+        const candidate = findMatchingSenator(entry, [person])
+        return candidate?.id === person.id
+      })
+
+      if (!matchedEntry) {
+        metrics.rollCallPositions[snapshot.id] = 'not_in_office'
+        metrics.notInOfficeCount += 1
+        continue
+      }
+
+      if (isSkippedLegislativeCast(matchedEntry.cast)) {
+        metrics.rollCallPositions[snapshot.id] = 'missed'
+        metrics.missedCount += 1
+        continue
+      }
+
+      const isProTrump =
+        normalizeLegislativeCast(matchedEntry.cast) ===
+        normalizeLegislativeCast(snapshot.proTrumpCast)
+      const weight = getLegislativeRollCallWeight(snapshot)
+
+      if (isProTrump) {
+        metrics.proVotes += 1
+        metrics.weightedProVotes += weight
+      } else {
+        metrics.antiVotes += 1
+        metrics.weightedAntiVotes += weight
+      }
+
+      metrics.sampleSize += 1
+      metrics.weightedSampleSize += weight
+      metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
+
+      if (snapshot.highlight && metrics.evidence.length < 4) {
+        metrics.evidence.push(
+          `${snapshot.label}: ${matchedEntry.cast} (${isProTrump ? 'pro-Trump side' : 'not pro-Trump side'}).`,
+        )
+      }
+    }
+  }
+
+  return {
+    legislativeMetricsByPersonId: metricsByPersonId,
+    legislativeRollCallSummary: {
+      houseCandidateCount: houseTrumpRollCallPool.length,
+      houseSelectedCount: selectedHouseCount,
+      selectedEvents: snapshots.map((snapshot) => ({
+        category: snapshot.category,
+        chamber: snapshot.chamber,
+        date: snapshot.date,
+        id: snapshot.id,
+        label: snapshot.label,
+        nayTotal: snapshot.nayTotal,
+        proTrumpCast: snapshot.proTrumpCast,
+        question: snapshot.question,
+        sourceUrl: snapshot.sourceUrl,
+        title: snapshot.title,
+        trumpOutcome: snapshot.trumpOutcome,
+        weight: getLegislativeRollCallWeight(snapshot),
+        yeaTotal: snapshot.yeaTotal,
+      })),
+      senateCandidateCount: senateTrumpRollCallPool.length,
+      senateSelectedCount: selectedSenateCount,
+    },
+  }
+}
+
+function finalizeTrumpAnnotation(person, score, note, evidence) {
+  const finalScore = clampTrumpScore(score)
+
+  return {
+    ...person,
+    trumpEvidence: uniqueStrings(evidence),
+    trumpLabel: trumpLabelFromScore(finalScore),
+    trumpNote: note,
+    trumpScore: finalScore,
+  }
+}
+
+function extractExecutiveTrumpEvidence(person) {
+  const evidence = []
+
+  if (person.name === 'Donald J. Trump') {
+    return evidence
+  }
+
+  if (person.title === 'Vice President of the United States') {
+    evidence.push('Current vice president.')
+  } else {
+    evidence.push('Serving in Trump’s current administration.')
+  }
+
+  if (/Trump-Vance Transition Team/i.test(person.description)) {
+    evidence.push('Held a senior role on the Trump-Vance transition team during the 2024 campaign.')
+  }
+
+  if (/served in President Donald Trump’s Cabinet/i.test(person.description)) {
+    evidence.push('Previously served in Trump’s first cabinet.')
+  }
+
+  if (/America First Policy Institute/i.test(person.description)) {
+    evidence.push('Worked at the America First Policy Institute between Trump terms.')
+  }
+
+  return evidence
+}
+
+function buildExecutiveTrumpNote(person, evidence) {
+  if (person.name === 'Donald J. Trump') {
+    return 'Trump is the reference point for the relationship scale, so the score is fixed at 10.'
+  }
+
+  if (person.name === 'J.D. Vance') {
+    return 'The vice presidency and the 2024 ticket make this one of the clearest high-alignment cases in the entire dataset.'
+  }
+
+  if (person.sectionId === 'independent-agencies') {
+    if (/acting|interim|performing the duties/i.test(person.title)) {
+      return 'This profile is tied to an acting or interim independent-agency leadership role, so the score stays in the middle range unless there is a clearer direct Trump appointment path.'
+    }
+
+    if (/board member|vice chair|vice chairman/i.test(person.title)) {
+      return 'This profile tracks a current senior official in an independent agency, but not a full White House or cabinet-style role, so the score stays modest.'
+    }
+
+    if (person.appointedBy === 'Donald J. Trump' || person.alignment === 'republican') {
+      return 'A direct Trump appointment path pushes this independent-agency score above the middle range, while still stopping short of White House or cabinet inner-circle status.'
+    }
+
+    return 'Independent agencies sit at some formal distance from the White House, so the default score stays near the middle unless there is a stronger direct Trump-specific link.'
+  }
+
+  if (evidence.length > 1) {
+    return 'Current service in Trump’s administration plus earlier Trump-linked roles push this estimate close to the top of the scale.'
+  }
+
+  return 'Current service in Trump’s administration is the clearest factual tie in this dataset, so the score stays high without claiming personal friendship.'
+}
+
+function annotateExecutiveTrumpRelationship(person) {
+  const override = trumpManualOverrides.get(person.name)
+
+  if (override) {
+    return finalizeTrumpAnnotation(person, override.score, override.note, override.evidence)
+  }
+
+  const evidence = extractExecutiveTrumpEvidence(person)
+
+  if (person.sectionId === 'independent-agencies') {
+    let score = 5
+
+    if (person.appointedBy === 'Donald J. Trump' || person.alignment === 'republican') {
+      score = 7
+    }
+
+    if (/acting|interim|performing the duties/i.test(person.title)) {
+      score = Math.min(score, 4)
+    }
+
+    if (/board member|vice chair|vice chairman/i.test(person.title)) {
+      score = Math.min(score, 3)
+    }
+
+    return finalizeTrumpAnnotation(person, score, buildExecutiveTrumpNote(person, evidence), evidence)
+  }
+
+  const score = person.title === 'Vice President of the United States' ? 10 : 9
+
+  return finalizeTrumpAnnotation(person, score, buildExecutiveTrumpNote(person, evidence), evidence)
+}
+
+function annotateJudicialTrumpRelationship(person) {
+  let proVotes = 0
+  let antiVotes = 0
+  let notOnCourt = 0
+
+  for (const caseItem of supremeCourtTrumpPowerCases) {
+    const stance = caseItem.justiceStances[person.id]
+
+    if (stance === 'pro') {
+      proVotes += 1
+    } else if (stance === 'anti') {
+      antiVotes += 1
+    } else if (stance === 'not_on_court') {
+      notOnCourt += 1
+    }
+  }
+
+  const countedVotes = proVotes + antiVotes
+  const derivedScore = countedVotes === 0 ? 0 : clampTrumpScoreToSingleDecimal((proVotes / countedVotes) * 10)
+  const evidence = [
+    `${proVotes} Pro Trump votes and ${antiVotes} Not pro Trump votes across the 19 selected Trump-related Supreme Court cases on this site.`,
+  ]
+  const trumpAppointment = supremeCourtTrumpFacts.get(person.name)
+
+  if (notOnCourt > 0) {
+    evidence.push(`Not on Court for ${notOnCourt} of the 19 selected cases.`)
+  }
+
+  if (trumpAppointment) {
+    evidence.push(trumpAppointment.note)
+  }
+
+  return {
+    ...person,
+    trumpEvidence: uniqueStrings(evidence),
+    trumpLabel: judicialTrumpLabelFromScore(derivedScore),
+    trumpNote: `Score is derived from the 19 selected Trump-related Supreme Court cases on this site: ${proVotes}/${countedVotes} counted votes on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
+    trumpScore: derivedScore,
+  }
+}
+
+function getLegislativeLeadershipEvidence(person) {
+  const houseFact = houseLeadershipFacts.get(person.name)
+
+  if (houseFact) {
+    return houseFact
+  }
+
+  if (!person.leadership) {
+    return null
+  }
+
+  const delta = /Leader|Speaker/i.test(person.leadership) ? 2 : /Whip|Conference/i.test(person.leadership) ? 1 : 0
+
+  return {
+    delta,
+    text: `${person.leadership}.`,
+  }
+}
+
+function buildLegislativeTrumpNote(person, flags) {
+  if (flags.jan6Objector && flags.leadership && person.partyCode === 'R') {
+    return 'Republican leadership status plus a January 6, 2021 Electoral College objection place this member near the top of Trump’s congressional coalition.'
+  }
+
+  if (flags.convictedOrImpeached && flags.leadership && person.partyCode === 'D') {
+    return 'Current Democratic leadership plus a 2021 impeachment vote place this member in the institutional opposition to Trump.'
+  }
+
+  if (flags.convictedOrImpeached) {
+    return person.partyCode === 'R'
+      ? 'This member broke with Trump on a defining post-January 6, 2021 impeachment vote, which pulls the score below most current Republicans.'
+      : 'This member was on the anti-Trump side of the 2021 impeachment process, reinforcing an already oppositional political position.'
+  }
+
+  if (flags.jan6Objector) {
+    return 'Support for a January 6, 2021 objection to counting Electoral College votes is treated here as a concrete sign of alignment with Trump at a pivotal moment.'
+  }
+
+  if (flags.leadership && person.partyCode === 'R') {
+    return 'Current Republican leadership status places this member close to Trump’s governing coalition, though the score is about public alignment rather than private loyalty.'
+  }
+
+  if (flags.leadership && person.partyCode === 'D') {
+    return 'Current Democratic leadership status places this member in the institutional opposition to Trump.'
+  }
+
+  if (flags.no2021VoteRecord) {
+    return 'This member was not serving for the 2021 Trump-related votes used in this model, so the estimate leans more on current party and leadership than on a longer shared history.'
+  }
+
+  if (person.partyCode === 'R') {
+    return 'No stronger Trump-specific break or tie surfaced in this lightweight model, so the estimate mostly reflects current Republican coalition membership.'
+  }
+
+  if (person.partyCode === 'D') {
+    return 'No stronger Trump-specific role surfaced in this lightweight model, so the estimate mostly reflects current Democratic opposition.'
+  }
+
+  return 'This member sits outside Trump’s party coalition, but without enough direct Trump-specific history in the model to push the score lower.'
+}
+
+function annotateLegislativeTrumpRelationship(person, context) {
+  const metrics = context.legislativeMetricsByPersonId.get(person.id)
+
+  if (!metrics) {
+    return finalizeTrumpAnnotation(
+      person,
+      0,
+      'No selected Trump-linked legislative votes were available for this member in the current model.',
+      [],
+    )
+  }
+
+  const derivedScore =
+    metrics.weightedSampleSize === 0
+      ? 0
+      : clampTrumpScoreToSingleDecimal((metrics.weightedProVotes / metrics.weightedSampleSize) * 10)
+  const confidence = getLegislativeTrumpConfidence(metrics.sampleSize, metrics.availableEvents)
+  const noteParts = [
+    `Score is derived from weighted selected Trump-linked ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls on this site: ${formatWeightedValue(metrics.weightedProVotes)}/${formatWeightedValue(metrics.weightedSampleSize)} weighted vote-equivalents on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
+    LEGISLATIVE_WEIGHTING_NOTE,
+  ]
+
+  if (metrics.notInOfficeCount > 0) {
+    noteParts.push(`Not in office for ${metrics.notInOfficeCount} selected votes.`)
+  }
+
+  if (metrics.missedCount > 0) {
+    noteParts.push(`Missed or abstained on ${metrics.missedCount} selected votes.`)
+  }
+
+  const evidence = [
+    `${metrics.proVotes} raw Pro Trump votes and ${metrics.antiVotes} raw Not pro Trump votes across ${metrics.sampleSize} counted selected ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
+    `${formatWeightedValue(metrics.weightedProVotes)} weighted Pro Trump vote-equivalents and ${formatWeightedValue(metrics.weightedAntiVotes)} weighted Not pro Trump vote-equivalents across ${formatWeightedValue(metrics.weightedSampleSize)} weighted counted selected ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
+    `Sample size: ${metrics.sampleSize} of ${metrics.availableEvents} selected votes. Confidence: ${confidence}.`,
+    LEGISLATIVE_WEIGHTING_NOTE,
+  ]
+
+  if (metrics.notInOfficeCount > 0) {
+    evidence.push(`Not in office for ${metrics.notInOfficeCount} selected votes.`)
+  }
+
+  if (metrics.missedCount > 0) {
+    evidence.push(`Missed or abstained on ${metrics.missedCount} selected votes.`)
+  }
+
+  evidence.push(...metrics.evidence)
+
+  return {
+    ...person,
+    trumpAntiCount: metrics.antiVotes,
+    trumpAvailableEvents: metrics.availableEvents,
+    trumpConfidence: confidence,
+    trumpEvidence: uniqueStrings(evidence),
+    trumpLabel: buildLegislativeTrumpLabel(derivedScore),
+    trumpMissedCount: metrics.missedCount,
+    trumpNote: noteParts.join(' '),
+    trumpNotInOfficeCount: metrics.notInOfficeCount,
+    trumpProCount: metrics.proVotes,
+    trumpRollCallPositions: metrics.rollCallPositions,
+    trumpSampleSize: metrics.sampleSize,
+    trumpScore: derivedScore,
+  }
+}
+
+function annotateTrumpProximity(person, context) {
+  if (person.branchId === 'executive') {
+    return annotateExecutiveTrumpRelationship(person)
+  }
+
+  if (person.branchId === 'judicial') {
+    return annotateJudicialTrumpRelationship(person)
+  }
+
+  if (person.branchId === 'legislative') {
+    return annotateLegislativeTrumpRelationship(person, context)
+  }
+
+  return finalizeTrumpAnnotation(person, 5, 'Fallback editorial estimate.', [])
+}
+
+function finalizeSalary(person, amount, note, sourceLabel, sourceUrl) {
+  return {
+    ...person,
+    salaryAmount: amount,
+    salaryNote: note,
+    salarySourceLabel: sourceLabel,
+    salarySourceUrl: sourceUrl,
+  }
+}
+
+function annotateSalary(person) {
+  if (person.branchId === 'executive') {
+    if (person.name === 'Donald J. Trump') {
+      return finalizeSalary(
+        person,
+        '$400,000',
+        'The statutory presidential salary is $400,000 per year, plus a $50,000 expense allowance.',
+        'President compensation statute',
+        PRESIDENT_SALARY_SOURCE_URL,
+      )
+    }
+
+    if (person.title === 'Vice President of the United States') {
+      return finalizeSalary(
+        person,
+        '$235,100',
+        'The payable 2026 vice presidential salary is frozen at $235,100 under current OPM guidance for covered senior political officials.',
+        'OPM 2026 senior political pay guidance',
+        SENIOR_POLITICAL_PAY_FREEZE_SOURCE_URL,
+      )
+    }
+
+    const independentAgencyOverride = independentAgencySalaryOverrides.get(person.name)
+
+    if (independentAgencyOverride) {
+      return finalizeSalary(
+        person,
+        independentAgencyOverride.amount,
+        independentAgencyOverride.note,
+        '2026 Executive Schedule rates',
+        EXECUTIVE_SCHEDULE_2026_SOURCE_URL,
+      )
+    }
+
+    return finalizeSalary(
+      person,
+      '$203,500',
+      'The payable 2026 rate for Executive Schedule Level I positions held by covered senior political appointees is frozen at $203,500.',
+      'OPM 2026 senior political pay guidance',
+      SENIOR_POLITICAL_PAY_FREEZE_SOURCE_URL,
+    )
+  }
+
+  if (person.branchId === 'judicial') {
+    if (/Chief Justice/i.test(person.title)) {
+      return finalizeSalary(
+        person,
+        '$320,700',
+        'The 2026 salary for the chief justice is $320,700 per year.',
+        'Judicial compensation',
+        JUDICIAL_SALARY_SOURCE_URL,
+      )
+    }
+
+    return finalizeSalary(
+      person,
+      '$306,600',
+      'The 2026 salary for an associate justice is $306,600 per year.',
+      'Judicial compensation',
+      JUDICIAL_SALARY_SOURCE_URL,
+    )
+  }
+
+  if (person.branchId === 'legislative') {
+    if (person.sectionId === 'senate') {
+      const override = person.leadership ? senateLeadershipSalaryOverrides.get(person.leadership) : null
+
+      if (override) {
+        return finalizeSalary(
+          person,
+          override.amount,
+          override.note,
+          'Senate salary history and current pay',
+          SENATE_SALARY_SOURCE_URL,
+        )
+      }
+
+      return finalizeSalary(
+        person,
+        '$174,000',
+        'The current annual salary for senators is $174,000.',
+        'Senate salary history and current pay',
+        SENATE_SALARY_SOURCE_URL,
+      )
+    }
+
+    if (person.sectionId === 'house') {
+      const override = houseSalaryOverrides.get(person.name)
+
+      if (override) {
+        return finalizeSalary(
+          person,
+          override.amount,
+          override.note,
+          'Current House salaries',
+          HOUSE_SALARY_SOURCE_URL,
+        )
+      }
+
+      return finalizeSalary(
+        person,
+        '$174,000',
+        'The current annual salary for House members, delegates, and the resident commissioner is $174,000.',
+        'Current House salaries',
+        HOUSE_SALARY_SOURCE_URL,
+      )
+    }
+  }
+
+  return person
+}
+
+function annotateDepartmentBudget(person) {
+  if (person.sectionId !== 'cabinet' || !person.department) {
+    return person
+  }
+
+  const budget = manualDepartmentBudgetsByDepartment[person.department]
+
+  if (!budget) {
+    return person
+  }
+
+  return {
+    ...person,
+    departmentBudgetDiscretionaryAmount: budget.discretionaryAmount,
+    departmentBudgetDiscretionaryLabel: budget.discretionaryLabel,
+    departmentBudgetNote: budget.note,
+    departmentBudgetSourceLabel: budget.sourceLabel,
+    departmentBudgetSourceUrl: budget.sourceUrl,
+    departmentBudgetTotalAmount: budget.totalAmount,
+    departmentBudgetTotalLabel: budget.totalLabel,
+  }
+}
+
+function annotateIndependentAgencyBudget(person) {
+  if (person.sectionId !== 'independent-agencies' || !person.department) {
+    return person
+  }
+
+  const budget = manualIndependentAgencyBudgetsByDepartment[person.department]
+
+  if (!budget) {
+    return person
+  }
+
+  return {
+    ...person,
+    agencyBudgetAmount: budget.amount,
+    agencyBudgetLabel: budget.label,
+    agencyBudgetNote: budget.note,
+    agencyBudgetSourceLabel: budget.sourceLabel,
+    agencyBudgetSourceUrl: budget.sourceUrl,
+    agencyFundingModel: budget.fundingModel,
+  }
+}
+
+function joinList(items) {
+  if (items.length <= 1) {
+    return items[0] ?? ''
+  }
+
+  if (items.length === 2) {
+    return `${items[0]} and ${items[1]}`
+  }
+
+  return `${items.slice(0, -1).join(', ')}, and ${items.at(-1)}`
+}
+
+function getDisclosureSearchHint(name) {
+  return name
+    .replace(/\b(Jr|Sr)\.?\b/gi, ' ')
+    .replace(/\bII|III|IV|V\b/g, ' ')
+    .replace(/[^A-Za-z\s-]/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .at(-1)
+}
+
+function annotateFinancialDisclosure(person) {
+  const searchHint = getDisclosureSearchHint(person.name)
+
+  if (person.branchId === 'executive') {
+    return {
+      ...person,
+      financialDisclosureLabel: 'OGE disclosure portal',
+      financialDisclosureNote: searchHint
+        ? `Search ${searchHint} in the Office of Government Ethics collection. Executive disclosures usually list assets, liabilities, income, gifts, reimbursements, agreements, positions, and many securities transactions in value ranges rather than exact net worth.`
+        : 'Use the Office of Government Ethics collection for this official. Executive disclosures usually list assets, liabilities, income, gifts, reimbursements, agreements, positions, and many securities transactions in value ranges rather than exact net worth.',
+      financialDisclosureSearchHint: searchHint,
+      financialDisclosureUrl:
+        'https://www.oge.gov/Web/OGE.nsf/Officials%20Individual%20Disclosures%20Search%20Collection?OpenForm=',
+    }
+  }
+
+  if (person.sectionId === 'senate') {
+    return {
+      ...person,
+      financialDisclosureLabel: 'Senate eFD search',
+      financialDisclosureNote: searchHint
+        ? `Search ${searchHint} in the Senate eFD system for annual filings and periodic transaction reports. Senate disclosures typically cover assets, liabilities, income, positions, agreements, gifts, travel, and many stock trades, with many values shown as ranges.`
+        : 'Use the Senate eFD system for annual filings and periodic transaction reports. Senate disclosures typically cover assets, liabilities, income, positions, agreements, gifts, travel, and many stock trades, with many values shown as ranges.',
+      financialDisclosureSearchHint: searchHint,
+      financialDisclosureUrl: 'https://efdsearch.senate.gov/search/home/',
+    }
+  }
+
+  if (person.sectionId === 'house') {
+    return {
+      ...person,
+      financialDisclosureLabel: 'House disclosure search',
+      financialDisclosureNote: searchHint
+        ? `Search ${searchHint} in the House Clerk database and choose the filing year. House disclosures typically list assets, liabilities, income, gifts or travel where applicable, and periodic transaction reports, often using value ranges.`
+        : 'Use the House Clerk database and choose the filing year. House disclosures typically list assets, liabilities, income, gifts or travel where applicable, and periodic transaction reports, often using value ranges.',
+      financialDisclosureSearchHint: searchHint,
+      financialDisclosureUrl: 'https://disclosures-clerk.house.gov/FinancialDisclosure/ViewSearch',
+    }
+  }
+
+  if (person.branchId === 'judicial') {
+    return {
+      ...person,
+      financialDisclosureLabel: 'Judicial disclosure database',
+      financialDisclosureNote: searchHint
+        ? `Search ${person.name} in the federal judiciary disclosure database. Judicial reports generally cover assets, liabilities, reimbursements, gifts, spouse or dependent interests, and many transactions, again with ranges instead of a single exact net-worth figure.`
+        : 'Use the federal judiciary disclosure database for this justice. Judicial reports generally cover assets, liabilities, reimbursements, gifts, spouse or dependent interests, and many transactions, again with ranges instead of a single exact net-worth figure.',
+      financialDisclosureSearchHint: searchHint,
+      financialDisclosureUrl: 'https://pub.jefs.uscourts.gov/',
+    }
+  }
+
+  return person
+}
+
+function annotateDerivedHoldingEstimates(person) {
+  if (!person.topHoldings?.length) {
+    return person
+  }
+
+  return {
+    ...person,
+    topHoldings: person.topHoldings.map((holding) => {
+      const derivedFields = SEC_DERIVED_HOLDING_ESTIMATES.get(`${person.id}|${holding.label}`)
+      return derivedFields ? { ...holding, ...derivedFields } : holding
+    }),
+  }
+}
+
+function parseStateDistrict(value) {
+  const cleaned = value.replace(/\s+/g, ' ').trim()
+  const match = cleaned.match(
+    /^(.*?)(?:\s+(At Large|Delegate|Resident Commissioner|\d+(?:st|nd|rd|th)))$/,
+  )
+
+  if (!match) {
+    return { district: '', state: cleaned }
+  }
+
+  return {
+    district: match[2],
+    state: match[1],
+  }
+}
+
+async function fetchText(url) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(url, {
+      headers: REQUEST_HEADERS,
+      signal: AbortSignal.timeout(15000),
+    }).catch(() => null)
+
+    if (response?.ok) {
+      return response.text()
+    }
+
+    if (response && ![403, 429].includes(response.status) && response.status < 500) {
+      throw new Error(`Failed to fetch ${url}: ${response.status}`)
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)))
+  }
+
+  throw new Error(`Failed to fetch ${url} after retries`)
+}
+
+function buildNameTokenInfo(name) {
+  const tokens = name
+    .toLowerCase()
+    .replace(/\b(jr|jr\.|sr|sr\.|ii|iii|iv|v)\b/g, ' ')
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+
+  return {
+    compact: tokens.join(''),
+    first: tokens[0] ?? '',
+    givenNames: tokens.slice(0, -1).join(''),
+    initials: tokens.map((token) => token[0]).join(''),
+    last: tokens.at(-1) ?? '',
+    tokens,
+  }
+}
+
+function normalizeXUrl(rawUrl) {
+  if (!rawUrl) {
+    return null
+  }
+
+  const cleaned = decodeHtml(rawUrl)
+    .replace(/\\u002f/gi, '/')
+    .replace(/\\\//g, '/')
+    .trim()
+    .replace(/^[('"`\s]+/, '')
+    .replace(/[)"'`,.;\s]+$/, '')
+
+  const withProtocol = cleaned.startsWith('//')
+    ? `https:${cleaned}`
+    : /^https?:\/\//i.test(cleaned)
+      ? cleaned
+      : `https://${cleaned}`
+
+  let parsed
+
+  try {
+    parsed = new URL(withProtocol)
+  } catch {
+    return null
+  }
+
+  const hostname = parsed.hostname.toLowerCase().replace(/^www\./, '')
+
+  if (hostname !== 'twitter.com' && hostname !== 'x.com' && hostname !== 'mobile.twitter.com') {
+    return null
+  }
+
+  const segments = parsed.pathname
+    .split('/')
+    .map((segment) => segment.trim())
+    .filter(Boolean)
+
+  const handle = segments[0]?.replace(/^@/, '')
+
+  if (!handle) {
+    return null
+  }
+
+  if (
+    ['compose', 'explore', 'hashtag', 'home', 'i', 'intent', 'messages', 'search', 'share'].includes(
+      handle.toLowerCase(),
+    )
+  ) {
+    return null
+  }
+
+  if (!/^[A-Za-z0-9_]{1,15}$/.test(handle)) {
+    return null
+  }
+
+  return `https://x.com/${handle}`
+}
+
+function extractXCandidates(html) {
+  const normalizedHtml = html
+    .replace(/\\u002f/gi, '/')
+    .replace(/\\\//g, '/')
+    .replace(/&#x2f;/gi, '/')
+    .replace(/&#47;/g, '/')
+
+  const directMatches = [
+    ...normalizedHtml.matchAll(/(?:https?:)?\/\/(?:www\.)?(?:twitter|x)\.com\/[^"'`\s<>()\\]+/gi),
+  ].map((match) => match[0])
+
+  const encodedMatches = [
+    ...normalizedHtml.matchAll(
+      /https?:%2f%2f(?:www\.)?(?:twitter|x)\.com%2f[^"'`\s<>()\\]+/gi,
+    ),
+  ]
+    .map((match) => {
+      try {
+        return decodeURIComponent(match[0])
+      } catch {
+        return null
+      }
+    })
+    .filter(Boolean)
+
+  return [...new Set([...directMatches, ...encodedMatches].map(normalizeXUrl).filter(Boolean))]
+}
+
+function buildUrlVariants(url) {
+  try {
+    const parsed = new URL(url)
+    const variants = [parsed.toString()]
+
+    if (parsed.hostname.startsWith('www.')) {
+      const alternate = new URL(parsed)
+      alternate.hostname = parsed.hostname.replace(/^www\./, '')
+      variants.push(alternate.toString())
+    } else if (/\.(?:house|senate)\.gov$/i.test(parsed.hostname)) {
+      const alternate = new URL(parsed)
+      alternate.hostname = `www.${parsed.hostname}`
+      variants.push(alternate.toString())
+    }
+
+    return [...new Set(variants)]
+  } catch {
+    return [url]
+  }
+}
+
+async function fetchOptionalText(url) {
+  const variants = buildUrlVariants(url)
+
+  for (const variant of variants) {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      try {
+        const response = await fetch(variant, {
+          headers: REQUEST_HEADERS,
+          signal: AbortSignal.timeout(12000),
+        })
+
+        if (!response.ok) {
+          if (response.status >= 500 || response.status === 429) {
+            await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
+            continue
+          }
+
+          break
+        }
+
+        return await response.text()
+      } catch {
+        await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)))
+      }
+    }
+  }
+
+  return null
+}
+
+function isInstitutionalXHandle(handle, person, tokenInfo) {
+  if (genericXHandles.has(handle)) {
+    return true
+  }
+
+  const signals = [
+    tokenInfo.last,
+    tokenInfo.first.length >= 3 ? tokenInfo.first : '',
+    tokenInfo.givenNames.length >= 2 ? tokenInfo.givenNames : '',
+    tokenInfo.initials.length >= 2 ? tokenInfo.initials : '',
+  ].filter(Boolean)
+
+  const hasNameSignal = signals.some((signal) => handle.includes(signal))
+
+  if (hasNameSignal) {
+    return false
+  }
+
+  if (
+    /(committee|congress|dems|democrats|gop|house|judiciary|office|press|republicans|senate|whitehouse)/.test(
+      handle,
+    )
+  ) {
+    return true
+  }
+
+  if (person.branchId === 'executive' && /(gov|policy|press|staff|team)/.test(handle)) {
+    return true
+  }
+
+  return false
+}
+
+function scoreXCandidate(person, url) {
+  const handle = url.split('/').at(-1)?.toLowerCase() ?? ''
+  const tokenInfo = buildNameTokenInfo(person.name)
+
+  if (!handle || isInstitutionalXHandle(handle, person, tokenInfo)) {
+    return -100
+  }
+
+  let score = 0
+
+  if (tokenInfo.compact && handle.includes(tokenInfo.compact)) {
+    score += 12
+  }
+
+  if (tokenInfo.last && handle.includes(tokenInfo.last)) {
+    score += 7
+  }
+
+  if (tokenInfo.first.length >= 3 && handle.includes(tokenInfo.first)) {
+    score += 3
+  }
+
+  if (tokenInfo.givenNames.length >= 2 && handle.includes(tokenInfo.givenNames)) {
+    score += 4
+  }
+
+  if (tokenInfo.initials.length >= 2 && handle.includes(tokenInfo.initials)) {
+    score += 2
+  }
+
+  if (/^(rep|sen|speaker|sec|secretary|ag|judge|justice|gov|potus|vp)/.test(handle)) {
+    score += 1
+  }
+
+  if (person.sectionId === 'house' && /^rep/.test(handle)) {
+    score += 2
+  }
+
+  if (person.sectionId === 'senate' && /^sen/.test(handle)) {
+    score += 2
+  }
+
+  if (person.branchId === 'executive' && /^(potus|president|sec|vp)/.test(handle)) {
+    score += 2
+  }
+
+  return score
+}
+
+function chooseBestXUrl(person, candidates) {
+  if (candidates.length === 0) {
+    return undefined
+  }
+
+  const scoredCandidates = candidates
+    .map((url) => ({
+      score: scoreXCandidate(person, url),
+      url,
+    }))
+    .sort((left, right) => right.score - left.score || left.url.localeCompare(right.url))
+
+  const bestCandidate = scoredCandidates[0]
+  const secondCandidate = scoredCandidates[1]
+
+  if (!bestCandidate) {
+    return undefined
+  }
+
+  if (bestCandidate.score < 1) {
+    return undefined
+  }
+
+  if (secondCandidate && bestCandidate.score === secondCandidate.score && bestCandidate.score < 8) {
+    return undefined
+  }
+
+  return bestCandidate.url
+}
+
+async function mapWithConcurrency(items, concurrency, mapper) {
+  const results = new Array(items.length)
+  let currentIndex = 0
+
+  async function worker() {
+    while (true) {
+      const index = currentIndex
+      currentIndex += 1
+
+      if (index >= items.length) {
+        return
+      }
+
+      results[index] = await mapper(items[index], index)
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.max(1, Math.min(concurrency, items.length)) }, () => worker()),
+  )
+
+  return results
+}
+
+async function enrichPeopleWithXUrls(people) {
+  const enrichedPeople = await mapWithConcurrency(people, 10, async (person) => {
+    if (manualXUrlSuppressions.has(person.name)) {
+      return person
+    }
+
+    const urlsToCheck = [...new Set([person.website, person.sourceUrl].filter(Boolean))]
+
+    for (const url of urlsToCheck) {
+      const html = await fetchOptionalText(url)
+
+      if (!html) {
+        continue
+      }
+
+      const bestXUrl = chooseBestXUrl(person, extractXCandidates(html))
+
+      if (bestXUrl) {
+        return {
+          ...person,
+          xUrl: bestXUrl,
+        }
+      }
+    }
+
+    const override = manualXUrlOverrides.get(person.name)
+    const cachedPerson =
+      previousPeopleById.get(person.id) ??
+      (person.website ? previousPeopleByWebsite.get(person.website) : undefined)
+
+    if (override) {
+      return {
+        ...person,
+        xUrl: override,
+      }
+    }
+
+    return cachedPerson?.xUrl
+      ? {
+          ...person,
+          xUrl: cachedPerson.xUrl,
+        }
+      : person
+  })
+
+  const xCount = enrichedPeople.filter((person) => person.xUrl).length
+  const legislativeXCount = enrichedPeople.filter(
+    (person) => person.branchId === 'legislative' && person.xUrl,
+  ).length
+
+  console.log(`Attached ${xCount} X profiles total, including ${legislativeXCount} lawmakers.`)
+
+  return enrichedPeople
+}
+
+function getCachedLegislativeFinancials(person) {
+  const cachedPerson =
+    previousPeopleById.get(person.id) ??
+    (person.website ? previousPeopleByWebsite.get(person.website) : undefined)
+
+  if (!cachedPerson) {
+    return {}
+  }
+
+  return {
+    financialAnnualReportUrl: cachedPerson.financialAnnualReportUrl,
+    financialFilingDate: cachedPerson.financialFilingDate,
+    liabilities: cachedPerson.liabilities,
+    recentTrades: cachedPerson.recentTrades,
+    topHoldings: cachedPerson.topHoldings,
+  }
+}
+
+function getCachedBackground(person) {
+  const cachedPerson =
+    previousPeopleById.get(person.id) ??
+    (person.website ? previousPeopleByWebsite.get(person.website) : undefined)
+
+  if (!cachedPerson) {
+    return {}
+  }
+
+  return {
+    birthDate: cachedPerson.birthDate,
+    birthYear: cachedPerson.birthYear,
+    careerHistory: cachedPerson.careerHistory,
+    education: cachedPerson.education,
+    highestDegree: cachedPerson.highestDegree,
+    highestEducationField: cachedPerson.highestEducationField,
+    highestEducationSchool: cachedPerson.highestEducationSchool,
+    imageUrl: cachedPerson.imageUrl,
+  }
+}
+
+async function enrichPeopleWithLegislativeFinancials(people) {
+  const legislativePeople = people.filter((person) => person.branchId === 'legislative')
+
+  if (legislativePeople.length === 0) {
+    return people
+  }
+
+  let financialDetailsById = {}
+
+  try {
+    const rawOutput = execFileSync(
+      'python3',
+      [resolve(__dirname, './fetch_legislative_finance.py')],
+      {
+        cwd: resolve(__dirname, '..'),
+        encoding: 'utf8',
+        input: JSON.stringify({ people: legislativePeople }),
+        maxBuffer: 24 * 1024 * 1024,
+      },
+    )
+
+    financialDetailsById = JSON.parse(rawOutput)
+  } catch (error) {
+    console.warn('Legislative finance enrichment failed, using cached values when available.')
+    console.warn(error instanceof Error ? error.message : error)
+  }
+
+  return people.map((person) => {
+    if (person.branchId !== 'legislative') {
+      return person
+    }
+
+    const fetchedDetails = financialDetailsById[person.id] ?? {}
+    const cachedDetails = getCachedLegislativeFinancials(person)
+
+    return {
+      ...person,
+      ...cachedDetails,
+      ...fetchedDetails,
+    }
+  })
+}
+
+async function enrichPeopleWithBackground(people) {
+  if (people.length === 0) {
+    return people
+  }
+
+  let backgroundDetailsById = {}
+
+  try {
+    const rawOutput = execFileSync('python3', [resolve(__dirname, './fetch_person_background.py')], {
+      cwd: resolve(__dirname, '..'),
+      encoding: 'utf8',
+      input: JSON.stringify({ people }),
+      maxBuffer: 24 * 1024 * 1024,
+    })
+
+    backgroundDetailsById = JSON.parse(rawOutput)
+  } catch (error) {
+    console.warn('Background enrichment failed, using cached values when available.')
+    console.warn(error instanceof Error ? error.message : error)
+  }
+
+  return people.map((person) => {
+    const fetchedDetails = backgroundDetailsById[person.id] ?? {}
+    const cachedDetails = getCachedBackground(person)
+    const imageUrl = person.imageUrl ?? fetchedDetails.imageUrl ?? cachedDetails.imageUrl
+
+    return {
+      ...person,
+      ...cachedDetails,
+      ...fetchedDetails,
+      imageUrl,
+    }
+  })
+}
+
+async function buildExecutivePeople() {
+  const independentAgencyHeads = await buildIndependentAgencyHeads()
+  let html = ''
+
+  try {
+    html = await fetchText('https://www.whitehouse.gov/administration/the-cabinet/')
+  } catch {
+    const cachedExecutive = previousPeople
+      .filter((person) => person.branchId === 'executive')
+      .map(clonePerson)
+
+    if (cachedExecutive.some((person) => person.sectionId === 'independent-agencies')) {
+      return cachedExecutive
+    }
+
+    if (cachedExecutive.length === 17) {
+      return [...cachedExecutive, ...independentAgencyHeads]
+    }
+
+    throw new Error('Unable to fetch executive roster and no cached executive snapshot is available.')
+  }
+
+  const entries = [
+    ...html.matchAll(
+      /<h2[^>]*><strong(?:><strong)*>([^<]+)(?:<\/strong>)+<\/h2>[\s\S]*?<h3[^>]*><strong(?:><strong)*>([^<]+)(?:<\/strong>)+<\/h3>[\s\S]*?<img[^>]+src="([^"]+)"[\s\S]*?<p>(.*?)<\/p>/g,
+    ),
+  ]
+
+  const cabinetPeople = entries
+    .map((match) => {
+      const rawRole = stripTags(match[2]).replace(/\s+/g, ' ').trim()
+      const roleConfig = executiveRoleMap.get(rawRole)
+
+      if (!roleConfig) {
+        return null
+      }
+
+      const name = stripTags(match[1]).replace(/\s+/g, ' ').trim()
+      const imageUrl = decodeHtml(match[3]).trim()
+      const description = stripTags(match[4])
+
+      return {
+        alignment: 'republican',
+        alignmentLabel: 'Republican',
+        branchId: 'executive',
+        department: roleConfig.department,
+        description,
+        id: `executive-${slugify(name)}`,
+        imageUrl,
+        name,
+        salaryNote: EXECUTIVE_SALARY_NOTE,
+        sectionId: 'cabinet',
+        sortOrder: roleConfig.sortOrder,
+        sourceUrl: 'https://www.whitehouse.gov/administration/the-cabinet/',
+        subtitle: roleConfig.department,
+        title: roleConfig.title,
+        wealthNote: EXECUTIVE_WEALTH_NOTE,
+      }
+    })
+    .filter(Boolean)
+
+  if (cabinetPeople.length !== 15) {
+    throw new Error(`Expected 15 cabinet secretaries, found ${cabinetPeople.length}`)
+  }
+
+  const whiteHouse = [
+    {
+      alignment: 'republican',
+      alignmentLabel: 'Republican',
+      branchId: 'executive',
+      description:
+        'Donald J. Trump is the 47th President of the United States and leads the executive branch, federal agencies, cabinet nominations, and commander-in-chief duties.',
+      id: 'executive-donald-j-trump',
+      imageUrl:
+        'https://www.whitehouse.gov/wp-content/uploads/2026/01/Screenshot-2026-01-21-at-10.13.23-AM-3.jpg?w=580',
+      name: 'Donald J. Trump',
+      salaryNote:
+        'The presidency carries a statutory salary of $400,000 plus official allowances, and annual financial disclosure filings are required.',
+      sectionId: 'white-house',
+      sortOrder: 1,
+      sourceUrl: 'https://www.whitehouse.gov/administration/',
+      subtitle: 'The White House',
+      title: 'President of the United States',
+      wealthNote:
+        'Public disclosure forms are available, and they are more reliable than media net-worth estimates because they report covered assets and liabilities in official filing ranges.',
+    },
+    {
+      alignment: 'republican',
+      alignmentLabel: 'Republican',
+      branchId: 'executive',
+      description:
+        'J.D. Vance serves as vice president, first in the presidential line of succession and a constitutional presiding officer of the Senate.',
+      id: 'executive-jd-vance',
+      imageUrl:
+        'https://www.whitehouse.gov/wp-content/uploads/2026/01/Vice-President-J.D.-Vance.jpg-1.jpg?w=580',
+      name: 'J.D. Vance',
+      salaryNote:
+        'The vice presidency is a salaried elected office with required public financial disclosure reporting.',
+      sectionId: 'white-house',
+      sortOrder: 2,
+      sourceUrl: 'https://www.whitehouse.gov/administration/jd-vance/',
+      subtitle: 'The White House',
+      title: 'Vice President of the United States',
+      wealthNote:
+        'Vice presidential financial disclosures are public, and those official forms are more reliable than media net-worth estimates because many values are reported in ranges.',
+    },
+  ]
+
+  return [...whiteHouse, ...cabinetPeople, ...independentAgencyHeads]
+}
+
+async function buildSenators() {
+  let xml = ''
+
+  try {
+    xml = await fetchText('https://www.senate.gov/general/contact_information/senators_cfm.xml')
+  } catch {
+    const cachedSenators = previousPeople
+      .filter((person) => person.sectionId === 'senate')
+      .map(clonePerson)
+
+    if (cachedSenators.length === 100) {
+      return cachedSenators
+    }
+
+    throw new Error('Unable to fetch Senate roster and no cached Senate snapshot is available.')
+  }
+
+  const members = [...xml.matchAll(/<member>([\s\S]*?)<\/member>/g)]
+
+  return members.map((match, index) => {
+    const block = match[1]
+    const firstName = extractTag(block, 'first_name')
+    const lastName = extractTag(block, 'last_name')
+    const partyCode = extractTag(block, 'party')
+    const stateCode = extractTag(block, 'state')
+    const office = extractTag(block, 'address')
+    const phone = extractTag(block, 'phone')
+    const website = extractTag(block, 'website') || extractTag(block, 'email')
+    const senateClass = extractTag(block, 'class')
+    const leadership = extractTag(block, 'leadership_position')
+    const bioguideId = extractTag(block, 'bioguide_id')
+    const state = STATE_NAMES[stateCode] ?? stateCode
+    const name = `${firstName} ${lastName}`.replace(/\s+/g, ' ').trim()
+    const partyLabel = sentenceCaseParty(partyCode)
+    const leadershipSentence = leadership
+      ? ` Currently serves as ${leadership.toLowerCase()} in the Senate.`
+      : ''
+
+    return {
+      alignment: alignmentFromParty(partyCode),
+      alignmentLabel: partyLabel,
+      branchId: 'legislative',
+      description: `${name} is a ${partyLabel.toLowerCase()} U.S. senator from ${state}.${leadershipSentence} ${senateClass} seat.`.replace(
+        /\s+/g,
+        ' ',
+      ),
+      id: `senate-${slugify(name)}`,
+      imageUrl: congressPhotoUrl(bioguideId),
+      leadership: leadership || undefined,
+      name,
+      office,
+      partyCode,
+      phone,
+      salaryNote: CONGRESSIONAL_SALARY_NOTE,
+      sectionId: 'senate',
+      sortOrder: index + 1,
+      sourceUrl: website || 'https://www.senate.gov/general/contact_information/senators_cfm.xml',
+      state,
+      stateCode,
+      subtitle: `Senate • ${state}`,
+      title: 'U.S. Senator',
+      website,
+      wealthNote: CONGRESSIONAL_WEALTH_NOTE,
+    }
+  })
+}
+
+async function buildHouseBioguideMap() {
+  let xml = ''
+
+  try {
+    xml = await fetchText('https://clerk.house.gov/xml/lists/MemberData.xml')
+  } catch {
+    return new Map()
+  }
+
+  const members = [...xml.matchAll(/<member>([\s\S]*?)<\/member>/g)]
+  const bioguideMap = new Map()
+
+  for (const match of members) {
+    const block = match[1]
+    const stateCodeMatch = block.match(/<state postal-code="([^"]+)">/)
+    const district = extractTag(block, 'district')
+    const bioguideId = extractTag(block, 'bioguideID')
+    const stateCode = stateCodeMatch?.[1]
+
+    if (!stateCode || !district || !bioguideId) {
+      continue
+    }
+
+    bioguideMap.set(`${stateCode}|${district}`, bioguideId)
+  }
+
+  return bioguideMap
+}
+
+async function buildRepresentatives() {
+  const bioguideMap = await buildHouseBioguideMap()
+  let html = ''
+
+  try {
+    html = await fetchText('https://www.house.gov/representatives')
+  } catch {
+    const cachedRepresentatives = previousPeople
+      .filter((person) => person.sectionId === 'house')
+      .map(clonePerson)
+
+    if (cachedRepresentatives.length >= 430) {
+      return cachedRepresentatives
+    }
+
+    throw new Error('Unable to fetch House roster and no cached House snapshot is available.')
+  }
+
+  const rowPattern =
+    /<tr>\s*<td[^>]*views-field-value-1[^>]*>\s*<a href="([^"]+)">([^<]+)<\/a>\s*<\/td>\s*<td[^>]*views-field-value-3 views-field-value-4[^>]*>([^<]+)<\/td>\s*<td[^>]*views-field-value-6[^>]*>([^<]+)<\/td>\s*<td[^>]*views-field-value-7 views-field-value-8[^>]*>([^<]+)<\/td>\s*<td[^>]*views-field-value-9[^>]*>([^<]+)<\/td>\s*<td[^>]*views-field-markup[^>]*>([\s\S]*?)<\/td>\s*<\/tr>/g
+  const seen = new Set()
+  const representatives = []
+
+  for (const match of html.matchAll(rowPattern)) {
+    const website = decodeHtml(match[1]).trim()
+    const rawName = decodeHtml(match[2]).trim()
+    const location = decodeHtml(match[3]).trim()
+    const partyCode = decodeHtml(match[4]).trim()
+    const office = decodeHtml(match[5]).trim()
+    const phone = decodeHtml(match[6]).trim()
+    const committees = stripTags(match[7])
+      .split('|')
+      .map((item) => item.trim())
+      .filter(Boolean)
+
+    if (seen.has(website)) {
+      continue
+    }
+
+    seen.add(website)
+
+    const name = formatCommaName(rawName)
+    const { district, state } = parseStateDistrict(location)
+    const stateCode = STATE_CODES_BY_NAME[state]
+    const bioguideId = stateCode ? bioguideMap.get(`${stateCode}|${district}`) : undefined
+    const representativeId = `house-${slugify(name)}-${slugify(location)}`
+    const cachedPerson =
+      previousPeopleById.get(representativeId) ?? previousPeopleByWebsite.get(website)
+    const partyLabel = sentenceCaseParty(partyCode)
+    const locationText =
+      district === 'Delegate'
+        ? `serves as a delegate for ${state}`
+        : district === 'Resident Commissioner'
+          ? `serves as resident commissioner for ${state}`
+          : district === 'At Large'
+            ? `represents ${state} at large`
+            : `represents ${state}'s ${district} congressional district`
+    const committeeSentence = committees.length
+      ? ` House assignments listed on house.gov include ${joinList(committees)}.`
+      : ''
+
+    representatives.push({
+      alignment: alignmentFromParty(partyCode),
+      alignmentLabel: partyLabel,
+      branchId: 'legislative',
+      committees,
+      description: `${name} ${locationText} in the U.S. House.${committeeSentence}`.replace(
+        /\s+/g,
+        ' ',
+      ),
+      district,
+      id: representativeId,
+      imageUrl:
+        congressPhotoUrl(bioguideId) ??
+        previousHouseImageBySeat.get(stateCode ? `${stateCode}|${district}` : '') ??
+        cachedPerson?.imageUrl,
+      name,
+      office,
+      partyCode,
+      phone,
+      salaryNote: CONGRESSIONAL_SALARY_NOTE,
+      sectionId: 'house',
+      sortOrder: representatives.length + 1,
+      sourceUrl: website,
+      state,
+      stateCode,
+      subtitle: `House • ${location}`,
+      title:
+        district === 'Delegate'
+          ? 'Delegate to the U.S. House'
+          : district === 'Resident Commissioner'
+            ? 'Resident Commissioner'
+            : 'U.S. Representative',
+      website,
+      wealthNote: CONGRESSIONAL_WEALTH_NOTE,
+    })
+  }
+
+  if (representatives.length < 430) {
+    throw new Error(`Expected full House roster, found ${representatives.length}`)
+  }
+
+  return representatives
+}
+
+function buildExecutiveBranch(executivePeople) {
+  return {
+    headline:
+      'The president, vice president, cabinet, and independent-agency leaders shape executive power and federal regulation.',
+    id: 'executive',
+    name: 'Executive',
+    sections: [
+      {
+        countLabel: `${executivePeople.filter((person) => person.sectionId === 'white-house').length} White House principals`,
+        description:
+          'Start with the elected leadership at the center of the executive branch.',
+        id: 'white-house',
+        label: 'The White House',
+        personIds: executivePeople
+          .filter((person) => person.sectionId === 'white-house')
+          .sort((left, right) => left.sortOrder - right.sortOrder)
+          .map((person) => person.id),
+      },
+      {
+        countLabel: `${executivePeople.filter((person) => person.sectionId === 'cabinet').length} department heads`,
+        description:
+          'These are the heads of the 15 executive departments that report into the cabinet structure.',
+        id: 'cabinet',
+        label: 'Cabinet Departments',
+        personIds: executivePeople
+          .filter((person) => person.sectionId === 'cabinet')
+          .sort((left, right) => left.sortOrder - right.sortOrder)
+          .map((person) => person.id),
+      },
+      {
+        countLabel: `${executivePeople.filter((person) => person.sectionId === 'independent-agencies').length} profiled leaders`,
+        description:
+          'This section now profiles the full independent-agency and government-corporation catalog used on this site.',
+        id: 'independent-agencies',
+        label: 'Independent Agencies',
+        personIds: executivePeople
+          .filter((person) => person.sectionId === 'independent-agencies')
+          .sort((left, right) => left.sortOrder - right.sortOrder)
+          .map((person) => person.id),
+      },
+    ],
+    summary:
+      'Explore the presidency, vice presidency, the 15 cabinet secretaries, and the full profiled independent-agency roster with short profiles and finance notes.',
+  }
+}
+
+function buildBranches(executivePeople, senators, representatives) {
+  return [
+    buildExecutiveBranch(executivePeople),
+    {
+      headline: 'Congress writes laws through the Senate and the House of Representatives.',
+      id: 'legislative',
+      name: 'Legislative',
+      sections: [
+        {
+          countLabel: `${senators.length} sitting senators`,
+          description:
+            'Every state sends two senators to the upper chamber, with party color, leadership roles, and contact basics shown here.',
+          id: 'senate',
+          label: 'United States Senate',
+          personIds: senators
+            .slice()
+            .sort((left, right) => left.name.localeCompare(right.name))
+            .map((person) => person.id),
+        },
+        {
+          countLabel: `${representatives.length} representatives and delegates`,
+          description:
+            'The House roster includes voting representatives plus delegates and the resident commissioner listed on house.gov.',
+          id: 'house',
+          label: 'United States House',
+          personIds: representatives
+            .slice()
+            .sort((left, right) => left.name.localeCompare(right.name))
+            .map((person) => person.id),
+        },
+      ],
+      summary:
+        'Browse the current congressional roster with search, chamber filters, party color, and compact detail cards.',
+    },
+    {
+      headline: 'The federal judiciary interprets laws, with the Supreme Court at its apex.',
+      id: 'judicial',
+      name: 'Judicial',
+      sections: [
+        {
+          countLabel: `${justices.length} sitting justices`,
+          description:
+            'This build focuses on the nine current Supreme Court justices and the party of the appointing president.',
+          id: 'supreme-court',
+          label: 'Supreme Court of the United States',
+          personIds: justices.map((justice) => justice.id),
+        },
+      ],
+      summary:
+        'View the sitting Supreme Court justices, their roles on the Court, and a simple read on appointment history.',
+    },
+  ]
+}
+
+async function main() {
+  const executiveOnly = process.env.EXEC_ONLY === '1'
+
+  if (executiveOnly && previousDataset) {
+    const executivePeople = await buildExecutivePeople()
+    const executiveBasePeople = executivePeople
+      .map((person) => annotateTrumpProximity(person, { legislativeMetricsByPersonId: new Map() }))
+      .map(annotateSalary)
+      .map(annotateDepartmentBudget)
+      .map(annotateIndependentAgencyBudget)
+      .map(annotateFinancialDisclosure)
+    const executiveWithBackground = await enrichPeopleWithBackground(executiveBasePeople)
+    const executiveWithManualCareerHistory =
+      applyManualCareerHistoryOverrides(executiveWithBackground)
+    const executiveWithDerivedEstimates = executiveWithManualCareerHistory.map(
+      annotateDerivedHoldingEstimates,
+    )
+    const refreshedExecutivePeople = await enrichPeopleWithXUrls(executiveWithDerivedEstimates)
+    const preservedPeople = previousPeople
+      .filter((person) => person.branchId !== 'executive')
+      .map(clonePerson)
+    const senators = preservedPeople.filter((person) => person.sectionId === 'senate')
+    const representatives = preservedPeople.filter((person) => person.sectionId === 'house')
+    const dataset = {
+      ...previousDataset,
+      branches: buildBranches(refreshedExecutivePeople, senators, representatives),
+      generatedAt: new Date().toISOString(),
+      people: [...refreshedExecutivePeople, ...preservedPeople],
+    }
+
+    mkdirSync(resolve(__dirname, '../public/data'), { recursive: true })
+    writeFileSync(outPath, `${JSON.stringify(dataset, null, 2)}\n`)
+
+    console.log(
+      `Wrote ${dataset.people.length} profiles with executive-only refresh: ${refreshedExecutivePeople.length} executive, ${refreshedExecutivePeople.filter((person) => person.sectionId === 'independent-agencies').length} independent-agency leaders.`,
+    )
+    return
+  }
+
+  const [executivePeople, senators, representatives] = await Promise.all([
+    buildExecutivePeople(),
+    buildSenators(),
+    buildRepresentatives(),
+  ])
+  const trumpRelationshipContext = await buildTrumpRelationshipContext(senators, representatives)
+
+  const basePeople = [...executivePeople, ...senators, ...representatives, ...justices]
+    .map((person) => annotateTrumpProximity(person, trumpRelationshipContext))
+    .map(annotateSalary)
+    .map(annotateDepartmentBudget)
+    .map(annotateIndependentAgencyBudget)
+    .map(annotateFinancialDisclosure)
+  const legislativelyEnrichedPeople = await enrichPeopleWithLegislativeFinancials(basePeople)
+  const peopleWithBackground = await enrichPeopleWithBackground(legislativelyEnrichedPeople)
+  const peopleWithManualCareerHistory = applyManualCareerHistoryOverrides(peopleWithBackground)
+  const peopleWithDerivedEstimates = peopleWithManualCareerHistory.map(annotateDerivedHoldingEstimates)
+  const people = await enrichPeopleWithXUrls(peopleWithDerivedEstimates)
+
+  const branches = buildBranches(executivePeople, senators, representatives)
+
+  const dataset = {
+    branches,
+    generatedAt: new Date().toISOString(),
+    legislativeTrumpRollCalls: trumpRelationshipContext.legislativeRollCallSummary,
+    people,
+    supremeCourtCases: supremeCourtTrumpPowerCases,
+    sources: SOURCES,
+  }
+
+  mkdirSync(resolve(__dirname, '../public/data'), { recursive: true })
+  writeFileSync(outPath, `${JSON.stringify(dataset, null, 2)}\n`)
+
+  console.log(
+    `Wrote ${people.length} profiles: ${executivePeople.length} executive, ${senators.length} senators, ${representatives.length} house members, ${justices.length} justices.`,
+  )
+}
+
+main().catch((error) => {
+  console.error(error)
+  process.exitCode = 1
+})
