@@ -257,6 +257,20 @@ function buildHouseRollCallXmlUrl(year, rollNumber) {
   return `https://clerk.house.gov/evs/${year}/roll${String(rollNumber).padStart(3, '0')}.xml`
 }
 
+function encodeHouseVotesTitle(title) {
+  return encodeURIComponent(title).replace(/%2C/g, ',')
+}
+
+function buildHouseRollCallPageUrl(year, rollNumber, title) {
+  const baseUrl = `https://clerk.house.gov/Votes/${year}${Number(rollNumber)}`
+
+  if (!title) {
+    return baseUrl
+  }
+
+  return `${baseUrl}?Title=${encodeHouseVotesTitle(title)}`
+}
+
 function buildSenateRollCallXmlUrl(congress, session, voteNumber) {
   return `https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${String(
     voteNumber,
@@ -363,8 +377,9 @@ async function buildSelectedLegislativeRollCallSnapshots() {
 
   const snapshots = await mapWithConcurrency(selectedRollCalls, 8, async (event) => {
     if (event.chamber === 'house') {
-      const sourceUrl = buildHouseRollCallXmlUrl(event.year, event.rollNumber)
-      const parsed = parseHouseVoteXml(await fetchText(sourceUrl))
+      const xmlUrl = buildHouseRollCallXmlUrl(event.year, event.rollNumber)
+      const parsed = parseHouseVoteXml(await fetchText(xmlUrl))
+      const sourceUrl = buildHouseRollCallPageUrl(event.year, event.rollNumber, parsed.title || event.label)
 
       return {
         ...event,
