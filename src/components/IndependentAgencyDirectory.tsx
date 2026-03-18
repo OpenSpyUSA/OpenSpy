@@ -11,6 +11,10 @@ function normalizeAgencyKey(value: string | undefined) {
   return (value ?? '').trim().toLowerCase()
 }
 
+function getAgencyWebsite(profiledPerson: GovernmentPerson | null) {
+  return profiledPerson?.website ?? profiledPerson?.sourceUrl ?? null
+}
+
 function getIndependentAgencyPeople(peopleById: Map<string, GovernmentPerson>) {
   return [...peopleById.values()]
     .filter((person) => person.sectionId === 'independent-agencies')
@@ -147,28 +151,61 @@ export function IndependentAgencyDirectory({
                   (item.featuredProfileId ? peopleById.get(item.featuredProfileId) ?? null : null) ??
                   agencyPeopleByDepartment.get(normalizeAgencyKey(item.name)) ??
                   null
+                const agencyWebsite = getAgencyWebsite(profiledPerson)
 
                 return (
                   <li key={item.name}>
                     {profiledPerson ? (
-                      <button
-                        className={`agency-node agency-node--button${
+                      <div
+                        className={`agency-node${
                           selectedPersonId === profiledPerson.id ? ' is-selected' : ''
                         }`}
-                        onClick={() => onOpenPerson(profiledPerson.id)}
-                        type="button"
                       >
                         <span className="agency-node__copy">
-                          <strong>{item.name}</strong>
-                          <span>{item.typeLabel}</span>
+                          {agencyWebsite ? (
+                            <a
+                              className="agency-node__primary-link"
+                              href={agencyWebsite}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              <strong>{item.name}</strong>
+                              <span>{item.typeLabel}</span>
+                            </a>
+                          ) : (
+                            <>
+                              <strong>{item.name}</strong>
+                              <span>{item.typeLabel}</span>
+                            </>
+                          )}
                         </span>
-                        <span className="agency-node__status">Open chair</span>
-                      </button>
+                        <button
+                          className="agency-node__status agency-node__status--button"
+                          onClick={() => onOpenPerson(profiledPerson.id)}
+                          type="button"
+                        >
+                          Open chair
+                        </button>
+                      </div>
                     ) : (
                       <div className="agency-node">
                         <span className="agency-node__copy">
-                          <strong>{item.name}</strong>
-                          <span>{item.typeLabel}</span>
+                          {agencyWebsite ? (
+                            <a
+                              className="agency-node__primary-link"
+                              href={agencyWebsite}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              <strong>{item.name}</strong>
+                              <span>{item.typeLabel}</span>
+                            </a>
+                          ) : (
+                            <>
+                              <strong>{item.name}</strong>
+                              <span>{item.typeLabel}</span>
+                            </>
+                          )}
                         </span>
                       </div>
                     )}

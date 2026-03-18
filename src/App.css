@@ -1255,6 +1255,19 @@
   min-width: 0;
 }
 
+.agency-node__primary-link {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.agency-node__primary-link:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
 .agency-node__copy strong {
   color: var(--ink);
   font-size: 0.96rem;
@@ -1281,6 +1294,11 @@
   letter-spacing: 0.08em;
   line-height: 1.2;
   text-transform: uppercase;
+}
+
+.agency-node__status--button {
+  cursor: pointer;
+  font: inherit;
 }
 
 .case-grid {
