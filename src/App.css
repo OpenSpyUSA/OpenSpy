@@ -1,7 +1,7 @@
 .screen {
-  width: min(1520px, calc(100% - 40px));
+  width: min(1520px, calc(100% - 40px - var(--safe-left) - var(--safe-right)));
   margin: 0 auto;
-  padding: 28px 0 56px;
+  padding: calc(28px + var(--safe-top)) 0 calc(56px + var(--safe-bottom));
   box-sizing: border-box;
 }
 
@@ -460,6 +460,33 @@
   grid-template-columns: 1fr;
   gap: 16px;
   min-width: min(100%, 540px);
+}
+
+.branch-stats--legislative .stat-group__label {
+  padding-left: 0;
+}
+
+.branch-stats--legislative .stat-group__grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.branch-stats--legislative .stat-card {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  min-height: 110px;
+  text-align: center;
+}
+
+.branch-stats--legislative .stat-card strong {
+  margin-bottom: 0;
+  line-height: 1;
+}
+
+.branch-stats--legislative .stat-card span {
+  line-height: 1.18;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .stat-group {
@@ -2034,6 +2061,10 @@
   border-radius: 28px;
 }
 
+.detail-panel--empty {
+  min-height: 340px;
+}
+
 .detail-panel--filled {
   max-height: calc(100vh - 48px);
   overflow-y: auto;
@@ -2307,12 +2338,17 @@
     display: grid;
     gap: 12px;
   }
+
+  .detail-panel--empty {
+    display: none;
+  }
 }
 
 @media (max-width: 960px) {
   .screen {
-    width: min(100%, calc(100% - 24px));
-    padding-top: 24px;
+    width: min(100%, calc(100% - 24px - var(--safe-left) - var(--safe-right)));
+    padding-top: calc(24px + var(--safe-top));
+    padding-bottom: calc(32px + var(--safe-bottom));
   }
 
   .hero-card,
@@ -2352,8 +2388,18 @@
     min-width: 0;
   }
 
+  .branch-stats--legislative .stat-group {
+    gap: 8px;
+  }
+
+  .branch-stats--legislative .stat-card {
+    min-height: 104px;
+    padding: 14px 12px;
+  }
+
   .toolbar {
     grid-template-columns: 1fr;
+    gap: 14px;
   }
 
   .case-justice-grid {
@@ -2376,9 +2422,13 @@
 
   .detail-panel--filled {
     position: fixed;
-    inset: auto 12px 12px;
+    inset:
+      auto
+      calc(12px + var(--safe-right))
+      calc(12px + var(--safe-bottom))
+      calc(12px + var(--safe-left));
     z-index: 30;
-    max-height: min(76vh, 760px);
+    max-height: min(calc(100svh - var(--safe-top) - 24px), 760px);
     overflow: auto;
     box-shadow: 0 30px 80px rgba(16, 36, 62, 0.24);
   }
@@ -2389,9 +2439,25 @@
 }
 
 @media (max-width: 640px) {
+  .screen {
+    width: min(100%, calc(100% - 20px - var(--safe-left) - var(--safe-right)));
+    padding-top: calc(18px + var(--safe-top));
+    padding-bottom: calc(24px + var(--safe-bottom));
+  }
+
   .hero-card h1,
   .branch-banner h1 {
     font-size: clamp(2.3rem, 12vw, 3.5rem);
+  }
+
+  .hero-card,
+  .source-card,
+  .branch-banner,
+  .toolbar,
+  .section-card,
+  .detail-panel {
+    padding: 18px;
+    border-radius: 22px;
   }
 
   .stat-group__grid {
@@ -2399,11 +2465,151 @@
   }
 
   .branch-orbit {
-    gap: 16px;
+    gap: 14px;
   }
 
   .branch-orb {
-    padding: 24px;
+    width: min(100%, 344px);
+    padding: 20px;
+  }
+
+  .branch-orb__count {
+    padding: 7px 12px;
+    font-size: 0.76rem;
+  }
+
+  .branch-orb__summary {
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .branch-banner__top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .branch-banner__title-row {
+    gap: 8px;
+  }
+
+  .branch-banner--legislative .branch-title-button,
+  .branch-banner--legislative .branch-state-heading {
+    justify-content: flex-start;
+    max-width: 100%;
+  }
+
+  .back-link {
+    min-height: 44px;
+  }
+
+  .branch-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .branch-stats--legislative .stat-group__label {
+    text-align: center;
+  }
+
+  .branch-stats--legislative .stat-group__grid {
+    gap: 8px;
+  }
+
+  .branch-stats--legislative .stat-card {
+    min-height: 92px;
+    padding: 12px 8px;
+  }
+
+  .branch-stats--legislative .stat-card strong {
+    font-size: 1.34rem;
+  }
+
+  .branch-stats--legislative .stat-card span {
+    font-size: 0.72rem;
+  }
+
+  .toolbar label {
+    gap: 6px;
+  }
+
+  .toolbar input,
+  .toolbar select,
+  .toolbar-state strong,
+  .toolbar-state__button {
+    min-height: 44px;
+    height: 44px;
+  }
+
+  .map-stage,
+  .state-focus {
+    padding: 14px;
+  }
+
+  .map-legend {
+    display: grid;
+    gap: 10px;
+  }
+
+  .vote-matrix__header {
+    display: grid;
+  }
+
+  .vote-matrix__scroller {
+    max-height: min(60svh, 560px);
+  }
+
+  .vote-matrix__corner {
+    min-width: 184px;
+    padding: 10px 12px;
+  }
+
+  .vote-matrix__person-button {
+    min-width: 184px;
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .vote-matrix__avatar {
+    width: 30px;
+  }
+
+  .vote-matrix__person-copy strong {
+    font-size: 0.8rem;
+  }
+
+  .vote-matrix__person-copy span {
+    font-size: 0.72rem;
+  }
+
+  .vote-matrix__score {
+    padding: 2px 6px;
+    font-size: 0.66rem;
+  }
+
+  .vote-matrix__event {
+    width: 34px;
+    min-width: 34px;
+  }
+
+  .vote-matrix__event-link {
+    width: 34px;
+    min-width: 34px;
+    min-height: 156px;
+    padding: 8px 3px;
+  }
+
+  .vote-matrix__event-date {
+    font-size: 0.66rem;
+  }
+
+  .vote-matrix__event-category {
+    font-size: 0.72rem;
+  }
+
+  .vote-matrix__event-weight,
+  .vote-matrix__event-counts {
+    font-size: 0.62rem;
   }
 
   .people-grid--legislative {
@@ -2437,11 +2643,28 @@
   .person-card {
     grid-template-columns: 52px minmax(0, 1fr);
     gap: 12px;
+    padding: 16px 16px 14px;
+    border-radius: 22px;
   }
 
   .agency-node,
   .agency-node--button {
     display: grid;
+  }
+
+  .person-card__service-row,
+  .person-card__chips,
+  .detail-tags {
+    gap: 6px;
+  }
+
+  .service-chip,
+  .social-chip,
+  .alignment-chip,
+  .trump-chip,
+  .detail-tag {
+    padding: 6px 9px;
+    font-size: 0.72rem;
   }
 
   .alignment-chip {
@@ -2452,8 +2675,50 @@
     width: 52px;
   }
 
+  .detail-panel--filled {
+    inset:
+      auto
+      calc(10px + var(--safe-right))
+      calc(10px + var(--safe-bottom))
+      calc(10px + var(--safe-left));
+    max-height: min(calc(100svh - var(--safe-top) - 20px), 760px);
+    padding: 18px 18px calc(18px + var(--safe-bottom));
+  }
+
+  .detail-panel--filled::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: rgba(15, 23, 42, 0.16);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .detail-close {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    justify-self: end;
+  }
+
+  .detail-header {
+    grid-template-columns: 60px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .detail-avatar {
+    width: 60px;
+    font-size: 1.05rem;
+  }
+
+  .detail-header__name-row {
+    gap: 8px;
+  }
+
   .fact-row {
     display: grid;
+    gap: 6px;
   }
 
   .fact-row strong {

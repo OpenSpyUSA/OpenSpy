@@ -1,4 +1,8 @@
 :root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
   --paper: #f5f5f7;
   --paper-deep: #ececf0;
   --paper-elevated: rgba(255, 255, 255, 0.76);
@@ -31,6 +35,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
 }
 
 * {
@@ -39,6 +44,7 @@
 
 html {
   scroll-behavior: smooth;
+  background: var(--paper);
 }
 
 body {
@@ -46,6 +52,7 @@ body {
   min-width: 320px;
   min-height: 100svh;
   position: relative;
+  background: var(--paper);
 }
 
 body::before {

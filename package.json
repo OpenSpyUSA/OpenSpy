@@ -6,11 +6,17 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "cap:copy": "npm run build && npx cap copy",
+    "cap:sync": "npm run build && npx cap sync",
+    "ios:open": "npx cap open ios",
+    "ios:sync": "npm run build && npx cap sync ios",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync:data": "node scripts/generate-government-data.mjs"
   },
   "dependencies": {
+    "@capacitor/core": "^8.2.0",
+    "@capacitor/ios": "^8.2.0",
     "@types/d3-geo": "^3.1.0",
     "d3-geo": "^3.1.1",
     "pdf-parse": "^2.4.5",
@@ -20,6 +26,7 @@
     "us-atlas": "^3.0.1"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.2.0",
     "@eslint/js": "^9.39.4",
     "@types/node": "^24.12.0",
     "@types/react": "^19.2.14",

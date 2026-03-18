@@ -1098,7 +1098,7 @@ function DetailPanel({
 
   if (!person || !section) {
     return (
-      <aside className="detail-panel">
+      <aside className="detail-panel detail-panel--empty">
         <div className="detail-empty">
           <p className="eyebrow">Profile Drawer</p>
           <h2>Select a person or roll call</h2>
