@@ -2590,7 +2590,7 @@
     grid-template-areas:
       'name name'
       'detail score';
-    column-gap: 4px;
+    column-gap: 2px;
     row-gap: 1px;
     align-items: end;
   }
@@ -2602,6 +2602,8 @@
   .vote-matrix__person-detail {
     grid-area: detail;
     min-width: 0;
+    justify-self: end;
+    text-align: right;
   }
 
   .vote-matrix__person-copy strong {
