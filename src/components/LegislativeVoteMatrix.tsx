@@ -1,5 +1,10 @@
 import { Avatar } from './Avatar'
-import { formatAgeLabel } from '../personMeta'
+import {
+  formatAgeLabel,
+  getCompactAgeValue,
+  getCompactLastName,
+  getCompactSinceValue,
+} from '../personMeta'
 import type {
   GovernmentPerson,
   LegislativeTrumpRollCall,
@@ -275,7 +280,15 @@ export function LegislativeVoteMatrix({
               const ageLabel = formatAgeLabel(person.birthDate, person.birthYear)
               const isSelected = selectedPersonId === person.id
               const scoreLabel = formatCompactTrumpScore(person.trumpScore)
-              const detailLabel = [ageLabel, getLegislativeSinceLabel(person)]
+              const compactScoreLabel = person.trumpScore.toFixed(1)
+              const sinceLabel = getLegislativeSinceLabel(person)
+              const detailLabel = [ageLabel, sinceLabel]
+                .filter(Boolean)
+                .join(' • ')
+              const compactDetailLabel = [
+                getCompactAgeValue(ageLabel),
+                getCompactSinceValue(sinceLabel),
+              ]
                 .filter(Boolean)
                 .join(' • ')
 
@@ -292,10 +305,21 @@ export function LegislativeVoteMatrix({
                       <Avatar className="vote-matrix__avatar" imageUrl={person.imageUrl} name={person.name} />
                       <span className="vote-matrix__person-copy">
                         <span className="vote-matrix__person-heading">
-                          <strong>{person.name}</strong>
-                          <span className="vote-matrix__score">{scoreLabel}</span>
+                          <strong>
+                            <span className="vote-matrix__desktop-copy">{person.name}</span>
+                            <span className="vote-matrix__mobile-copy">
+                              {getCompactLastName(person.name)}
+                            </span>
+                          </strong>
+                          <span className="vote-matrix__score">
+                            <span className="vote-matrix__desktop-copy">{scoreLabel}</span>
+                            <span className="vote-matrix__mobile-copy">{compactScoreLabel}</span>
+                          </span>
                         </span>
-                        <span>{detailLabel}</span>
+                        <span>
+                          <span className="vote-matrix__desktop-copy">{detailLabel}</span>
+                          <span className="vote-matrix__mobile-copy">{compactDetailLabel}</span>
+                        </span>
                       </span>
                     </button>
                   </th>

@@ -40,3 +40,25 @@ export function formatAgeLabel(birthDate?: string, birthYear?: number) {
 
   return `Age ~${sortableAge}`
 }
+
+export function getCompactLastName(name: string) {
+  const cleaned = name.replace(/,?\s+(Jr\.|Sr\.|II|III|IV)$/i, '').trim()
+  const parts = cleaned.split(/\s+/)
+  return parts[parts.length - 1] ?? cleaned
+}
+
+export function getCompactAgeValue(ageLabel?: string | null) {
+  if (!ageLabel) {
+    return null
+  }
+
+  return ageLabel.replace(/^Age\s*/i, '')
+}
+
+export function getCompactSinceValue(value?: string | null) {
+  if (!value) {
+    return null
+  }
+
+  return value.replace(/^since\s*/i, '')
+}

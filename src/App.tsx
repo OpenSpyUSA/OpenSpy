@@ -13,7 +13,13 @@ import { compareIndependentAgenciesByImportance } from './independentAgencyCatal
 import { LegislativeVoteMatrix } from './components/LegislativeVoteMatrix'
 import { LegislativeMap } from './components/LegislativeMap'
 import './App.css'
-import { formatAgeLabel, getSortableAge } from './personMeta'
+import {
+  formatAgeLabel,
+  getCompactAgeValue,
+  getCompactLastName,
+  getCompactSinceValue,
+  getSortableAge,
+} from './personMeta'
 import { describeLegislativeRollCall } from './legislativeRollCallMeta'
 import { FIFTY_STATE_CODES, STATE_CODE_TO_NAME } from './stateMeta'
 import { formatTrumpScore, getTrumpBand } from './trumpScore'
@@ -850,8 +856,15 @@ function SupremeCourtCaseMatrix({
                 const ageLabel = formatAgeLabel(justice.birthDate, justice.birthYear)
                 const serviceLabel = getSupremeCourtServiceLabel(justice)
                 const scoreLabel = `${justice.trumpScore.toFixed(1)}/10`
+                const compactScoreLabel = justice.trumpScore.toFixed(1)
                 const isSelected = selectedPersonId === justice.id
                 const detailLabel = [ageLabel, serviceLabel].filter(Boolean).join(' • ')
+                const compactDetailLabel = [
+                  getCompactAgeValue(ageLabel),
+                  getCompactSinceValue(serviceLabel),
+                ]
+                  .filter(Boolean)
+                  .join(' • ')
 
                 return (
                   <tr className={isSelected ? 'is-selected' : ''} key={justice.id}>
@@ -866,10 +879,21 @@ function SupremeCourtCaseMatrix({
                         <Avatar className="vote-matrix__avatar" imageUrl={justice.imageUrl} name={justice.name} />
                         <span className="vote-matrix__person-copy">
                           <span className="vote-matrix__person-heading">
-                            <strong>{justice.name}</strong>
-                            <span className="vote-matrix__score">{scoreLabel}</span>
+                            <strong>
+                              <span className="vote-matrix__desktop-copy">{justice.name}</span>
+                              <span className="vote-matrix__mobile-copy">
+                                {getCompactLastName(justice.name)}
+                              </span>
+                            </strong>
+                            <span className="vote-matrix__score">
+                              <span className="vote-matrix__desktop-copy">{scoreLabel}</span>
+                              <span className="vote-matrix__mobile-copy">{compactScoreLabel}</span>
+                            </span>
                           </span>
-                          <span>{detailLabel}</span>
+                          <span>
+                            <span className="vote-matrix__desktop-copy">{detailLabel}</span>
+                            <span className="vote-matrix__mobile-copy">{compactDetailLabel}</span>
+                          </span>
                         </span>
                       </button>
                     </th>

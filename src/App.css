@@ -989,6 +989,14 @@
   min-width: 0;
 }
 
+.vote-matrix__desktop-copy {
+  display: inline;
+}
+
+.vote-matrix__mobile-copy {
+  display: none;
+}
+
 .vote-matrix__person-heading {
   display: flex;
   align-items: baseline;
@@ -2612,6 +2620,14 @@
     width: 18px;
     min-width: 18px;
     height: 18px;
+  }
+
+  .vote-matrix__desktop-copy {
+    display: none;
+  }
+
+  .vote-matrix__mobile-copy {
+    display: inline;
   }
 
   .vote-matrix__event {
