@@ -858,13 +858,9 @@ function SupremeCourtCaseMatrix({
                 const scoreLabel = `${justice.trumpScore.toFixed(1)}/10`
                 const compactScoreLabel = justice.trumpScore.toFixed(1)
                 const isSelected = selectedPersonId === justice.id
+                const compactAgeLabel = getCompactAgeValue(ageLabel)
+                const compactSinceLabel = getCompactSinceValue(serviceLabel)
                 const detailLabel = [ageLabel, serviceLabel].filter(Boolean).join(' • ')
-                const compactDetailLabel = [
-                  getCompactAgeValue(ageLabel),
-                  getCompactSinceValue(serviceLabel),
-                ]
-                  .filter(Boolean)
-                  .join(' • ')
 
                 return (
                   <tr className={isSelected ? 'is-selected' : ''} key={justice.id}>
@@ -887,12 +883,17 @@ function SupremeCourtCaseMatrix({
                             </strong>
                             <span className="vote-matrix__score">
                               <span className="vote-matrix__desktop-copy">{scoreLabel}</span>
-                              <span className="vote-matrix__mobile-copy">{compactScoreLabel}</span>
                             </span>
                           </span>
                           <span className="vote-matrix__person-detail">
                             <span className="vote-matrix__desktop-copy">{detailLabel}</span>
-                            <span className="vote-matrix__mobile-copy">{compactDetailLabel}</span>
+                            <span className="vote-matrix__mobile-copy vote-matrix__person-detail-mobile">
+                              <span className="vote-matrix__person-detail-left">{compactAgeLabel}</span>
+                              <span className="vote-matrix__person-detail-right">
+                                {compactSinceLabel ? <span>{compactSinceLabel}</span> : null}
+                                <span className="vote-matrix__score-chip">{compactScoreLabel}</span>
+                              </span>
+                            </span>
                           </span>
                         </span>
                       </button>
