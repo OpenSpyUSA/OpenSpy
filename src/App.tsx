@@ -1465,6 +1465,7 @@ function DetailPanel({
 }
 
 function App() {
+  const datasetUrl = `${import.meta.env.BASE_URL}data/governmentData.json`
   const [dataset, setDataset] = useState<GovernmentDataset | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [route, setRoute] = useState<RouteState>(() => parseHash(window.location.hash))
@@ -1602,7 +1603,7 @@ function App() {
   useEffect(() => {
     let active = true
 
-    fetch('/data/governmentData.json')
+    fetch(datasetUrl)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Unable to load data snapshot (${response.status})`)
@@ -1629,7 +1630,7 @@ function App() {
     return () => {
       active = false
     }
-  }, [])
+  }, [datasetUrl])
 
   const handleHashChange = useEffectEvent(() => {
     const nextRoute = parseHash(window.location.hash, peopleById)
