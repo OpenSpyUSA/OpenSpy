@@ -944,12 +944,12 @@
 .vote-matrix__person-button {
   --tone: var(--nonpartisan);
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 10px;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 8px;
   align-items: center;
   width: 100%;
-  min-width: 240px;
-  padding: 9px 12px;
+  min-width: 220px;
+  padding: 6px 10px;
   border: 0;
   background: transparent;
   color: var(--ink);
@@ -979,13 +979,13 @@
 }
 
 .vote-matrix__avatar {
-  width: 34px;
-  font-size: 0.8rem;
+  width: 28px;
+  font-size: 0.72rem;
 }
 
 .vote-matrix__person-copy {
   display: grid;
-  gap: 2px;
+  gap: 1px;
   min-width: 0;
 }
 
@@ -993,40 +993,41 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
 }
 
 .vote-matrix__person-copy strong {
-  font-size: 0.85rem;
-  line-height: 1.25;
+  font-size: 0.8rem;
+  line-height: 1.15;
   color: var(--tone);
   overflow-wrap: anywhere;
 }
 
 .vote-matrix__person-copy span {
   color: color-mix(in srgb, var(--tone) 72%, var(--ink-soft));
-  font-size: 0.76rem;
+  font-size: 0.7rem;
+  line-height: 1.1;
 }
 
 .vote-matrix__score {
   flex: 0 0 auto;
-  padding: 2px 7px;
+  padding: 1px 6px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--tone) 24%, rgba(29, 29, 31, 0.08));
   background: color-mix(in srgb, var(--tone) 10%, rgba(255, 255, 255, 0.88));
   color: color-mix(in srgb, var(--tone) 86%, var(--ink));
-  font-size: 0.7rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  line-height: 1.15;
+  line-height: 1.05;
   white-space: nowrap;
 }
 
 .vote-matrix__cell {
-  width: 22px;
-  min-width: 22px;
-  height: 22px;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
 }
 
 .vote-cell {
@@ -2559,42 +2560,42 @@
   }
 
   .vote-matrix__corner {
-    min-width: 184px;
+    min-width: 172px;
     padding: 10px 12px;
   }
 
   .vote-matrix__person-button {
-    min-width: 184px;
-    grid-template-columns: 30px minmax(0, 1fr);
-    gap: 8px;
-    padding: 8px 10px;
+    min-width: 172px;
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 7px;
+    padding: 6px 8px;
   }
 
   .vote-matrix__avatar {
-    width: 30px;
+    width: 26px;
   }
 
   .vote-matrix__person-copy strong {
-    font-size: 0.8rem;
+    font-size: 0.76rem;
   }
 
   .vote-matrix__person-copy span {
-    font-size: 0.72rem;
-  }
-
-  .vote-matrix__score {
-    padding: 2px 6px;
     font-size: 0.66rem;
   }
 
+  .vote-matrix__score {
+    padding: 1px 5px;
+    font-size: 0.6rem;
+  }
+
   .vote-matrix__event {
-    width: 34px;
-    min-width: 34px;
+    width: 32px;
+    min-width: 32px;
   }
 
   .vote-matrix__event-link {
-    width: 34px;
-    min-width: 34px;
+    width: 32px;
+    min-width: 32px;
     min-height: 156px;
     padding: 8px 3px;
   }
