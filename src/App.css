@@ -2586,13 +2586,16 @@
 
   .vote-matrix__person-copy {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto auto;
     grid-template-areas:
       'name name'
       'detail score';
     column-gap: 2px;
     row-gap: 1px;
     align-items: end;
+    justify-content: start;
+    width: fit-content;
+    max-width: 100%;
   }
 
   .vote-matrix__person-heading {
@@ -2602,8 +2605,8 @@
   .vote-matrix__person-detail {
     grid-area: detail;
     min-width: 0;
-    justify-self: end;
-    text-align: right;
+    justify-self: start;
+    text-align: left;
   }
 
   .vote-matrix__person-copy strong {
@@ -2626,7 +2629,7 @@
 
   .vote-matrix__score {
     grid-area: score;
-    justify-self: end;
+    justify-self: start;
     padding: 1px 3px;
     font-size: 0.5rem;
     line-height: 1;
