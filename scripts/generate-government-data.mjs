@@ -120,7 +120,7 @@ const SOURCES = [
   },
   {
     label: 'OPM 2026 Senior Political Pay Freeze Guidance',
-    url: 'https://www.opm.gov/policy-data-oversight/pay-leave/salaries-wages/2026/executive-senior-level/freeze-for-certain-senior-political-officials/',
+    url: 'https://www.opm.gov/chcoc/latest-memos/updated-guidance-pay-freeze-for-certain-senior-political-officials-1.pdf',
   },
   {
     label: 'Current House Salaries',
@@ -290,7 +290,7 @@ const JUSTICE_WEALTH_NOTE =
 const PRESIDENT_SALARY_SOURCE_URL =
   'https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title3-section102&num=0&edition=prelim'
 const SENIOR_POLITICAL_PAY_FREEZE_SOURCE_URL =
-  'https://www.opm.gov/policy-data-oversight/pay-leave/salaries-wages/2026/executive-senior-level/freeze-for-certain-senior-political-officials/'
+  'https://www.opm.gov/chcoc/latest-memos/updated-guidance-pay-freeze-for-certain-senior-political-officials-1.pdf'
 const HOUSE_SALARY_SOURCE_URL = 'https://www.house.gov/doing-business-with-the-house/current-house-salaries'
 const SENATE_SALARY_SOURCE_URL = 'https://www.senate.gov/legislative/common/generic/Salaries.htm'
 const JUDICIAL_SALARY_SOURCE_URL =
