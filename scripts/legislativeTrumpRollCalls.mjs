@@ -977,6 +977,36 @@ const selectedSenateRollCalls = [
 ]
 
 const senateCandidateExtras = [
+  senate('senate-mattis-confirm', 115, 1, 29, 'nominations', {
+    label: 'James Mattis confirmation',
+  }),
+  senate('senate-pompeo-cia-motion-to-proceed', 115, 1, 31, 'nominations', {
+    label: 'Mike Pompeo CIA motion to proceed',
+  }),
+  senate('senate-pompeo-cia-confirm', 115, 1, 32, 'nominations', {
+    label: 'Mike Pompeo CIA confirmation',
+  }),
+  senate('senate-haley-un-confirm', 115, 1, 33, 'nominations', {
+    label: 'Nikki Haley U.N. confirmation',
+  }),
+  senate('senate-tillerson-cloture', 115, 1, 34, 'nominations', {
+    label: 'Rex Tillerson cloture',
+  }),
+  senate('senate-chao-confirm', 115, 1, 35, 'nominations', {
+    label: 'Elaine Chao confirmation',
+  }),
+  senate('senate-tillerson-confirm', 115, 1, 36, 'nominations', {
+    label: 'Rex Tillerson confirmation',
+  }),
+  senate('senate-devos-motion-to-proceed', 115, 1, 40, 'nominations', {
+    label: 'Betsy DeVos motion to proceed',
+  }),
+  senate('senate-devos-cloture', 115, 1, 52, 'nominations', {
+    label: 'Betsy DeVos cloture',
+  }),
+  senate('senate-devos-confirm', 115, 1, 54, 'nominations', {
+    label: 'Betsy DeVos confirmation',
+  }),
   senate('senate-sessions-motion-to-proceed', 115, 1, 44, 'nominations', {
     label: 'Jeff Sessions motion to proceed',
   }),
@@ -1081,6 +1111,42 @@ const senateCandidateExtras = [
   }),
   senate('senate-wray-fbi-confirm', 115, 1, 181, 'nominations', {
     label: 'Christopher Wray confirmation',
+  }),
+  senate('senate-nielsen-dhs-cloture', 115, 1, 304, 'immigration', {
+    label: 'Kirstjen Nielsen cloture',
+  }),
+  senate('senate-nielsen-dhs-confirm', 115, 1, 305, 'immigration', {
+    label: 'Kirstjen Nielsen confirmation',
+  }),
+  senate('senate-pompeo-state-cloture', 115, 2, 83, 'nominations', {
+    label: 'Mike Pompeo State cloture',
+  }),
+  senate('senate-pompeo-state-confirm', 115, 2, 84, 'nominations', {
+    label: 'Mike Pompeo State confirmation',
+  }),
+  senate('senate-haspel-cia-cloture', 115, 2, 100, 'nominations', {
+    label: 'Gina Haspel cloture',
+  }),
+  senate('senate-haspel-cia-confirm', 115, 2, 101, 'nominations', {
+    label: 'Gina Haspel confirmation',
+  }),
+  senate('senate-barr-ag-cloture', 116, 1, 23, 'nominations', {
+    label: 'William Barr cloture',
+  }),
+  senate('senate-barr-ag-confirm', 116, 1, 24, 'nominations', {
+    label: 'William Barr confirmation',
+  }),
+  senate('senate-bernhardt-interior-cloture', 116, 1, 76, 'nominations', {
+    label: 'David Bernhardt cloture',
+  }),
+  senate('senate-bernhardt-interior-confirm', 116, 1, 77, 'nominations', {
+    label: 'David Bernhardt confirmation',
+  }),
+  senate('senate-esper-defense-cloture', 116, 1, 219, 'nominations', {
+    label: 'Mark Esper cloture',
+  }),
+  senate('senate-esper-defense-confirm', 116, 1, 220, 'nominations', {
+    label: 'Mark Esper confirmation',
   }),
   senate('senate-obamacare-2017-4', 115, 1, 4, 'health-care', {
     label: 'Protect Medicare and Medicaid amendment',

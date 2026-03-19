@@ -156,7 +156,7 @@ const SOURCES = [
   },
   {
     label: 'Trump v. United States opinion',
-    url: 'https://www.supremecourt.gov/opinions/23pdf/23-939_e2pg.pdf',
+    url: 'https://www.supremecourt.gov/opinions/23pdf/603us1r57_2dp3.pdf',
   },
   {
     label: 'Trump v. CASA, Inc. opinion',
@@ -164,7 +164,7 @@ const SOURCES = [
   },
   {
     label: 'Learning Resources, Inc. v. Trump opinion',
-    url: 'https://www.supremecourt.gov/opinions/25pdf/24-1287_4gcj.pdf',
+    url: 'https://www.supremecourt.gov/opinions/25pdf/24-1287_new_3135.pdf',
   },
   {
     label: 'Senate Roll Call Vote 59 (Second Trump Impeachment Trial)',
@@ -1882,7 +1882,7 @@ const supremeCourtTrumpAdministrationCases = [
     },
     powerTag: 'Tariffs',
     result: 'The Court held that IEEPA does not authorize the President to impose tariffs.',
-    sourceUrl: 'https://www.supremecourt.gov/opinions/25pdf/24-1287_4gcj.pdf',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/25pdf/24-1287_new_3135.pdf',
   },
   {
     caseName: 'Trump v. Illinois',
@@ -2173,7 +2173,7 @@ const supremeCourtTrumpAdministrationCases = [
     powerTag: 'Immunity',
     result:
       'The Court recognized absolute immunity for core constitutional powers and presumptive immunity for official acts.',
-    sourceUrl: 'https://www.supremecourt.gov/opinions/23pdf/23-939_e2pg.pdf',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/23pdf/603us1r57_2dp3.pdf',
   },
   {
     caseName: 'Trump v. New York',
@@ -2196,7 +2196,7 @@ const supremeCourtTrumpAdministrationCases = [
     powerTag: 'Census',
     result:
       'The Court treated the case as too uncertain and not ripe, vacated the lower ruling, and remanded.',
-    sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/20-366_2d93.pdf',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/592us1r10_fd9g.pdf',
   },
   {
     caseName: 'Department of Homeland Security v. Thuraissigiam',
@@ -2332,7 +2332,7 @@ const supremeCourtTrumpAdministrationCases = [
     powerTag: 'Deportation',
     result:
       'The Court held the rescission was arbitrary and capricious as explained and sent the case back.',
-    sourceUrl: 'https://www.supremecourt.gov/opinions/19pdf/18-587_5ifl.pdf',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/19pdf/591us1r46_1o23.pdf',
   },
   {
     caseName: 'Department of Commerce v. New York',
@@ -2355,7 +2355,7 @@ const supremeCourtTrumpAdministrationCases = [
     powerTag: 'Census',
     result:
       "The Court said the administration's stated rationale was inadequate and sent the matter back.",
-    sourceUrl: 'https://www.supremecourt.gov/opinions/18pdf/18-966_bq7c.pdf',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/preliminaryprint/588US2PP_final.pdf#page=414',
   },
   {
     caseName: 'Nielsen v. Preap',
@@ -2378,7 +2378,7 @@ const supremeCourtTrumpAdministrationCases = [
     powerTag: 'Detention',
     result:
       'The Court ruled for the administration and upheld its broad reading of the mandatory-detention provision, 5-4.',
-    sourceUrl: 'https://www.supremecourt.gov/opinions/18pdf/16-1363_a86c.pdf',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/boundvolumes/586BV.pdf#page=591',
   },
   {
     caseName: 'Trump v. East Bay Sanctuary Covenant',
@@ -2515,7 +2515,7 @@ const supremeCourtTrumpPersonalCases = [
     },
     powerTag: 'Election',
     result: 'The Court denied expedition before the election.',
-    sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/20-542_i3dj.pdf',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/20-542(1)_3e04.pdf',
   },
   {
     caseName: 'Trump v. Anderson',
@@ -2538,7 +2538,7 @@ const supremeCourtTrumpPersonalCases = [
     powerTag: 'Ballot',
     result:
       'The Court unanimously held that states cannot enforce Section 3 against presidential candidates for federal office on their own.',
-    sourceUrl: 'https://www.supremecourt.gov/opinions/23pdf/23-719_19m2.pdf',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/23pdf/601us1r06_a86c.pdf',
   },
   {
     caseName: 'Trump v. Thompson',
