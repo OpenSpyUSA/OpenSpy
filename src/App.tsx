@@ -112,21 +112,32 @@ const supremeCourtCaseOpinionOverrides = new Map<string, string>([
   ['learning-resources-v-trump', 'https://www.supremecourt.gov/opinions/25pdf/24-1287_new_3135.pdf'],
   ['trump-v-illinois', 'https://www.supremecourt.gov/opinions/25pdf/25a443_new_b07d.pdf'],
   ['trump-v-jgg', 'https://www.supremecourt.gov/opinions/24pdf/604us2r25_7648.pdf'],
+  ['trump-v-sierra-club-2019-stay', 'https://www.supremecourt.gov/opinions/18pdf/19a60_o75p.pdf'],
   ['dhs-v-thuraissigiam', 'https://www.supremecourt.gov/opinions/19pdf/591us1r48_9o6b.pdf'],
   ['trump-v-sierra-club', 'https://www.supremecourt.gov/opinions/19pdf/19a60_bqm1.pdf'],
   ['dhs-v-new-york-public-charge', 'https://www.supremecourt.gov/opinions/19pdf/19a785_j4ek.pdf'],
   ['barr-v-east-bay-sanctuary-covenant', 'https://www.supremecourt.gov/opinions/18pdf/19a230_k53l.pdf'],
-  ['trump-v-hawaii', 'https://www.supremecourt.gov/opinions/preliminaryprint/585US2PP_final.pdf#page=172'],
+  ['trump-v-hawaii', 'https://www.supremecourt.gov/opinions/boundvolumes/585BV.pdf#page=699'],
   ['trump-v-vance', 'https://www.supremecourt.gov/opinions/19pdf/591us2r59_g3bi.pdf'],
   ['trump-v-mazars', 'https://www.supremecourt.gov/opinions/19pdf/591us2r60_lkgm.pdf'],
   ['trump-v-deutsche-bank', 'https://www.supremecourt.gov/opinions/19pdf/591us2r60_lkgm.pdf'],
 ])
 
 const supremeCourtCaseDocketOverrides = new Map<string, string>([
+  ['aarp-v-trump', 'https://www.supremecourt.gov/docket/docketfiles/html/public/24a1007.html'],
+  ['aarp-v-trump-interim-order', 'https://www.supremecourt.gov/docket/docketfiles/html/public/24a1007.html'],
+  ['trump-v-sierra-club-2019-stay', 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a60.html'],
   ['trump-v-east-bay-sanctuary-covenant', 'https://www.supremecourt.gov/docket/docketfiles/html/public/18a615.html'],
   ['republican-party-of-pa-v-degraffenreid', 'https://www.supremecourt.gov/docket/docketfiles/html/public/20-542.html'],
   ['texas-v-pennsylvania', 'https://www.supremecourt.gov/search.aspx?filename=%2Fdocket%2Fdocketfiles%2Fhtml%2Fpublic%2F22o155.html'],
 ])
+
+const supremeCourtCaseOpinionMeta: Partial<Record<string, { label: string, note?: string }>> = {
+  'trump-v-deutsche-bank': {
+    label: 'Opinion (Mazars companion)',
+    note: 'The Supreme Court published this consolidated merits opinion under the lead case Trump v. Mazars USA, LLP.',
+  },
+}
 
 const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   'learning-resources-v-trump': [
@@ -173,8 +184,13 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
     'The application for stay presented to THE CHIEF JUSTICE and by him referred to the Court is granted.',
   ],
   'aarp-v-trump': [
-    'The Court ordered "[t]he Government" not to remove a "putative class of detainees" until this Court issues a superseding order.',
+    'The application for an injunction pending further proceedings is granted.',
+    'JUSTICE KAVANAUGH, concurring.',
     'JUSTICE ALITO, with whom JUSTICE THOMAS joins, dissenting.',
+  ],
+  'aarp-v-trump-interim-order': [
+    'The Government is directed not to remove any member of the putative class of detainees from the United States until further order of this Court.',
+    'Justice Thomas and Justice Alito dissent from the Court’s order.',
   ],
   'trump-v-jgg': [
     'The application to vacate the orders issued by the United States District Court for the District of Columbia is granted.',
@@ -184,13 +200,19 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   ],
   'trump-v-new-york': [
     'PER CURIAM. Every ten years, the Nation undertakes an "Enumeration" of its population...',
-    'JUSTICE BREYER, with whom JUSTICE SOTOMAYOR and JUSTICE KAGAN join, dissenting.',
+    'Justice Breyer, with whom Justice Sotomayor and Justice Kagan join, dissenting.',
   ],
   'dhs-v-thuraissigiam': [
     'ALITO, J., delivered the opinion of the Court, in which ROBERTS, C. J., and THOMAS, GORSUCH, and KAVANAUGH, JJ., joined.',
   ],
   'trump-v-sierra-club': [
+    'The motion to lift stay is denied.',
+    'JUSTICE BREYER, with whom JUSTICE GINSBURG, JUSTICE SOTOMAYOR, and JUSTICE KAGAN join, dissenting from denial of motion to lift stay.',
+  ],
+  'trump-v-sierra-club-2019-stay': [
     'The application for stay presented to JUSTICE KAGAN and by her referred to the Court is granted.',
+    'JUSTICE GINSBURG, JUSTICE SOTOMAYOR, and JUSTICE KAGAN would deny the application.',
+    'JUSTICE BREYER, concurring in part and dissenting in part from grant of stay.',
   ],
   'wolf-v-innovation-law-lab': [
     'Application (19A960) granted by the Court.',
@@ -217,7 +239,7 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
     'Justice Thomas, Justice Alito, Justice Gorsuch, and Justice Kavanaugh would grant the application for stay.',
   ],
   'trump-v-hawaii': [
-    'ROBERTS, C. J., delivered the opinion of the Court, in which KENNEDY, THOMAS, ALITO, and GORSUCH, JJ., joined.',
+    'Roberts, C. J., delivered the opinion of the Court, in which Kennedy, Thomas, Alito, and Gorsuch, JJ., joined.',
   ],
   'trump-v-hawaii-2017-stay': [
     'The application for stay of mandate presented to Justice Kennedy and by him referred to the Court is granted...',
@@ -236,13 +258,16 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
     'Statement of JUSTICE ALITO, with whom JUSTICE THOMAS and JUSTICE GORSUCH join.',
   ],
   'trump-v-anderson': [
-    'Because the Constitution makes Congress, rather than the States, responsible for enforcing Section 3 against federal officeholders and candidates, we reverse.',
+    "Because the Constitution makes Congress, rather than the States, responsible for enforcing Section 3 against federal officeholders and candidates, the Colorado Supreme Court erred in ordering former President Trump excluded from Colorado's 2024 Presidential primary ballot.",
   ],
   'trump-v-thompson': [
     'The application for stay of mandate and injunction pending review presented to THE CHIEF JUSTICE and by him referred to the Court is denied.',
+    'JUSTICE THOMAS would grant the application.',
+    'Statement of JUSTICE KAVANAUGH respecting denial of application.',
   ],
   'republican-party-of-pa-v-degraffenreid': [
     'The petitions for writs of certiorari are denied.',
+    'THOMAS, J., dissenting.',
   ],
   'trump-v-vance': [
     'ROBERTS, C. J., delivered the opinion of the Court, in which GINSBURG, BREYER, SOTOMAYOR, and KAGAN, JJ., joined.',
@@ -256,6 +281,73 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   'texas-v-pennsylvania': [
     "The State of Texas's motion for leave to file a bill of complaint is denied for lack of standing under Article III of the Constitution.",
     'Statement of Justice Alito, with whom Justice Thomas joins: I would therefore grant the motion to file the bill of complaint but would not grant other relief.',
+  ],
+}
+
+const inferredSupremeCourtCaseIds = new Set<string>([
+  'aarp-v-trump',
+  'aarp-v-trump-interim-order',
+  'barr-v-east-bay-sanctuary-covenant',
+  'dhs-v-dvd',
+  'mcmahon-v-new-york',
+  'republican-party-of-pa-v-boockvar-expedition',
+  'republican-party-of-pa-v-degraffenreid',
+  'texas-v-pennsylvania',
+  'trump-v-hawaii-2017-stay',
+  'trump-v-illinois',
+  'trump-v-irap',
+  'trump-v-jgg',
+  'trump-v-orr',
+  'trump-v-sierra-club',
+  'trump-v-sierra-club-2019-stay',
+  'trump-v-thompson',
+  'trump-v-wilcox',
+  'wolf-v-innovation-law-lab',
+])
+
+const confirmedSupremeCourtJusticeIdsByCase: Record<string, string[]> = {
+  'aarp-v-trump': [
+    'judicial-clarence-thomas',
+    'judicial-samuel-a-alito-jr',
+    'judicial-brett-m-kavanaugh',
+  ],
+  'aarp-v-trump-interim-order': [
+    'judicial-clarence-thomas',
+    'judicial-samuel-a-alito-jr',
+  ],
+  'republican-party-of-pa-v-boockvar-expedition': [
+    'judicial-clarence-thomas',
+    'judicial-samuel-a-alito-jr',
+    'judicial-neil-m-gorsuch',
+  ],
+  'republican-party-of-pa-v-degraffenreid': [
+    'judicial-clarence-thomas',
+  ],
+  'texas-v-pennsylvania': [
+    'judicial-clarence-thomas',
+    'judicial-samuel-a-alito-jr',
+  ],
+  'trump-v-hawaii-2017-stay': [
+    'judicial-clarence-thomas',
+    'judicial-samuel-a-alito-jr',
+    'judicial-neil-m-gorsuch',
+  ],
+  'trump-v-irap': [
+    'judicial-clarence-thomas',
+    'judicial-samuel-a-alito-jr',
+    'judicial-neil-m-gorsuch',
+  ],
+  'trump-v-sierra-club': [
+    'judicial-sonia-sotomayor',
+    'judicial-elena-kagan',
+  ],
+  'trump-v-sierra-club-2019-stay': [
+    'judicial-sonia-sotomayor',
+    'judicial-elena-kagan',
+  ],
+  'trump-v-thompson': [
+    'judicial-clarence-thomas',
+    'judicial-brett-m-kavanaugh',
   ],
 }
 
@@ -315,24 +407,30 @@ function getSupremeCourtCaseDocketUrl(caseItem: SupremeCourtCase) {
 function SupremeCourtCaseLinks({ caseItem }: { caseItem: SupremeCourtCase }) {
   const opinionUrl = getSupremeCourtCaseOpinionUrl(caseItem)
   const docketUrl = getSupremeCourtCaseDocketUrl(caseItem)
+  const opinionMeta = supremeCourtCaseOpinionMeta[caseItem.id]
 
   return (
-    <div className="detail-links detail-links--pair">
-      {opinionUrl ? (
-        <a href={opinionUrl} rel="noreferrer" target="_blank">
-          Opinion
-        </a>
-      ) : (
-        <span className="detail-link-disabled">Opinion unavailable</span>
-      )}
-      {docketUrl ? (
-        <a href={docketUrl} rel="noreferrer" target="_blank">
-          Docket
-        </a>
-      ) : (
-        <span className="detail-link-disabled">Docket unavailable</span>
-      )}
-    </div>
+    <>
+      <div className="detail-links detail-links--pair">
+        {opinionUrl ? (
+          <a href={opinionUrl} rel="noreferrer" target="_blank">
+            {opinionMeta?.label ?? 'Opinion'}
+          </a>
+        ) : (
+          <span className="detail-link-disabled">Opinion unavailable</span>
+        )}
+        {docketUrl ? (
+          <a href={docketUrl} rel="noreferrer" target="_blank">
+            Docket
+          </a>
+        ) : (
+          <span className="detail-link-disabled">Docket unavailable</span>
+        )}
+      </div>
+      {opinionMeta?.note ? (
+        <p className="detail-links-note">{opinionMeta.note}</p>
+      ) : null}
+    </>
   )
 }
 
@@ -893,6 +991,23 @@ function buildLegislativeChamberStats(people: GovernmentPerson[]) {
   ] as const
 }
 
+function getLegislativeStatGroupTotal(
+  group:
+    | {
+        counts: Record<Alignment, number>
+        id: string
+        label: string
+      }
+    | null
+    | undefined,
+) {
+  if (!group) {
+    return 0
+  }
+
+  return Object.values(group.counts).reduce((total, count) => total + count, 0)
+}
+
 function HouseVacancySection({
   selectedStateCode,
 }: {
@@ -1113,11 +1228,18 @@ function SupremeCourtCaseMatrix({
                     </th>
                     {sortedCases.map((caseItem) => {
                       const stance = caseItem.justiceStances[justice.id] ?? 'not_on_court'
+                      const confirmedJusticeIds = confirmedSupremeCourtJusticeIdsByCase[caseItem.id] ?? []
+                      const isInferred = (
+                        inferredSupremeCourtCaseIds.has(caseItem.id) &&
+                        stance !== 'not_on_court' &&
+                        !confirmedJusticeIds.includes(justice.id)
+                      )
+                      const titleSuffix = isInferred ? ' • Inferred lineup' : ''
                       return (
                         <td className="vote-matrix__cell" key={`${justice.id}-${caseItem.id}`}>
                           <span
-                            className={`vote-cell vote-cell--${stance}`}
-                            title={`${justice.name} • ${caseItem.caseName} • ${getTrumpCaseStanceLabel(stance)}`}
+                            className={`vote-cell vote-cell--${stance}${isInferred ? ' vote-cell--inferred' : ''}`}
+                            title={`${justice.name} • ${caseItem.caseName} • ${getTrumpCaseStanceLabel(stance)}${titleSuffix}`}
                           />
                         </td>
                       )
@@ -1971,6 +2093,16 @@ function App() {
   const stats = selectedBranch ? buildBranchStats(selectedBranch, statsPeople) : []
   const legislativeStats =
     selectedBranch?.id === 'legislative' ? buildLegislativeChamberStats(statsPeople) : []
+  const legislativeSenateGroup =
+    selectedBranch?.id === 'legislative'
+      ? legislativeStats.find((group) => group.id === 'senate') ?? null
+      : null
+  const legislativeHouseGroup =
+    selectedBranch?.id === 'legislative'
+      ? legislativeStats.find((group) => group.id === 'house') ?? null
+      : null
+  const legislativeSenateCount = getLegislativeStatGroupTotal(legislativeSenateGroup)
+  const legislativeHouseCount = getLegislativeStatGroupTotal(legislativeHouseGroup)
   const judicialJustices =
     selectedBranch?.id === 'judicial'
       ? visiblePeople
@@ -1982,6 +2114,12 @@ function App() {
     selectedBranch?.id === 'legislative'
       ? branchSections.flatMap((section) => section.rollCallEvents ?? [])
       : []
+  const legislativeOverviewSummary =
+    selectedBranch?.id !== 'legislative'
+      ? ''
+      : selectedStateSummary
+        ? `${selectedStateSummary.stateName} currently sends ${selectedStateSummary.houseCount} representatives and ${selectedStateSummary.senateCount} senators. ${selectedStateSummary.balanceLabel}. Open any member below to see biography, finance, social links, and vote context.`
+        : 'Start with the state map, then move into the Senate and House below to open member profiles, compare party balance, and trace how lawmakers line up on major Trump-linked votes.'
   const selectedRollCall =
     selectedBranch?.id === 'legislative' && selectedRollCallId
       ? visibleRollCallEvents.find((event) => event.id === selectedRollCallId) ?? null
@@ -2228,7 +2366,25 @@ function App() {
             ) : null}
           </div>
         </div>
-        {selectedBranch.id === 'legislative' ? null : (
+        {selectedBranch.id === 'legislative' ? (
+          <div className="branch-banner__copy branch-banner__copy--legislative">
+            <p className="eyebrow">Congress overview</p>
+            <p className="branch-banner__lede">
+              Congress translates elections, party coalitions, committees, and state
+              delegations into lawmaking, appropriations, confirmations, and oversight.
+            </p>
+            <p className="branch-summary">{legislativeOverviewSummary}</p>
+            <div className="hero-pills branch-banner__pills">
+              <span className="hero-pill">50 states</span>
+              <span className="hero-pill">{legislativeSenateCount} Senate profiles</span>
+              <span className="hero-pill">{legislativeHouseCount} House profiles</span>
+              <span className="hero-pill">{visibleRollCallEvents.length} roll calls in view</span>
+              {selectedStateSummary ? (
+                <span className="hero-pill hero-pill--focus">{selectedStateSummary.stateName} focus</span>
+              ) : null}
+            </div>
+          </div>
+        ) : (
           <div className="branch-banner__copy">
             <p>{selectedBranch.headline}</p>
             <p className="branch-summary">{selectedBranch.summary}</p>
