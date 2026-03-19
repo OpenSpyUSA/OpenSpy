@@ -122,6 +122,16 @@ function formatRollCallOutcome(outcome?: LegislativeTrumpRollCall['trumpOutcome'
   return 'Unavailable'
 }
 
+function formatRollCallSignalTier(rollCall: LegislativeTrumpRollCall) {
+  return rollCall.signalTier === 'broad_admin_related'
+    ? 'Broad administration-related'
+    : 'High-signal scored'
+}
+
+function formatRollCallScoringStatus(rollCall: LegislativeTrumpRollCall) {
+  return rollCall.scoreIncluded ? 'Counts in Trump score' : 'Browser only'
+}
+
 function formatRollCallVoteTotals(event: LegislativeTrumpRollCall) {
   if (!Number.isFinite(event.yeaTotal) || !Number.isFinite(event.nayTotal)) {
     return null
@@ -1003,6 +1013,7 @@ function DetailPanel({
   if (rollCall) {
     const voteTotals = formatRollCallVoteTotals(rollCall)
     const outcomeLabel = formatRollCallOutcome(rollCall.trumpOutcome)
+    const signalTierLabel = formatRollCallSignalTier(rollCall)
     const narrative = describeLegislativeRollCall(rollCall)
     const referenceLine = formatRollCallReferenceLine(rollCall)
     const recordedLine = formatRollCallRecordedLine(rollCall)
@@ -1028,6 +1039,7 @@ function DetailPanel({
         <div className="detail-tags">
           <span className="detail-tag">{formatRollCallChamber(rollCall.chamber)}</span>
           <span className="detail-tag">{formatRollCallCategory(rollCall.category)}</span>
+          <span className="detail-tag">{signalTierLabel}</span>
           <span
             className={`detail-tag${
               rollCall.trumpOutcome ? ` detail-tag--${rollCall.trumpOutcome}` : ''
@@ -1043,6 +1055,14 @@ function DetailPanel({
           <div className="fact-row">
             <span>Question</span>
             <strong>{rollCall.question}</strong>
+          </div>
+          <div className="fact-row">
+            <span>Tier</span>
+            <strong>{signalTierLabel}</strong>
+          </div>
+          <div className="fact-row">
+            <span>Scoring</span>
+            <strong>{formatRollCallScoringStatus(rollCall)}</strong>
           </div>
           <div className="fact-row">
             <span>Trump side cast</span>
@@ -1206,7 +1226,7 @@ function DetailPanel({
 
       {judicialCases.length > 0 ? (
         <section className="detail-block">
-          <h3>Trump Power Cases</h3>
+          <h3>Administration Cases</h3>
           <div className="justice-case-list">
             {judicialCases.map((caseItem) => {
               const stance = caseItem.justiceStances[person.id]
@@ -1240,7 +1260,7 @@ function DetailPanel({
 
       {judicialPersonalCases.length > 0 ? (
         <section className="detail-block">
-          <h3>Trump Personal Cases</h3>
+          <h3>Personal Cases</h3>
           <div className="justice-case-list">
             {judicialPersonalCases.map((caseItem) => {
               const stance = caseItem.justiceStances[person.id]
@@ -1974,7 +1994,7 @@ function App() {
                 {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
                   <SupremeCourtCaseMatrix
                     cases={supremeCourtCases}
-                    eyebrow="Trump Power Cases"
+                    eyebrow="Administration Cases"
                     title="How The Nine Justices Lined Up"
                     justices={judicialJustices}
                     onOpenPerson={openPerson}
@@ -1984,7 +2004,7 @@ function App() {
                 {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
                   <SupremeCourtCaseMatrix
                     cases={supremeCourtPersonalCases}
-                    eyebrow="Trump Personal Cases"
+                    eyebrow="Personal Cases"
                     title="How The Nine Justices Lined Up"
                     justices={judicialJustices}
                     onOpenPerson={openPerson}

@@ -130,11 +130,11 @@ function uniqueStrings(items) {
 
 function buildLegislativeTrumpLabel(score) {
   if (score >= 8) {
-    return 'Very often pro-Trump in selected votes'
+    return 'Very often pro-Trump in scored votes'
   }
 
   if (score >= 6.5) {
-    return 'Mostly pro-Trump in selected votes'
+    return 'Mostly pro-Trump in scored votes'
   }
 
   if (score >= 4.5) {
@@ -146,10 +146,10 @@ function buildLegislativeTrumpLabel(score) {
   }
 
   if (score >= 0.5) {
-    return 'Usually not pro-Trump in selected votes'
+    return 'Usually not pro-Trump in scored votes'
   }
 
-  return 'Never pro-Trump in selected votes'
+  return 'Never pro-Trump in scored votes'
 }
 
 function getLegislativeTrumpConfidence(sampleSize, selectedCount) {
@@ -430,6 +430,8 @@ async function mapWithConcurrency(items, concurrency, mapper) {
 async function buildSelectedLegislativeRollCallSnapshots() {
   const selectedHouseRollCalls = houseTrumpRollCallPool.filter((item) => item.selected)
   const selectedSenateRollCalls = senateTrumpRollCallPool.filter((item) => item.selected)
+  const scoredHouseRollCalls = selectedHouseRollCalls.filter((item) => item.scoreIncluded !== false)
+  const scoredSenateRollCalls = selectedSenateRollCalls.filter((item) => item.scoreIncluded !== false)
   const selectedRollCalls = [...selectedHouseRollCalls, ...selectedSenateRollCalls]
 
   const snapshots = await mapWithConcurrency(selectedRollCalls, 8, async (event) => {
@@ -488,6 +490,8 @@ async function buildSelectedLegislativeRollCallSnapshots() {
   })
 
   return {
+    scoredHouseCount: scoredHouseRollCalls.length,
+    scoredSenateCount: scoredSenateRollCalls.length,
     selectedHouseCount: selectedHouseRollCalls.length,
     selectedSenateCount: selectedSenateRollCalls.length,
     snapshots,
@@ -501,14 +505,14 @@ async function main() {
   const representatives = people.filter(
     (person) => person.branchId === 'legislative' && person.sectionId === 'house',
   )
-  const { selectedHouseCount, selectedSenateCount, snapshots } =
+  const { scoredHouseCount, scoredSenateCount, selectedHouseCount, selectedSenateCount, snapshots } =
     await buildSelectedLegislativeRollCallSnapshots()
   const metricsByPersonId = new Map()
 
   for (const person of [...senators, ...representatives]) {
     metricsByPersonId.set(person.id, {
       antiVotes: 0,
-      availableEvents: person.sectionId === 'senate' ? selectedSenateCount : selectedHouseCount,
+      availableEvents: person.sectionId === 'senate' ? scoredSenateCount : scoredHouseCount,
       evidence: [],
       missedCount: 0,
       notInOfficeCount: 0,
@@ -534,13 +538,21 @@ async function main() {
 
         if (!cast) {
           metrics.rollCallPositions[snapshot.id] = 'not_in_office'
-          metrics.notInOfficeCount += 1
+          if (snapshot.scoreIncluded !== false) {
+            metrics.notInOfficeCount += 1
+          }
           continue
         }
 
         if (isSkippedLegislativeCast(cast)) {
           metrics.rollCallPositions[snapshot.id] = 'missed'
-          metrics.missedCount += 1
+          if (snapshot.scoreIncluded !== false) {
+            metrics.missedCount += 1
+          }
+          continue
+        }
+
+        if (snapshot.scoreIncluded === false) {
           continue
         }
 
@@ -583,13 +595,21 @@ async function main() {
 
       if (!matchedEntry) {
         metrics.rollCallPositions[snapshot.id] = 'not_in_office'
-        metrics.notInOfficeCount += 1
+        if (snapshot.scoreIncluded !== false) {
+          metrics.notInOfficeCount += 1
+        }
         continue
       }
 
       if (isSkippedLegislativeCast(matchedEntry.cast)) {
         metrics.rollCallPositions[snapshot.id] = 'missed'
-        metrics.missedCount += 1
+        if (snapshot.scoreIncluded !== false) {
+          metrics.missedCount += 1
+        }
+        continue
+      }
+
+      if (snapshot.scoreIncluded === false) {
         continue
       }
 
@@ -634,16 +654,16 @@ async function main() {
         : clampTrumpScoreToSingleDecimal((metrics.weightedProVotes / metrics.weightedSampleSize) * 10)
     const confidence = getLegislativeTrumpConfidence(metrics.sampleSize, metrics.availableEvents)
     const noteParts = [
-      `Score is derived from weighted selected Trump-linked ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls on this site: ${formatWeightedValue(metrics.weightedProVotes)}/${formatWeightedValue(metrics.weightedSampleSize)} weighted vote-equivalents on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
+      `Score is derived from weighted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls on this site: ${formatWeightedValue(metrics.weightedProVotes)}/${formatWeightedValue(metrics.weightedSampleSize)} weighted vote-equivalents on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
       LEGISLATIVE_WEIGHTING_NOTE,
     ]
 
     if (metrics.notInOfficeCount > 0) {
-      noteParts.push(`Not in office for ${metrics.notInOfficeCount} selected votes.`)
+      noteParts.push(`Not in office for ${metrics.notInOfficeCount} high-signal scored votes.`)
     }
 
     if (metrics.missedCount > 0) {
-      noteParts.push(`Missed or abstained on ${metrics.missedCount} selected votes.`)
+      noteParts.push(`Missed or abstained on ${metrics.missedCount} high-signal scored votes.`)
     }
 
     return {
@@ -652,12 +672,16 @@ async function main() {
       trumpAvailableEvents: metrics.availableEvents,
       trumpConfidence: confidence,
       trumpEvidence: uniqueStrings([
-        `${metrics.proVotes} raw Pro Trump votes and ${metrics.antiVotes} raw Not pro Trump votes across ${metrics.sampleSize} counted selected ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
-        `${formatWeightedValue(metrics.weightedProVotes)} weighted Pro Trump vote-equivalents and ${formatWeightedValue(metrics.weightedAntiVotes)} weighted Not pro Trump vote-equivalents across ${formatWeightedValue(metrics.weightedSampleSize)} weighted counted selected ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
-        `Sample size: ${metrics.sampleSize} of ${metrics.availableEvents} selected votes. Confidence: ${confidence}.`,
+        `${metrics.proVotes} raw Pro Trump votes and ${metrics.antiVotes} raw Not pro Trump votes across ${metrics.sampleSize} counted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
+        `${formatWeightedValue(metrics.weightedProVotes)} weighted Pro Trump vote-equivalents and ${formatWeightedValue(metrics.weightedAntiVotes)} weighted Not pro Trump vote-equivalents across ${formatWeightedValue(metrics.weightedSampleSize)} weighted counted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
+        `Sample size: ${metrics.sampleSize} of ${metrics.availableEvents} high-signal scored votes. Confidence: ${confidence}.`,
         LEGISLATIVE_WEIGHTING_NOTE,
-        metrics.notInOfficeCount > 0 ? `Not in office for ${metrics.notInOfficeCount} selected votes.` : null,
-        metrics.missedCount > 0 ? `Missed or abstained on ${metrics.missedCount} selected votes.` : null,
+        metrics.notInOfficeCount > 0
+          ? `Not in office for ${metrics.notInOfficeCount} high-signal scored votes.`
+          : null,
+        metrics.missedCount > 0
+          ? `Missed or abstained on ${metrics.missedCount} high-signal scored votes.`
+          : null,
         ...metrics.evidence,
       ]),
       trumpLabel: buildLegislativeTrumpLabel(derivedScore),
@@ -673,6 +697,7 @@ async function main() {
 
   dataset.legislativeTrumpRollCalls = {
     houseCandidateCount: houseTrumpRollCallPool.length,
+    houseScoredCount: scoredHouseCount,
     houseSelectedCount: selectedHouseCount,
     selectedEvents: snapshots.map((snapshot) => ({
       actionTime: snapshot.actionTime,
@@ -687,7 +712,9 @@ async function main() {
       proTrumpCast: snapshot.proTrumpCast,
       question: snapshot.question,
       rollCallNumber: snapshot.rollCallNumber,
+      scoreIncluded: snapshot.scoreIncluded !== false,
       session: snapshot.session,
+      signalTier: snapshot.signalTier ?? 'high_signal_scored',
       sourceUrl: snapshot.sourceUrl,
       title: snapshot.title,
       trumpOutcome: snapshot.trumpOutcome,
@@ -695,6 +722,7 @@ async function main() {
       yeaTotal: snapshot.yeaTotal,
     })),
     senateCandidateCount: senateTrumpRollCallPool.length,
+    senateScoredCount: scoredSenateCount,
     senateSelectedCount: selectedSenateCount,
   }
 

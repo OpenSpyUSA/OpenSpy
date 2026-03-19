@@ -17,11 +17,14 @@ import type {
 
 const CATEGORY_SHORT_LABELS: Record<string, string> = {
   appropriations: 'Funds',
+  'culture-war': 'Social',
   'emergency-powers': 'Power',
+  energy: 'Energy',
   'health-care': 'Health',
   immigration: 'Immig',
   impeachment: 'Impch',
   jan6: 'Jan 6',
+  labor: 'Labor',
   nominations: 'Nom',
   reconciliation: 'Recon',
   rescissions: 'Cuts',
@@ -71,6 +74,12 @@ function formatRollCallVoteTotals(event: LegislativeTrumpRollCall) {
 
 function formatRollCallWeight(event: LegislativeTrumpRollCall) {
   return `Weight ${event.weight.toFixed(2)}`
+}
+
+function formatRollCallSignalTier(event: LegislativeTrumpRollCall) {
+  return event.signalTier === 'broad_admin_related'
+    ? 'Broad administration-related'
+    : 'High-signal scored'
 }
 
 function formatCompactTrumpScore(score: number) {
@@ -148,6 +157,8 @@ export function LegislativeVoteMatrix({
       compareLegislativeRollCallsByRecency(left.event, right.event, left.index, right.index),
     )
     .map(({ event }) => event)
+  const scoredCount = sortedEvents.filter((event) => event.scoreIncluded).length
+  const broadCount = sortedEvents.length - scoredCount
 
   return (
     <section className="vote-matrix">
@@ -155,7 +166,20 @@ export function LegislativeVoteMatrix({
         <div>
           <p className="eyebrow">Vote matrix</p>
           <h3>{chamberLabel} Trump-linked roll calls</h3>
-          <p className="vote-matrix__axes">Rows sorted by age. Newest votes on the left.</p>
+          <p className="vote-matrix__axes">
+            Rows sorted by age. Newest votes on the left. <strong>Scored</strong> votes move the
+            Trump score. <strong>Broad</strong> votes stay in the browser only.
+          </p>
+          <div className="vote-matrix__scope-summary" aria-label="Roll-call scope summary">
+            <span className="vote-matrix__scope-pill vote-matrix__scope-pill--scored">
+              High-signal scored {scoredCount}
+            </span>
+            {broadCount > 0 ? (
+              <span className="vote-matrix__scope-pill vote-matrix__scope-pill--broad">
+                Broad administration-related {broadCount}
+              </span>
+            ) : null}
+          </div>
         </div>
         <div className="vote-matrix__legend" aria-label="Vote matrix legend">
           <span className="vote-matrix__legend-item">
@@ -190,6 +214,7 @@ export function LegislativeVoteMatrix({
                   const countsLabel = formatRollCallVoteTotals(event)
                   const isSelected = selectedRollCallId === event.id
                   const weightLabel = formatRollCallWeight(event)
+                  const scopeLabel = formatRollCallSignalTier(event)
 
                   return (
                     <th
@@ -205,9 +230,9 @@ export function LegislativeVoteMatrix({
                           event.trumpOutcome ? ` vote-matrix__event-link--${event.trumpOutcome}` : ''
                         }${isSelected ? ' is-selected' : ''}`}
                         onClick={() => onOpenRollCall(event.id)}
-                        title={`${event.label} • ${formatRollCallMatrixDateLabel(event)} • ${getRollCallOutcomeLabel(event.trumpOutcome)}${
+                        title={`${event.label} • ${formatRollCallMatrixDateLabel(event)} • ${scopeLabel} • ${getRollCallOutcomeLabel(event.trumpOutcome)}${
                           countsLabel ? ` • ${countsLabel}` : ''
-                        } • ${weightLabel}`}
+                        }${event.scoreIncluded ? ` • ${weightLabel}` : ' • Browser only'}`}
                         type="button"
                       >
                         <span className="vote-matrix__event-date">
@@ -216,7 +241,13 @@ export function LegislativeVoteMatrix({
                         <span className="vote-matrix__event-category">
                           {getCategoryShortLabel(event.category)}
                         </span>
-                        <span className="vote-matrix__event-weight">{weightLabel}</span>
+                        <span
+                          className={`vote-matrix__event-scope vote-matrix__event-scope--${
+                            event.scoreIncluded ? 'scored' : 'broad'
+                          }`}
+                        >
+                          {event.scoreIncluded ? 'Scored' : 'Broad'}
+                        </span>
                         {countsLabel ? (
                           <span className="vote-matrix__event-counts">{countsLabel}</span>
                         ) : null}

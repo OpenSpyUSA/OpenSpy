@@ -36,6 +36,38 @@ function describeTopic(event: LegislativeTrumpRollCall) {
     return 'The Kayla Hamilton Act would tighten how the federal government places unaccompanied migrant children, require more information-sharing with Homeland Security, and bar placement with sponsors who are unlawfully present in the United States.'
   }
 
+  if (
+    text.includes('permit act') ||
+    text.includes('speed act') ||
+    text.includes('mining regulatory clarity act') ||
+    text.includes('reliable power act') ||
+    text.includes('power plant reliability act') ||
+    text.includes('state planning for reliability and affordability act') ||
+    text.includes('electric supply chain act') ||
+    text.includes('pipeline reviews act')
+  ) {
+    return 'This vote was part of the House Republican push to speed permitting, support conventional energy and mining, strengthen electric-grid reliability, or reduce federal regulatory friction, all central themes of the broader Trump administration agenda.'
+  }
+
+  if (text.includes("protect america's workforce act")) {
+    return 'This bill would nullify an executive-order framework on federal labor-management relations, making it a direct test of support for stronger White House control over the federal workforce.'
+  }
+
+  if (text.includes("protect children's innocence act")) {
+    return 'This vote concerned restrictions on gender-transition medical interventions for minors, a major social-policy issue strongly aligned with Trump-era messaging and executive action.'
+  }
+
+  if (
+    text.includes('do no harm in medicaid act') ||
+    text.includes('lower health care premiums for all americans act')
+  ) {
+    return 'This was part of the House Republican health-policy push under Trump, centered on Medicaid, premium costs, and rolling back Democratic health-policy priorities.'
+  }
+
+  if (text.includes('deporting fraudsters act')) {
+    return 'This immigration-enforcement bill would add deportation consequences to certain fraud-related conduct, fitting the Trump administration’s broader deportation and removal agenda.'
+  }
+
   if (text.includes('rescissions act')) {
     return 'The Rescissions Act would cancel previously appropriated federal funds, with the 2025 package focusing on foreign-aid accounts, related agencies, and the Corporation for Public Broadcasting.'
   }
@@ -132,8 +164,12 @@ function describeTopic(event: LegislativeTrumpRollCall) {
   switch (event.category) {
     case 'appropriations':
       return "This was a funding vote on a bill or rule that affected Trump's governing priorities."
+    case 'culture-war':
+      return 'This was a social-policy vote tied to one of the Trump coalition’s highest-visibility cultural fights.'
     case 'emergency-powers':
       return "This vote was about Congress checking or protecting presidential emergency power used by Trump."
+    case 'energy':
+      return "This was an energy, permitting, mining, pipeline, or grid-reliability vote tied to Trump's deregulatory and production-focused agenda."
     case 'health-care':
       return "This was a health-policy vote tied to Trump's agenda or to a high-profile Trump nominee."
     case 'immigration':
@@ -142,6 +178,8 @@ function describeTopic(event: LegislativeTrumpRollCall) {
       return 'This was a direct institutional test of whether Congress would punish or protect Trump.'
     case 'jan6':
       return "This vote concerned Trump's 2020 election challenge or the January 6 aftermath."
+    case 'labor':
+      return 'This was a labor or civil-service vote tied to executive control of the federal workforce under Trump.'
     case 'nominations':
       return "This was a Senate staffing vote on one of Trump's nominees."
     case 'reconciliation':

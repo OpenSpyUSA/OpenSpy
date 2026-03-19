@@ -759,6 +759,40 @@
   line-height: 1.4;
 }
 
+.vote-matrix__axes strong {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.vote-matrix__scope-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.vote-matrix__scope-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 34, 58, 0.08);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.vote-matrix__scope-pill--scored {
+  background: color-mix(in srgb, var(--republican) 8%, rgba(255, 255, 255, 0.92));
+  color: color-mix(in srgb, var(--republican) 74%, var(--ink));
+}
+
+.vote-matrix__scope-pill--broad {
+  background: color-mix(in srgb, var(--democratic) 8%, rgba(255, 255, 255, 0.92));
+  color: color-mix(in srgb, var(--democratic) 74%, var(--ink));
+}
+
 .vote-matrix__legend {
   display: flex;
   flex-wrap: wrap;
@@ -906,7 +940,7 @@
 
 .vote-matrix__event-date,
 .vote-matrix__event-category,
-.vote-matrix__event-weight,
+.vote-matrix__event-scope,
 .vote-matrix__event-counts {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -927,11 +961,19 @@
   color: color-mix(in srgb, var(--event-tone) 88%, var(--ink));
 }
 
-.vote-matrix__event-weight {
+.vote-matrix__event-scope {
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   color: color-mix(in srgb, var(--event-tone) 72%, var(--ink-soft));
+}
+
+.vote-matrix__event-scope--scored {
+  color: color-mix(in srgb, var(--republican) 72%, var(--ink-soft));
+}
+
+.vote-matrix__event-scope--broad {
+  color: color-mix(in srgb, var(--democratic) 72%, var(--ink-soft));
 }
 
 .vote-matrix__event-counts {
@@ -2706,7 +2748,7 @@
     font-size: 0.72rem;
   }
 
-  .vote-matrix__event-weight,
+  .vote-matrix__event-scope,
   .vote-matrix__event-counts {
     font-size: 0.62rem;
   }

@@ -1866,7 +1866,7 @@ const justices = [
   wealthNote: JUSTICE_WEALTH_NOTE,
 }))
 
-const supremeCourtTrumpPowerCases = [
+const supremeCourtTrumpAdministrationCases = [
   {
     caseName: 'Learning Resources, Inc. v. Trump',
     date: '2026-02-20',
@@ -1909,6 +1909,29 @@ const supremeCourtTrumpPowerCases = [
     powerTag: 'Military',
     result: "The Court denied Trump's stay application.",
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/25a443.html',
+  },
+  {
+    caseName: 'Trump v. Orr',
+    date: '2025-11-06',
+    id: 'trump-v-orr',
+    type: 'order',
+    issue:
+      'Passport sex-marker policy. The case asked whether the administration could enforce its rule requiring passports to reflect biological sex at birth while the appeal continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Passports',
+    result:
+      'The Court granted the administration stay relief; Jackson dissented, joined by Sotomayor and Kagan.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/25pdf/25a319_i4dj.pdf',
   },
   {
     caseName: 'Trump v. Slaughter',
@@ -1955,6 +1978,52 @@ const supremeCourtTrumpPowerCases = [
     sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/25a11_2cp3.pdf',
   },
   {
+    caseName: 'McMahon v. New York',
+    date: '2025-07-14',
+    id: 'mcmahon-v-new-york',
+    type: 'order',
+    issue:
+      'Department of Education shutdown effort. The case asked whether the administration could keep its mass layoff and closure plan moving while the appeal continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Education',
+    result:
+      'The Court granted the administration stay relief; Sotomayor dissented, joined by Kagan and Jackson.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1203_new_6j37.pdf',
+  },
+  {
+    caseName: 'Trump v. American Federation of Government Employees',
+    date: '2025-07-08',
+    id: 'trump-v-afge',
+    type: 'order',
+    issue:
+      'Federal workforce reorganization. The case asked whether the administration could keep implementing its government-wide reorganization and reduction-in-force directives during the appeal.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'pro',
+      'judicial-elena-kagan': 'pro',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Workforce',
+    result:
+      'The Court granted the administration stay relief; Sotomayor concurred in the grant, and Jackson dissented.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1174_h3ci.pdf',
+  },
+  {
     caseName: 'Trump v. CASA, Inc.',
     date: '2025-06-27',
     id: 'trump-v-casa',
@@ -1976,6 +2045,52 @@ const supremeCourtTrumpPowerCases = [
     result:
       'The Court narrowed universal-injunction relief and partly stayed lower-court orders, without deciding the citizenship merits.',
     sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a884_8n59.pdf',
+  },
+  {
+    caseName: 'Department of Homeland Security v. D.V.D.',
+    date: '2025-06-23',
+    id: 'dhs-v-dvd',
+    type: 'order',
+    issue:
+      'Third-country removals. The case asked whether the administration could resume deportations to countries such as South Sudan and Libya while the appeal continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Deportation',
+    result:
+      'The Court granted the administration stay relief; Sotomayor dissented, joined by Kagan and Jackson.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1153_l5gm.pdf',
+  },
+  {
+    caseName: 'Noem v. Doe',
+    date: '2025-05-30',
+    id: 'noem-v-doe',
+    type: 'order',
+    issue:
+      'Temporary protected status and work authorization. The case asked whether the administration could end TPS-linked protections for hundreds of thousands of people while the appeal continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'pro',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Immigration',
+    result:
+      'The Court granted the administration stay relief; Jackson dissented, joined by Sotomayor.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1079_p86b.pdf',
   },
   {
     caseName: 'Trump v. Wilcox',
@@ -2092,6 +2207,29 @@ const supremeCourtTrumpPowerCases = [
     sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/20-366_2d93.pdf',
   },
   {
+    caseName: 'Department of Homeland Security v. Thuraissigiam',
+    date: '2020-06-25',
+    id: 'dhs-v-thuraissigiam',
+    type: 'merits',
+    issue:
+      'Expedited removal and habeas review. The case asked whether the Trump administration could sharply limit judicial review of an asylum-seeker’s expedited-removal order.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Immigration',
+    result:
+      'The Court upheld the limits on habeas review as applied here and ruled for the administration, with Sotomayor and Kagan dissenting.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-161.html',
+  },
+  {
     caseName: 'Trump v. Sierra Club',
     date: '2020-07-31',
     id: 'trump-v-sierra-club',
@@ -2113,6 +2251,75 @@ const supremeCourtTrumpPowerCases = [
     result:
       'The Court denied a motion to lift its stay, leaving the administration free to keep using the funds while the case proceeded.',
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a60.html',
+  },
+  {
+    caseName: 'Wolf v. Innovation Law Lab',
+    date: '2020-03-11',
+    id: 'wolf-v-innovation-law-lab',
+    type: 'order',
+    issue:
+      'Remain in Mexico policy. The case asked whether the Trump administration could keep enforcing the Migrant Protection Protocols while the appeal continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'pro',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Immigration',
+    result:
+      'The Court granted the administration’s stay application and allowed the policy to remain in effect during the appeal; Sotomayor would have denied.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a960.html',
+  },
+  {
+    caseName: 'Department of Homeland Security v. New York',
+    date: '2020-01-27',
+    id: 'dhs-v-new-york-public-charge',
+    type: 'order',
+    issue:
+      'Public-charge rule. The case asked whether the Trump administration could enforce its immigration public-charge rule while lower-court injunctions were on appeal.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Immigration',
+    result:
+      'The Court granted the stay and allowed the public-charge rule to take effect pending appeal; Ginsburg, Breyer, Sotomayor, and Kagan would have denied.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a785.html',
+  },
+  {
+    caseName: 'Barr v. East Bay Sanctuary Covenant',
+    date: '2019-09-11',
+    id: 'barr-v-east-bay-sanctuary-covenant',
+    type: 'order',
+    issue:
+      'Third-country-transit asylum rule. The case asked whether the Trump administration could enforce its restrictive asylum rule nationwide while litigation continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'pro',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Asylum',
+    result:
+      'The Court granted the stay and let the asylum rule take effect nationwide during the appeal; Sotomayor, joined by Ginsburg, dissented.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a230.html',
   },
   {
     caseName: 'Department of Homeland Security v. Regents of the University of California',
@@ -2159,6 +2366,52 @@ const supremeCourtTrumpPowerCases = [
     result:
       "The Court said the administration's stated rationale was inadequate and sent the matter back.",
     sourceUrl: 'https://www.supremecourt.gov/opinions/18pdf/18-966_bq7c.pdf',
+  },
+  {
+    caseName: 'Nielsen v. Preap',
+    date: '2019-03-19',
+    id: 'nielsen-v-preap',
+    type: 'merits',
+    issue:
+      'Mandatory immigration detention. The case asked whether the Trump administration could detain certain noncitizens under the statute even if immigration authorities did not arrest them immediately upon release from criminal custody.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Detention',
+    result:
+      'The Court ruled for the administration and upheld its broad reading of the mandatory-detention provision, 5-4.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/18pdf/16-1363_a86c.pdf',
+  },
+  {
+    caseName: 'Trump v. East Bay Sanctuary Covenant',
+    date: '2018-12-21',
+    id: 'trump-v-east-bay-sanctuary-covenant',
+    type: 'order',
+    issue:
+      'Asylum-ban stay request. The case asked whether the Trump administration could immediately enforce its asylum rule while the lower-court injunction remained in place.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Asylum',
+    result:
+      'The Court denied the stay request; Thomas, Alito, Gorsuch, and Kavanaugh would have granted it.',
+    sourceUrl: 'https://www.supremecourt.gov/orders/courtorders/122118zr_986b.pdf',
   },
   {
     caseName: 'Trump v. Hawaii',
@@ -2255,6 +2508,29 @@ const supremeCourtTrumpPersonalCases = [
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/24a666.html',
   },
   {
+    caseName: 'Republican Party of Pennsylvania v. Boockvar',
+    date: '2020-10-28',
+    id: 'republican-party-of-pa-v-boockvar-expedition',
+    type: 'procedural',
+    issue:
+      'Pre-election Pennsylvania mail-ballot deadline dispute. The case asked whether the Court should fast-track review before the 2020 election of the state court ruling extending the statutory receipt deadline.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Election',
+    result:
+      'The Court denied expedition before the election; Alito, joined by Thomas and Gorsuch, would have moved faster, and Barrett took no part.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/20-542_i3dj.pdf',
+  },
+  {
     caseName: 'Trump v. Anderson',
     date: '2024-03-04',
     id: 'trump-v-anderson',
@@ -2298,6 +2574,29 @@ const supremeCourtTrumpPersonalCases = [
     powerTag: 'Records',
     result: "The Court denied Trump's stay application and left the D.C. Circuit ruling in place.",
     sourceUrl: 'https://www.supremecourt.gov/opinions/21pdf/21a272_9p6b.pdf',
+  },
+  {
+    caseName: 'Republican Party of Pennsylvania v. Degraffenreid / Corman v. Pennsylvania Democratic Party',
+    date: '2021-02-22',
+    id: 'republican-party-of-pa-v-degraffenreid',
+    type: 'procedural',
+    issue:
+      'Post-election Pennsylvania mail-ballot deadline dispute. The petitions asked whether the state court could override the legislature and extend the federal-election receipt deadline.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Election',
+    result:
+      'The Court denied certiorari; Thomas dissented, and Alito, joined by Gorsuch, separately dissented from the denial.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/20-542_2c83.pdf',
   },
   {
     caseName: 'Trump v. Vance',
@@ -2366,6 +2665,30 @@ const supremeCourtTrumpPersonalCases = [
     result:
       "The Court rejected Trump's categorical position and vacated the judgment, remanding under the same separation-of-powers framework used in Mazars.",
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-760.html',
+  },
+  {
+    caseName: 'Texas v. Pennsylvania',
+    date: '2020-12-11',
+    id: 'texas-v-pennsylvania',
+    type: 'procedural',
+    issue:
+      '2020 election challenge. Texas, backed by Trump, asked the Court to let it sue four battleground states over how they ran the presidential election and to block the use of those states’ electoral votes.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Election',
+    result:
+      'The Court refused the case for lack of standing; Alito, joined by Thomas, said only that they would have allowed the bill of complaint to be filed, without granting other relief.',
+    sourceUrl:
+      'https://www.supremecourt.gov/search.aspx?filename=%2Fdocket%2Fdocketfiles%2Fhtml%2Fpublic%2F22o155.html',
   },
 ]
 
@@ -2926,11 +3249,11 @@ function parseSenateVoteXml(xml) {
 
 function buildLegislativeTrumpLabel(score) {
   if (score >= 8) {
-    return 'Very often pro-Trump in selected votes'
+    return 'Very often pro-Trump in scored votes'
   }
 
   if (score >= 6.5) {
-    return 'Mostly pro-Trump in selected votes'
+    return 'Mostly pro-Trump in scored votes'
   }
 
   if (score >= 4.5) {
@@ -2942,10 +3265,10 @@ function buildLegislativeTrumpLabel(score) {
   }
 
   if (score >= 0.5) {
-    return 'Usually not pro-Trump in selected votes'
+    return 'Usually not pro-Trump in scored votes'
   }
 
-  return 'Never pro-Trump in selected votes'
+  return 'Never pro-Trump in scored votes'
 }
 
 function getLegislativeTrumpConfidence(sampleSize, selectedCount) {
@@ -3052,6 +3375,8 @@ function deriveTrumpRollCallOutcome(proTrumpCast, resultText, yeaTotal, nayTotal
 async function buildSelectedLegislativeRollCallSnapshots() {
   const selectedHouseRollCalls = houseTrumpRollCallPool.filter((item) => item.selected)
   const selectedSenateRollCalls = senateTrumpRollCallPool.filter((item) => item.selected)
+  const scoredHouseRollCalls = selectedHouseRollCalls.filter((item) => item.scoreIncluded !== false)
+  const scoredSenateRollCalls = selectedSenateRollCalls.filter((item) => item.scoreIncluded !== false)
   const selectedRollCalls = [...selectedHouseRollCalls, ...selectedSenateRollCalls]
 
   const snapshots = await mapWithConcurrency(selectedRollCalls, 8, async (event) => {
@@ -3112,6 +3437,8 @@ async function buildSelectedLegislativeRollCallSnapshots() {
   })
 
   return {
+    scoredHouseCount: scoredHouseRollCalls.length,
+    scoredSenateCount: scoredSenateRollCalls.length,
     selectedHouseCount: selectedHouseRollCalls.length,
     selectedSenateCount: selectedSenateRollCalls.length,
     snapshots,
@@ -3119,7 +3446,7 @@ async function buildSelectedLegislativeRollCallSnapshots() {
 }
 
 async function buildTrumpRelationshipContext(senators, representatives) {
-  const { selectedHouseCount, selectedSenateCount, snapshots } =
+  const { scoredHouseCount, scoredSenateCount, selectedHouseCount, selectedSenateCount, snapshots } =
     await buildSelectedLegislativeRollCallSnapshots()
   const metricsByPersonId = new Map()
   const allLegislators = [...senators, ...representatives]
@@ -3127,7 +3454,7 @@ async function buildTrumpRelationshipContext(senators, representatives) {
   for (const person of allLegislators) {
     metricsByPersonId.set(person.id, {
       antiVotes: 0,
-      availableEvents: person.sectionId === 'senate' ? selectedSenateCount : selectedHouseCount,
+      availableEvents: person.sectionId === 'senate' ? scoredSenateCount : scoredHouseCount,
       chamber: person.sectionId,
       evidence: [],
       missedCount: 0,
@@ -3154,13 +3481,21 @@ async function buildTrumpRelationshipContext(senators, representatives) {
 
         if (!cast) {
           metrics.rollCallPositions[snapshot.id] = 'not_in_office'
-          metrics.notInOfficeCount += 1
+          if (snapshot.scoreIncluded !== false) {
+            metrics.notInOfficeCount += 1
+          }
           continue
         }
 
         if (isSkippedLegislativeCast(cast)) {
           metrics.rollCallPositions[snapshot.id] = 'missed'
-          metrics.missedCount += 1
+          if (snapshot.scoreIncluded !== false) {
+            metrics.missedCount += 1
+          }
+          continue
+        }
+
+        if (snapshot.scoreIncluded === false) {
           continue
         }
 
@@ -3204,13 +3539,21 @@ async function buildTrumpRelationshipContext(senators, representatives) {
 
       if (!matchedEntry) {
         metrics.rollCallPositions[snapshot.id] = 'not_in_office'
-        metrics.notInOfficeCount += 1
+        if (snapshot.scoreIncluded !== false) {
+          metrics.notInOfficeCount += 1
+        }
         continue
       }
 
       if (isSkippedLegislativeCast(matchedEntry.cast)) {
         metrics.rollCallPositions[snapshot.id] = 'missed'
-        metrics.missedCount += 1
+        if (snapshot.scoreIncluded !== false) {
+          metrics.missedCount += 1
+        }
+        continue
+      }
+
+      if (snapshot.scoreIncluded === false) {
         continue
       }
 
@@ -3243,6 +3586,7 @@ async function buildTrumpRelationshipContext(senators, representatives) {
     legislativeMetricsByPersonId: metricsByPersonId,
     legislativeRollCallSummary: {
       houseCandidateCount: houseTrumpRollCallPool.length,
+      houseScoredCount: scoredHouseCount,
       houseSelectedCount: selectedHouseCount,
       selectedEvents: snapshots.map((snapshot) => ({
         actionTime: snapshot.actionTime,
@@ -3257,7 +3601,9 @@ async function buildTrumpRelationshipContext(senators, representatives) {
         proTrumpCast: snapshot.proTrumpCast,
         question: snapshot.question,
         rollCallNumber: snapshot.rollCallNumber,
+        scoreIncluded: snapshot.scoreIncluded !== false,
         session: snapshot.session,
+        signalTier: snapshot.signalTier ?? 'high_signal_scored',
         sourceUrl: snapshot.sourceUrl,
         title: snapshot.title,
         trumpOutcome: snapshot.trumpOutcome,
@@ -3265,6 +3611,7 @@ async function buildTrumpRelationshipContext(senators, representatives) {
         yeaTotal: snapshot.yeaTotal,
       })),
       senateCandidateCount: senateTrumpRollCallPool.length,
+      senateScoredCount: scoredSenateCount,
       senateSelectedCount: selectedSenateCount,
     },
   }
@@ -3378,9 +3725,9 @@ function annotateJudicialTrumpRelationship(person) {
   let proVotes = 0
   let antiVotes = 0
   let notOnCourt = 0
-  const caseCount = supremeCourtTrumpPowerCases.length
+  const caseCount = supremeCourtTrumpAdministrationCases.length
 
-  for (const caseItem of supremeCourtTrumpPowerCases) {
+  for (const caseItem of supremeCourtTrumpAdministrationCases) {
     const stance = caseItem.justiceStances[person.id]
 
     if (stance === 'pro') {
@@ -3395,12 +3742,12 @@ function annotateJudicialTrumpRelationship(person) {
   const countedVotes = proVotes + antiVotes
   const derivedScore = countedVotes === 0 ? 0 : clampTrumpScoreToSingleDecimal((proVotes / countedVotes) * 10)
   const evidence = [
-    `${proVotes} Pro Trump votes and ${antiVotes} Not pro Trump votes across the ${caseCount} selected Trump Power Cases on this site.`,
+    `${proVotes} Pro Trump votes and ${antiVotes} Not pro Trump votes across the ${caseCount} selected Administration Cases on this site.`,
   ]
   const trumpAppointment = supremeCourtTrumpFacts.get(person.name)
 
   if (notOnCourt > 0) {
-    evidence.push(`Not on Court for ${notOnCourt} of the ${caseCount} selected power cases.`)
+    evidence.push(`Not on Court for ${notOnCourt} of the ${caseCount} selected Administration Cases on this site.`)
   }
 
   if (trumpAppointment) {
@@ -3411,7 +3758,7 @@ function annotateJudicialTrumpRelationship(person) {
     ...person,
     trumpEvidence: uniqueStrings(evidence),
     trumpLabel: judicialTrumpLabelFromScore(derivedScore),
-    trumpNote: `Score is derived from the ${caseCount} selected Trump Power Cases on this site: ${proVotes}/${countedVotes} counted votes on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
+    trumpNote: `Score is derived from the ${caseCount} selected Administration Cases on this site: ${proVotes}/${countedVotes} counted votes on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
     trumpScore: derivedScore,
   }
 }
@@ -3484,7 +3831,7 @@ function annotateLegislativeTrumpRelationship(person, context) {
     return finalizeTrumpAnnotation(
       person,
       0,
-      'No selected Trump-linked legislative votes were available for this member in the current model.',
+      'No high-signal scored Trump-linked legislative votes were available for this member in the current model.',
       [],
     )
   }
@@ -3495,31 +3842,31 @@ function annotateLegislativeTrumpRelationship(person, context) {
       : clampTrumpScoreToSingleDecimal((metrics.weightedProVotes / metrics.weightedSampleSize) * 10)
   const confidence = getLegislativeTrumpConfidence(metrics.sampleSize, metrics.availableEvents)
   const noteParts = [
-    `Score is derived from weighted selected Trump-linked ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls on this site: ${formatWeightedValue(metrics.weightedProVotes)}/${formatWeightedValue(metrics.weightedSampleSize)} weighted vote-equivalents on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
+    `Score is derived from weighted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls on this site: ${formatWeightedValue(metrics.weightedProVotes)}/${formatWeightedValue(metrics.weightedSampleSize)} weighted vote-equivalents on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
     LEGISLATIVE_WEIGHTING_NOTE,
   ]
 
   if (metrics.notInOfficeCount > 0) {
-    noteParts.push(`Not in office for ${metrics.notInOfficeCount} selected votes.`)
+    noteParts.push(`Not in office for ${metrics.notInOfficeCount} high-signal scored votes.`)
   }
 
   if (metrics.missedCount > 0) {
-    noteParts.push(`Missed or abstained on ${metrics.missedCount} selected votes.`)
+    noteParts.push(`Missed or abstained on ${metrics.missedCount} high-signal scored votes.`)
   }
 
   const evidence = [
-    `${metrics.proVotes} raw Pro Trump votes and ${metrics.antiVotes} raw Not pro Trump votes across ${metrics.sampleSize} counted selected ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
-    `${formatWeightedValue(metrics.weightedProVotes)} weighted Pro Trump vote-equivalents and ${formatWeightedValue(metrics.weightedAntiVotes)} weighted Not pro Trump vote-equivalents across ${formatWeightedValue(metrics.weightedSampleSize)} weighted counted selected ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
-    `Sample size: ${metrics.sampleSize} of ${metrics.availableEvents} selected votes. Confidence: ${confidence}.`,
+    `${metrics.proVotes} raw Pro Trump votes and ${metrics.antiVotes} raw Not pro Trump votes across ${metrics.sampleSize} counted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
+    `${formatWeightedValue(metrics.weightedProVotes)} weighted Pro Trump vote-equivalents and ${formatWeightedValue(metrics.weightedAntiVotes)} weighted Not pro Trump vote-equivalents across ${formatWeightedValue(metrics.weightedSampleSize)} weighted counted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
+    `Sample size: ${metrics.sampleSize} of ${metrics.availableEvents} high-signal scored votes. Confidence: ${confidence}.`,
     LEGISLATIVE_WEIGHTING_NOTE,
   ]
 
   if (metrics.notInOfficeCount > 0) {
-    evidence.push(`Not in office for ${metrics.notInOfficeCount} selected votes.`)
+    evidence.push(`Not in office for ${metrics.notInOfficeCount} high-signal scored votes.`)
   }
 
   if (metrics.missedCount > 0) {
-    evidence.push(`Missed or abstained on ${metrics.missedCount} selected votes.`)
+    evidence.push(`Missed or abstained on ${metrics.missedCount} high-signal scored votes.`)
   }
 
   evidence.push(...metrics.evidence)
@@ -4796,7 +5143,7 @@ async function main() {
     generatedAt: new Date().toISOString(),
     legislativeTrumpRollCalls: trumpRelationshipContext.legislativeRollCallSummary,
     people,
-    supremeCourtCases: supremeCourtTrumpPowerCases,
+    supremeCourtCases: supremeCourtTrumpAdministrationCases,
     supremeCourtPersonalCases: supremeCourtTrumpPersonalCases,
     sources: SOURCES,
   }

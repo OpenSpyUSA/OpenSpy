@@ -74,7 +74,9 @@ export interface LegislativeTrumpRollCall {
   proTrumpCast: string
   question: string
   rollCallNumber?: number
+  scoreIncluded: boolean
   session?: string
+  signalTier: 'broad_admin_related' | 'high_signal_scored'
   sourceUrl: string
   title: string
   trumpOutcome?: 'anti' | 'pro'
@@ -86,9 +88,11 @@ export type LegislativeVotePosition = 'anti' | 'missed' | 'not_in_office' | 'pro
 
 export interface LegislativeTrumpRollCallSummary {
   houseCandidateCount: number
+  houseScoredCount: number
   houseSelectedCount: number
   selectedEvents: LegislativeTrumpRollCall[]
   senateCandidateCount: number
+  senateScoredCount: number
   senateSelectedCount: number
 }
 

@@ -6,7 +6,9 @@ function house(id, year, rollNumber, category, options = {}) {
     id,
     proTrumpCast: 'Yea',
     rollNumber,
+    scoreIncluded: true,
     selected: false,
+    signalTier: 'high_signal_scored',
     year,
     ...options,
   }
@@ -33,6 +35,15 @@ function selectedHouse(id, year, rollNumber, category, options = {}) {
 
 function selectedSenate(id, congress, session, voteNumber, category, options = {}) {
   return senate(id, congress, session, voteNumber, category, { selected: true, ...options })
+}
+
+function selectedBroadHouse(id, year, rollNumber, category, options = {}) {
+  return house(id, year, rollNumber, category, {
+    scoreIncluded: false,
+    selected: true,
+    signalTier: 'broad_admin_related',
+    ...options,
+  })
 }
 
 const selectedHouseRollCalls = [
@@ -314,10 +325,10 @@ const selectedHouseRollCalls = [
     label: 'Rescissions Act Senate-amendment rule adoption',
   }),
   selectedHouse('house-2025-kayla-hamilton-rule-pq', 2025, 337, 'immigration', {
-    label: 'Kayla Hamilton Act rule previous question',
+    label: 'December 2025 energy-and-immigration package rule previous question',
   }),
   selectedHouse('house-2025-kayla-hamilton-rule', 2025, 338, 'immigration', {
-    label: 'Kayla Hamilton Act rule adoption',
+    label: 'December 2025 energy-and-immigration package rule adoption',
   }),
   selectedHouse('house-2025-kayla-hamilton-passage', 2025, 340, 'immigration', {
     highlight: true,
@@ -400,6 +411,10 @@ const houseCandidateExtras = [
     label: 'Border Security and Immigration Reform Act recommit motion',
     proTrumpCast: 'Nay',
   }),
+  house('house-2025-trump-impeachment-table', 2025, 322, 'impeachment', {
+    highlight: true,
+    label: 'Motion to table Trump impeachment resolution',
+  }),
   house('house-2025-hr1-recommit', 2025, 144, 'reconciliation', {
     label: 'One Big Beautiful Bill Act recommit motion',
     proTrumpCast: 'Nay',
@@ -424,6 +439,16 @@ const houseCandidateExtras = [
   }),
   house('house-2025-kayla-hamilton-recommit', 2025, 339, 'immigration', {
     label: 'Kayla Hamilton Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  house('house-2025-war-powers-western-hemisphere', 2025, 345, 'war-powers', {
+    highlight: true,
+    label: 'Western Hemisphere war powers resolution',
+    proTrumpCast: 'Nay',
+  }),
+  house('house-2025-war-powers-venezuela', 2025, 346, 'war-powers', {
+    highlight: true,
+    label: 'Venezuela war powers resolution',
     proTrumpCast: 'Nay',
   }),
   house('house-2025-cr-rule-pq', 2025, 272, 'appropriations', {
@@ -460,6 +485,95 @@ const houseCandidateExtras = [
   house('house-2026-dhs-recommit', 2026, 86, 'appropriations', {
     label: 'FY2026 DHS appropriations recommit motion',
     proTrumpCast: 'Nay',
+  }),
+]
+
+const broadHouseRollCalls = [
+  selectedBroadHouse('house-2025-state-planning-power', 2025, 323, 'energy', {
+    label: 'State Planning for Reliability and Affordability Act passage',
+  }),
+  selectedBroadHouse('house-2025-electric-supply-chain', 2025, 324, 'energy', {
+    label: 'Electric Supply Chain Act passage',
+  }),
+  selectedBroadHouse('house-2025-permit-recommit', 2025, 329, 'energy', {
+    label: 'PERMIT Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2025-permit-passage', 2025, 330, 'energy', {
+    label: 'PERMIT Act passage',
+  }),
+  selectedBroadHouse('house-2025-workforce-rule', 2025, 331, 'labor', {
+    label: "Protect America's Workforce Act rule adoption",
+  }),
+  selectedBroadHouse('house-2025-workforce-passage', 2025, 332, 'labor', {
+    label: "Protect America's Workforce Act passage",
+  }),
+  selectedBroadHouse('house-2025-pipeline-recommit', 2025, 333, 'energy', {
+    label: 'Pipeline Reviews Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2025-pipeline-passage', 2025, 334, 'energy', {
+    label: 'Pipeline Reviews Act passage',
+  }),
+  selectedBroadHouse('house-2025-health-package-rule-pq', 2025, 343, 'health-care', {
+    label: 'December 2025 health-and-SPEED package rule previous question',
+  }),
+  selectedBroadHouse('house-2025-health-package-rule', 2025, 344, 'health-care', {
+    label: 'December 2025 health-and-SPEED package rule adoption',
+  }),
+  selectedBroadHouse('house-2025-reliable-power', 2025, 347, 'energy', {
+    label: 'Reliable Power Act passage',
+  }),
+  selectedBroadHouse('house-2025-lower-premiums-recommit', 2025, 348, 'health-care', {
+    label: 'Lower Health Care Premiums Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2025-lower-premiums-passage', 2025, 349, 'health-care', {
+    label: 'Lower Health Care Premiums Act passage',
+  }),
+  selectedBroadHouse('house-2025-childrens-innocence-recommit', 2025, 350, 'culture-war', {
+    label: "Protect Children's Innocence Act recommit motion",
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2025-childrens-innocence-passage', 2025, 351, 'culture-war', {
+    label: "Protect Children's Innocence Act passage",
+  }),
+  selectedBroadHouse('house-2025-speed-recommit', 2025, 355, 'energy', {
+    label: 'SPEED Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2025-speed-passage', 2025, 356, 'energy', {
+    label: 'SPEED Act passage',
+  }),
+  selectedBroadHouse('house-2025-mining-recommit', 2025, 357, 'energy', {
+    label: 'Mining Regulatory Clarity Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2025-mining-passage', 2025, 358, 'energy', {
+    label: 'Mining Regulatory Clarity Act passage',
+  }),
+  selectedBroadHouse('house-2025-do-no-harm-medicaid-recommit', 2025, 361, 'health-care', {
+    label: 'Do No Harm in Medicaid Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2025-do-no-harm-medicaid-passage', 2025, 362, 'health-care', {
+    label: 'Do No Harm in Medicaid Act passage',
+  }),
+  selectedBroadHouse('house-2025-power-plant-recommit', 2025, 341, 'energy', {
+    label: 'Power Plant Reliability Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2025-power-plant-passage', 2025, 342, 'energy', {
+    label: 'Power Plant Reliability Act passage',
+  }),
+  selectedBroadHouse('house-2026-deporting-fraudsters-rule-pq', 2026, 90, 'immigration', {
+    label: 'Deporting Fraudsters Act rule previous question',
+  }),
+  selectedBroadHouse('house-2026-deporting-fraudsters-rule', 2026, 91, 'immigration', {
+    label: 'Deporting Fraudsters Act rule adoption',
+  }),
+  selectedBroadHouse('house-2026-deporting-fraudsters-passage', 2026, 94, 'immigration', {
+    label: 'Deporting Fraudsters Act passage',
   }),
 ]
 
@@ -892,6 +1006,7 @@ const senateCandidateExtras = [
 export const houseTrumpRollCallPool = [
   ...selectedHouseRollCalls,
   ...houseCandidateExtras.map((item) => ({ ...item, selected: true })),
+  ...broadHouseRollCalls,
 ]
 export const senateTrumpRollCallPool = [
   ...selectedSenateRollCalls,
