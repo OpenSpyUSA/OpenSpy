@@ -2199,6 +2199,52 @@ const supremeCourtTrumpAdministrationCases = [
     sourceUrl: 'https://www.supremecourt.gov/opinions/23pdf/603us1r57_2dp3.pdf',
   },
   {
+    caseName: 'Collins v. Yellen',
+    date: '2021-06-23',
+    id: 'collins-v-yellen',
+    type: 'merits',
+    issue:
+      'FHFA removal protections. The case asked whether Congress could shield the FHFA director from at-will presidential removal and what remedy followed.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Removal',
+    result:
+      "The Court held that the FHFA director's for-cause removal protection is unconstitutional and remanded on remedy.",
+    sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/19-422_new_c0n2.pdf',
+  },
+  {
+    caseName: 'California v. Texas',
+    date: '2021-06-17',
+    id: 'california-v-texas',
+    type: 'merits',
+    issue:
+      'ACA challenge after the individual-penalty change. The case asked whether challengers backed by the Trump administration had standing to invalidate the law.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'anti',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Healthcare',
+    result:
+      'The Court held that the challengers lacked standing and left the Affordable Care Act in place.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/19-840_new_5hdk.pdf',
+  },
+  {
     caseName: 'Trump v. New York',
     date: '2020-12-18',
     id: 'trump-v-new-york',
@@ -2243,6 +2289,52 @@ const supremeCourtTrumpAdministrationCases = [
     result:
       'The Court upheld the limits on habeas review as applied here and ruled for the administration, with Sotomayor and Kagan dissenting.',
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-161.html',
+  },
+  {
+    caseName: 'Little Sisters of the Poor Saints Peter and Paul Home v. Pennsylvania',
+    date: '2020-07-08',
+    id: 'little-sisters-v-pennsylvania',
+    type: 'merits',
+    issue:
+      'ACA contraceptive-mandate exemptions. The case asked whether the Trump administration could broaden religious and moral exemptions by rule.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'pro',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Healthcare',
+    result:
+      'The Court held that the administration had authority to issue the religious and moral exemptions and reversed the injunction.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/19pdf/19-431_5i36.pdf',
+  },
+  {
+    caseName: 'Seila Law LLC v. Consumer Financial Protection Bureau',
+    date: '2020-06-29',
+    id: 'seila-law-v-cfpb',
+    type: 'merits',
+    issue:
+      'CFPB removal protections. The case asked whether Congress could insulate the CFPB director from at-will presidential removal.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Removal',
+    result:
+      "The Court held that the CFPB director's removal protection is unconstitutional but severable from the rest of the statute.",
+    sourceUrl: 'https://www.supremecourt.gov/opinions/19pdf/19-7_new_bq7d.pdf',
   },
   {
     caseName: 'Trump v. Sierra Club',
@@ -2312,6 +2404,75 @@ const supremeCourtTrumpAdministrationCases = [
     result:
       'The Court granted the administration’s stay application and allowed the policy to remain in effect during the appeal.',
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a960.html',
+  },
+  {
+    caseName: 'Barton v. Barr',
+    date: '2020-04-23',
+    id: 'barton-v-barr',
+    type: 'merits',
+    issue:
+      'Cancellation of removal eligibility. The case asked whether a noncitizen could be disqualified based on a Section 1182(a)(2) offense even when that was not the removal charge.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Deportation',
+    result:
+      'The Court ruled for the Government and held that the stop-time bar could block cancellation of removal even if the offense was not the removal charge.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/19pdf/18-725_f2bh.pdf',
+  },
+  {
+    caseName: 'Nasrallah v. Barr',
+    date: '2020-06-01',
+    id: 'nasrallah-v-barr',
+    type: 'merits',
+    issue:
+      'CAT review for criminal noncitizens. The case asked whether courts of appeals could review factual challenges to CAT protection denials.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Deportation',
+    result:
+      'The Court held that courts of appeals may review factual challenges to CAT orders and reversed the Government-backed position.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/19pdf/18-1432_e2pg.pdf',
+  },
+  {
+    caseName: 'Guerrero-Lasprilla v. Barr',
+    date: '2020-03-23',
+    id: 'guerrero-lasprilla-v-barr',
+    type: 'merits',
+    issue:
+      'Judicial review of legal questions in removal cases. The case asked whether courts could review mixed questions of law and fact in this immigration context.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Deportation',
+    result:
+      'The Court held that the statute allows review of mixed questions of law and fact and vacated the Fifth Circuit judgments.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/19pdf/18-776_8759.pdf',
   },
   {
     caseName: 'Department of Homeland Security v. New York',
@@ -3050,6 +3211,102 @@ const FIRST_NAME_EQUIVALENTS = new Map(
   ]),
 )
 
+const executiveCongressServiceOverrides = new Map([
+  [
+    'executive-jd-vance',
+    [
+      {
+        chamber: 'senate',
+        label: 'U.S. senator from Ohio (2023-2025)',
+        matchName: 'JD Vance',
+        stateCode: 'OH',
+      },
+    ],
+  ],
+  [
+    'executive-marco-rubio',
+    [{ chamber: 'senate', label: 'U.S. senator from Florida (2011-2025)', stateCode: 'FL' }],
+  ],
+  [
+    'executive-marco-rubio-national-archives-and-records-administration',
+    [{ chamber: 'senate', label: 'U.S. senator from Florida (2011-2025)', stateCode: 'FL' }],
+  ],
+  [
+    'executive-kelly-loeffler-small-business-administration',
+    [{ chamber: 'senate', label: 'U.S. senator from Georgia (2020-2021)', stateCode: 'GA' }],
+  ],
+  [
+    'executive-lori-chavez-deremer',
+    [
+      {
+        chamber: 'house',
+        label: "U.S. representative for Oregon's 5th congressional district (2023-2025)",
+        stateCode: 'OR',
+      },
+    ],
+  ],
+  [
+    'executive-doug-collins',
+    [
+      {
+        chamber: 'house',
+        label: "U.S. representative for Georgia's 9th congressional district (2013-2021)",
+        stateCode: 'GA',
+      },
+    ],
+  ],
+  [
+    'executive-sean-duffy',
+    [
+      {
+        chamber: 'house',
+        label: "U.S. representative for Wisconsin's 7th congressional district (2011-2019)",
+        stateCode: 'WI',
+      },
+    ],
+  ],
+  [
+    'executive-kristi-noem',
+    [
+      {
+        chamber: 'house',
+        label: "U.S. representative for South Dakota's at-large district (2011-2019)",
+        stateCode: 'SD',
+      },
+    ],
+  ],
+  [
+    'executive-lee-zeldin-environmental-protection-agency',
+    [
+      {
+        chamber: 'house',
+        label: 'U.S. representative for New York (2015-2023)',
+        stateCode: 'NY',
+      },
+    ],
+  ],
+  [
+    'executive-john-ratcliffe-central-intelligence-agency',
+    [
+      {
+        chamber: 'house',
+        label: 'U.S. representative for Texas (2015-2021)',
+        stateCode: 'TX',
+      },
+    ],
+  ],
+  [
+    'executive-tulsi-gabbard-office-of-the-director-of-national-intelligence',
+    [
+      {
+        chamber: 'house',
+        label: 'U.S. representative for Hawaii (2013-2021)',
+        stateCode: 'HI',
+      },
+    ],
+  ],
+])
+
 function buildNormalizedNameTokens(value) {
   return removeSingleLetterNameTokens(normalizeNameMatch(value))
     .split(' ')
@@ -3133,6 +3390,82 @@ function findMatchingSenator(voteEntry, senators) {
   )
 }
 
+function findMatchingRepresentative(voteEntry, representatives) {
+  const normalizedVoteName = removeSingleLetterNameTokens(normalizeNameMatch(voteEntry.name))
+  const candidates = representatives.filter((person) => person.stateCode === voteEntry.stateCode)
+
+  return (
+    candidates.find((person) => {
+      const tokens = buildNormalizedNameTokens(person.name)
+
+      if (tokens.length === 0) {
+        return false
+      }
+
+      const personLastOne = tokens.slice(-1).join(' ')
+      const personLastTwo = tokens.slice(-2).join(' ')
+
+      return (
+        normalizedVoteName === personLastOne ||
+        normalizedVoteName === personLastTwo ||
+        normalizedVoteName.startsWith(`${personLastOne} `) ||
+        normalizedVoteName.startsWith(`${personLastTwo} `) ||
+        normalizedVoteName.endsWith(` ${personLastOne}`) ||
+        normalizedVoteName.endsWith(` ${personLastTwo}`)
+      )
+    }) ?? null
+  )
+}
+
+function findMatchingExecutiveCongressVoteEntry(voteEntries, service, fallbackName) {
+  const referenceName = service.matchName ?? fallbackName
+  const referenceTokens = buildNormalizedNameTokens(referenceName)
+  const referenceFirstName = referenceTokens[0] ?? ''
+  const referenceLastOne = referenceTokens.slice(-1).join(' ')
+  const referenceLastTwo = referenceTokens.slice(-2).join(' ')
+
+  return (
+    voteEntries.find((entry) => {
+      if (service.stateCode && entry.stateCode !== service.stateCode) {
+        return false
+      }
+
+      if (service.chamber === 'senate') {
+        const voteFirstName = buildNormalizedNameTokens(entry.firstName ?? entry.name)[0] ?? ''
+        const voteLastName = removeSingleLetterNameTokens(
+          normalizeNameMatch(entry.lastName ?? entry.name),
+        )
+        const surnameMatches =
+          referenceLastOne === voteLastName ||
+          referenceLastTwo === voteLastName ||
+          voteLastName.endsWith(` ${referenceLastOne}`) ||
+          referenceLastTwo.endsWith(` ${voteLastName}`)
+
+        if (!surnameMatches) {
+          return false
+        }
+
+        if (!voteFirstName || !referenceFirstName) {
+          return true
+        }
+
+        return firstNamesLikelyMatch(referenceFirstName, voteFirstName)
+      }
+
+      const normalizedVoteName = removeSingleLetterNameTokens(normalizeNameMatch(entry.name))
+
+      return (
+        normalizedVoteName === referenceLastOne ||
+        normalizedVoteName === referenceLastTwo ||
+        normalizedVoteName.startsWith(`${referenceLastOne} `) ||
+        normalizedVoteName.startsWith(`${referenceLastTwo} `) ||
+        normalizedVoteName.endsWith(` ${referenceLastOne}`) ||
+        normalizedVoteName.endsWith(` ${referenceLastTwo}`)
+      )
+    }) ?? null
+  )
+}
+
 async function fetchHouseVoteMap(url) {
   const html = await fetchText(url)
   return new Map(parseHouseVoteEntries(html).map((entry) => [entry.bioguideId, entry.cast]))
@@ -3207,11 +3540,18 @@ function parseHouseVoteXml(xml) {
   const yeaTotal = Number(xml.match(/<totals-by-vote>[\s\S]*?<yea-total>(\d+)<\/yea-total>/)?.[1] ?? Number.NaN)
   const nayTotal = Number(xml.match(/<totals-by-vote>[\s\S]*?<nay-total>(\d+)<\/nay-total>/)?.[1] ?? Number.NaN)
   const entries = new Map()
+  const voteEntries = []
 
   for (const match of xml.matchAll(
-    /<recorded-vote><legislator[^>]+name-id="([A-Z]\d{6})"[\s\S]*?<\/legislator><vote>([^<]+)<\/vote><\/recorded-vote>/g,
+    /<recorded-vote><legislator[^>]+name-id="([A-Z]\d{6})"[\s\S]*?sort-field="([^"]+)"[\s\S]*?state="([A-Z]{2})"[\s\S]*?<\/legislator><vote>([^<]+)<\/vote><\/recorded-vote>/g,
   )) {
-    entries.set(match[1], match[2].trim())
+    entries.set(match[1], match[4].trim())
+    voteEntries.push({
+      bioguideId: match[1],
+      cast: match[4].trim(),
+      name: match[2].trim(),
+      stateCode: match[3].trim(),
+    })
   }
 
   return {
@@ -3220,6 +3560,7 @@ function parseHouseVoteXml(xml) {
     congress: Number.isFinite(congress) ? congress : undefined,
     date,
     entries,
+    voteEntries,
     nayTotal,
     question,
     resultText,
@@ -3253,6 +3594,8 @@ function parseSenateVoteXml(xml) {
   )) {
     entries.push({
       cast: match[5].trim(),
+      firstName: match[2].trim(),
+      lastName: match[1].trim(),
       name: `${match[2].trim()} ${match[1].trim()}`.trim(),
       partyCode: match[3].trim(),
       stateCode: match[4].trim(),
@@ -3420,6 +3763,7 @@ async function buildSelectedLegislativeRollCallSnapshots() {
         congress: parsed.congress,
         date: parsed.date,
         entries: parsed.entries,
+        voteEntries: parsed.voteEntries,
         nayTotal: parsed.nayTotal,
         question: parsed.question,
         rollCallNumber: parsed.rollCallNumber,
@@ -3447,6 +3791,7 @@ async function buildSelectedLegislativeRollCallSnapshots() {
       congress: parsed.congress,
       date: parsed.date,
       entries: parsed.entries,
+      voteEntries: parsed.entries,
       nayTotal: parsed.nayTotal,
       question: parsed.question,
       rollCallNumber: parsed.rollCallNumber,
@@ -3472,10 +3817,120 @@ async function buildSelectedLegislativeRollCallSnapshots() {
   }
 }
 
-async function buildTrumpRelationshipContext(senators, representatives) {
+function buildExecutiveCongressServiceHistoryMap(executivePeople, snapshots) {
+  const historyByPersonId = new Map()
+
+  for (const person of executivePeople) {
+    const serviceOverrides = executiveCongressServiceOverrides.get(person.id) ?? []
+
+    if (!serviceOverrides.length) {
+      continue
+    }
+
+    const services = []
+
+    for (const service of serviceOverrides) {
+      const serviceVotes = []
+      let proCount = 0
+      let antiCount = 0
+      let missedCount = 0
+      let directVoteCount = 0
+      let broadVoteCount = 0
+
+      for (const snapshot of snapshots) {
+        if (snapshot.chamber !== service.chamber) {
+          continue
+        }
+
+        const matchedEntry = findMatchingExecutiveCongressVoteEntry(
+          snapshot.voteEntries ?? [],
+          service,
+          person.name,
+        )
+
+        if (!matchedEntry) {
+          continue
+        }
+
+        const skipped = isSkippedLegislativeCast(matchedEntry.cast)
+        const position = skipped
+          ? 'missed'
+          : normalizeLegislativeCast(matchedEntry.cast) ===
+              normalizeLegislativeCast(snapshot.proTrumpCast)
+            ? 'pro'
+            : 'anti'
+
+        if (snapshot.scoreIncluded === false) {
+          broadVoteCount += 1
+        } else {
+          directVoteCount += 1
+        }
+
+        if (position === 'missed') {
+          missedCount += 1
+        } else if (snapshot.scoreIncluded !== false) {
+          if (position === 'pro') {
+            proCount += 1
+          } else {
+            antiCount += 1
+          }
+        }
+
+        serviceVotes.push({
+          actionTime: snapshot.actionTime,
+          billNumber: snapshot.billNumber,
+          category: snapshot.category,
+          chamber: snapshot.chamber,
+          congress: snapshot.congress,
+          date: snapshot.date,
+          id: snapshot.id,
+          label: snapshot.label,
+          position,
+          proTrumpCast: snapshot.proTrumpCast,
+          question: snapshot.question,
+          rollCallNumber: snapshot.rollCallNumber,
+          scoreIncluded: snapshot.scoreIncluded !== false,
+          signalTier: snapshot.signalTier ?? 'high_signal_scored',
+          sourceUrl: snapshot.sourceUrl,
+          title: snapshot.title,
+          trumpOutcome: snapshot.trumpOutcome,
+          voteCast: matchedEntry.cast,
+        })
+      }
+
+      if (!serviceVotes.length) {
+        continue
+      }
+
+      services.push({
+        antiCount,
+        broadVoteCount,
+        chamber: service.chamber,
+        countedVoteCount: proCount + antiCount,
+        directVoteCount,
+        label: service.label,
+        missedCount,
+        proCount,
+        votes: serviceVotes,
+      })
+    }
+
+    if (services.length) {
+      historyByPersonId.set(person.id, services)
+    }
+  }
+
+  return historyByPersonId
+}
+
+async function buildTrumpRelationshipContext(executivePeople, senators, representatives) {
   const { scoredHouseCount, scoredSenateCount, selectedHouseCount, selectedSenateCount, snapshots } =
     await buildSelectedLegislativeRollCallSnapshots()
   const metricsByPersonId = new Map()
+  const executiveCongressHistoryByPersonId = buildExecutiveCongressServiceHistoryMap(
+    executivePeople,
+    snapshots,
+  )
   const allLegislators = [...senators, ...representatives]
 
   for (const person of allLegislators) {
@@ -3599,6 +4054,7 @@ async function buildTrumpRelationshipContext(senators, representatives) {
   }
 
   return {
+    executiveCongressHistoryByPersonId,
     legislativeMetricsByPersonId: metricsByPersonId,
     legislativeRollCallSummary: {
       houseCandidateCount: houseTrumpRollCallPool.length,
@@ -3892,6 +4348,23 @@ function annotateLegislativeTrumpRelationship(person, context) {
     trumpRollCallPositions: metrics.rollCallPositions,
     trumpSampleSize: metrics.sampleSize,
     trumpScore: derivedScore,
+  }
+}
+
+function annotateExecutiveCongressHistory(person, context) {
+  if (person.branchId !== 'executive') {
+    return person
+  }
+
+  const history = context.executiveCongressHistoryByPersonId?.get(person.id)
+
+  if (!history?.length) {
+    return person
+  }
+
+  return {
+    ...person,
+    executiveCongressServiceHistory: history,
   }
 }
 
@@ -5090,8 +5563,18 @@ async function main() {
 
   if (executiveOnly && previousDataset) {
     const executivePeople = await buildExecutivePeople()
+    const preservedPeople = previousPeople
+      .filter((person) => person.branchId !== 'executive')
+      .map(clonePerson)
+    const senators = preservedPeople.filter((person) => person.sectionId === 'senate')
+    const representatives = preservedPeople.filter((person) => person.sectionId === 'house')
+    const trumpRelationshipContext = await buildTrumpRelationshipContext(
+      executivePeople,
+      senators,
+      representatives,
+    )
     const executiveBasePeople = executivePeople
-      .map((person) => annotateTrumpProximity(person, { legislativeMetricsByPersonId: new Map() }))
+      .map((person) => annotateTrumpProximity(person, trumpRelationshipContext))
       .map(annotateSalary)
       .map(annotateDepartmentBudget)
       .map(annotateIndependentAgencyBudget)
@@ -5099,15 +5582,12 @@ async function main() {
     const executiveWithBackground = await enrichPeopleWithBackground(executiveBasePeople)
     const executiveWithManualCareerHistory =
       applyManualCareerHistoryOverrides(executiveWithBackground)
-    const executiveWithDerivedEstimates = executiveWithManualCareerHistory.map(
-      annotateDerivedHoldingEstimates,
+    const executiveWithCongressHistory = executiveWithManualCareerHistory.map((person) =>
+      annotateExecutiveCongressHistory(person, trumpRelationshipContext),
     )
+    const executiveWithDerivedEstimates =
+      executiveWithCongressHistory.map(annotateDerivedHoldingEstimates)
     const refreshedExecutivePeople = await enrichPeopleWithXUrls(executiveWithDerivedEstimates)
-    const preservedPeople = previousPeople
-      .filter((person) => person.branchId !== 'executive')
-      .map(clonePerson)
-    const senators = preservedPeople.filter((person) => person.sectionId === 'senate')
-    const representatives = preservedPeople.filter((person) => person.sectionId === 'house')
     const dataset = {
       ...previousDataset,
       branches: buildBranches(refreshedExecutivePeople, senators, representatives),
@@ -5129,7 +5609,11 @@ async function main() {
     buildSenators(),
     buildRepresentatives(),
   ])
-  const trumpRelationshipContext = await buildTrumpRelationshipContext(senators, representatives)
+  const trumpRelationshipContext = await buildTrumpRelationshipContext(
+    executivePeople,
+    senators,
+    representatives,
+  )
 
   const basePeople = [...executivePeople, ...senators, ...representatives, ...justices]
     .map((person) => annotateTrumpProximity(person, trumpRelationshipContext))
@@ -5140,7 +5624,11 @@ async function main() {
   const legislativelyEnrichedPeople = await enrichPeopleWithLegislativeFinancials(basePeople)
   const peopleWithBackground = await enrichPeopleWithBackground(legislativelyEnrichedPeople)
   const peopleWithManualCareerHistory = applyManualCareerHistoryOverrides(peopleWithBackground)
-  const peopleWithDerivedEstimates = peopleWithManualCareerHistory.map(annotateDerivedHoldingEstimates)
+  const peopleWithExecutiveCongressHistory = peopleWithManualCareerHistory.map((person) =>
+    annotateExecutiveCongressHistory(person, trumpRelationshipContext),
+  )
+  const peopleWithDerivedEstimates =
+    peopleWithExecutiveCongressHistory.map(annotateDerivedHoldingEstimates)
   const people = await enrichPeopleWithXUrls(peopleWithDerivedEstimates)
 
   const branches = buildBranches(executivePeople, senators, representatives)

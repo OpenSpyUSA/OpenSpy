@@ -12,6 +12,7 @@ import { HOUSE_VACANCIES } from './houseVacancies'
 import { compareIndependentAgenciesByImportance } from './independentAgencyCatalog'
 import { LegislativeVoteMatrix } from './components/LegislativeVoteMatrix'
 import {
+  compareLegislativeRollCallsByRecency,
   formatRollCallRecordedLine,
   formatRollCallReferenceLine,
 } from './legislativeRollCallFormat'
@@ -32,6 +33,8 @@ import type {
   Alignment,
   BranchId,
   BranchSection,
+  ExecutiveCongressRollCallVote,
+  ExecutiveCongressServiceRecord,
   GovernmentBranch,
   GovernmentDataset,
   GovernmentPerson,
@@ -263,6 +266,14 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   'trump-v-united-states': [
     'ROBERTS, C. J., delivered the opinion of the Court, in which THOMAS, ALITO, GORSUCH, and KAVANAUGH, JJ., joined in full...',
   ],
+  'collins-v-yellen': [
+    'ALITO, J., delivered the opinion of the Court, in which ROBERTS, C. J., and THOMAS, KAVANAUGH, and BARRETT, JJ., joined in full; in which KAGAN and BREYER, JJ., joined as to all but Part III-B; in which GORSUCH, J., joined as to all but Part III-C; and in which SOTOMAYOR, J., joined as to Parts I, II, and III-C.',
+  ],
+  'california-v-texas': [
+    'BREYER, J., delivered the opinion of the Court, in which ROBERTS, C. J., and THOMAS, SOTOMAYOR, KAGAN, KAVANAUGH, and BARRETT, JJ., joined.',
+    'THOMAS, J., filed a concurring opinion.',
+    'ALITO, J., filed a dissenting opinion, in which GORSUCH, J., joined.',
+  ],
   'trump-v-new-york': [
     'PER CURIAM. Every ten years, the Nation undertakes an "Enumeration" of its population...',
     'JUSTICE BREYER, with whom JUSTICE SOTOMAYOR and JUSTICE KAGAN join, dissenting.',
@@ -270,12 +281,35 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   'dhs-v-thuraissigiam': [
     'ALITO, J., delivered the opinion of the Court, in which ROBERTS, C. J., and THOMAS, GORSUCH, and KAVANAUGH, JJ., joined.',
   ],
+  'little-sisters-v-pennsylvania': [
+    'THOMAS, J., delivered the opinion of the Court, in which ROBERTS, C. J., and ALITO, GORSUCH, and KAVANAUGH, JJ., joined.',
+    'ALITO, J., filed a concurring opinion, in which GORSUCH, J., joined.',
+    'KAGAN, J., filed an opinion concurring in the judgment, in which BREYER, J., joined.',
+    'GINSBURG, J., filed a dissenting opinion, in which SOTOMAYOR, J., joined.',
+  ],
+  'seila-law-v-cfpb': [
+    'ROBERTS, C. J., delivered the opinion of the Court with respect to Parts I, II, and III, in which THOMAS, ALITO, GORSUCH, and KAVANAUGH, JJ., joined, and an opinion with respect to Part IV, in which ALITO and KAVANAUGH, JJ., joined.',
+    'THOMAS, J., filed an opinion concurring in part and dissenting in part, in which GORSUCH, J., joined.',
+    'KAGAN, J., filed an opinion concurring in the judgment with respect to severability and dissenting in part, in which GINSBURG, BREYER, and SOTOMAYOR, JJ., joined.',
+  ],
   'trump-v-sierra-club': [
     'The application for stay presented to JUSTICE KAGAN and by her referred to the Court is granted.',
   ],
   'wolf-v-innovation-law-lab': [
     'Application (19A960) granted by the Court.',
     'The application for stay presented to Justice Kagan and by her referred to the Court is granted...',
+  ],
+  'barton-v-barr': [
+    'KAVANAUGH, J., delivered the opinion of the Court, in which ROBERTS, C. J., and THOMAS, ALITO, and GORSUCH, JJ., joined.',
+    'SOTOMAYOR, J., filed a dissenting opinion, in which GINSBURG, BREYER, and KAGAN, JJ., joined.',
+  ],
+  'nasrallah-v-barr': [
+    'KAVANAUGH, J., delivered the opinion of the Court, in which ROBERTS, C. J., and GINSBURG, BREYER, SOTOMAYOR, KAGAN, and GORSUCH, JJ., joined.',
+    'THOMAS, J., filed a dissenting opinion, in which ALITO, J., joined.',
+  ],
+  'guerrero-lasprilla-v-barr': [
+    'BREYER, J., delivered the opinion of the Court, in which ROBERTS, C. J., and GINSBURG, SOTOMAYOR, KAGAN, GORSUCH, and KAVANAUGH, JJ., joined.',
+    'THOMAS, J., filed a dissenting opinion, in which ALITO, J., joined as to all but Part II-A-1.',
   ],
   'dhs-v-new-york-public-charge': [
     'The application for stay presented to JUSTICE GINSBURG and by her referred to the Court is granted.',
@@ -673,6 +707,43 @@ function formatRollCallVoteTotals(event: LegislativeTrumpRollCall) {
 
 function formatRollCallChamber(chamber: LegislativeTrumpRollCall['chamber']) {
   return chamber === 'house' ? 'House' : 'Senate'
+}
+
+function compareExecutiveCongressVotesByRecency(
+  left: ExecutiveCongressRollCallVote,
+  right: ExecutiveCongressRollCallVote,
+  leftIndex = 0,
+  rightIndex = 0,
+) {
+  return compareLegislativeRollCallsByRecency(
+    left as LegislativeTrumpRollCall,
+    right as LegislativeTrumpRollCall,
+    leftIndex,
+    rightIndex,
+  )
+}
+
+function formatExecutiveCongressVotePosition(position: ExecutiveCongressRollCallVote['position']) {
+  switch (position) {
+    case 'pro':
+      return 'On Trump side'
+    case 'anti':
+      return 'Not on Trump side'
+    case 'missed':
+      return 'Missed'
+  }
+}
+
+function buildExecutiveCongressHistorySummary(service: ExecutiveCongressServiceRecord) {
+  const parts = [
+    `${service.directVoteCount} direct`,
+    service.broadVoteCount > 0 ? `${service.broadVoteCount} broader` : null,
+    `${service.proCount} on Trump side`,
+    `${service.antiCount} not on Trump side`,
+    service.missedCount > 0 ? `${service.missedCount} missed` : null,
+  ].filter(Boolean)
+
+  return `${parts.join(' • ')}`
 }
 
 function formatDisplayedTrumpScore(person: GovernmentPerson) {
@@ -1820,6 +1891,8 @@ function DetailPanel({
   const independentAgencyServiceLabel = getIndependentAgencyServiceLabel(person)
   const independentAgencyAppointerLabel = getIndependentAgencyAppointerLabel(person)
   const showTrumpRelationship = shouldShowTrumpRelationship(person)
+  const executiveCongressHistory =
+    person.branchId === 'executive' ? person.executiveCongressServiceHistory ?? [] : []
   const judicialCases =
     person.branchId === 'judicial'
       ? supremeCourtCases.filter((caseItem) => caseItem.justiceStances[person.id])
@@ -1918,6 +1991,82 @@ function DetailPanel({
               <li key={`${person.id}-${record.category}-${record.summary}`}>{record.summary}</li>
             ))}
           </ul>
+        </section>
+      ) : null}
+
+      {executiveCongressHistory.length > 0 ? (
+        <section className="detail-block">
+          <h3>Past Trump-linked votes in Congress</h3>
+          <p className="detail-note">
+            Selected House or Senate roll calls from this site during this official&apos;s time in
+            Congress.
+          </p>
+          <div className="executive-congress-history">
+            {executiveCongressHistory.map((service) => {
+              const sortedVotes = service.votes
+                .map((vote, index) => ({ index, vote }))
+                .sort((left, right) =>
+                  compareExecutiveCongressVotesByRecency(
+                    left.vote,
+                    right.vote,
+                    left.index,
+                    right.index,
+                  ),
+                )
+                .map(({ vote }) => vote)
+
+              return (
+                <article className="executive-congress-service" key={`${person.id}-${service.label}`}>
+                  <div className="executive-congress-service__header">
+                    <div>
+                      <h4>{service.label}</h4>
+                      <p>{buildExecutiveCongressHistorySummary(service)}</p>
+                    </div>
+                  </div>
+
+                  <ul className="executive-congress-vote-list">
+                    {sortedVotes.map((vote) => {
+                      const referenceLine = formatRollCallReferenceLine(
+                        vote as LegislativeTrumpRollCall,
+                      )
+                      const recordedLine = formatRollCallRecordedLine(vote as LegislativeTrumpRollCall)
+
+                      return (
+                        <li
+                          className="executive-congress-vote-item"
+                          key={`${person.id}-${service.label}-${vote.id}`}
+                        >
+                          <div className="executive-congress-vote-item__header">
+                            <div>
+                              <strong>{vote.label}</strong>
+                              <p>
+                                {[
+                                  recordedLine,
+                                  `Vote: ${vote.voteCast}`,
+                                  vote.scoreIncluded ? 'Direct' : 'Broader',
+                                ]
+                                  .filter(Boolean)
+                                  .join(' • ')}
+                              </p>
+                            </div>
+                            <span className={`case-stance-chip case-stance-chip--${vote.position}`}>
+                              {formatExecutiveCongressVotePosition(vote.position)}
+                            </span>
+                          </div>
+                          {referenceLine ? (
+                            <p className="executive-congress-vote-item__meta">{referenceLine}</p>
+                          ) : null}
+                          <a href={vote.sourceUrl} rel="noreferrer" target="_blank">
+                            Official source
+                          </a>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </article>
+              )
+            })}
+          </div>
         </section>
       ) : null}
 

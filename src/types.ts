@@ -85,6 +85,39 @@ export interface LegislativeTrumpRollCall {
 
 export type LegislativeVotePosition = 'anti' | 'missed' | 'not_in_office' | 'pro'
 
+export interface ExecutiveCongressRollCallVote {
+  actionTime?: string
+  billNumber?: string
+  category: string
+  chamber: 'house' | 'senate'
+  congress?: number
+  date: string
+  id: string
+  label: string
+  position: Exclude<LegislativeVotePosition, 'not_in_office'>
+  proTrumpCast: string
+  question: string
+  rollCallNumber?: number
+  scoreIncluded: boolean
+  signalTier: 'broad_admin_related' | 'high_signal_scored'
+  sourceUrl: string
+  title: string
+  trumpOutcome?: 'anti' | 'pro'
+  voteCast: string
+}
+
+export interface ExecutiveCongressServiceRecord {
+  antiCount: number
+  broadVoteCount: number
+  chamber: 'house' | 'senate'
+  countedVoteCount: number
+  directVoteCount: number
+  label: string
+  missedCount: number
+  proCount: number
+  votes: ExecutiveCongressRollCallVote[]
+}
+
 export interface LegislativeTrumpRollCallSummary {
   houseCandidateCount: number
   houseScoredCount: number
@@ -122,6 +155,7 @@ export interface GovernmentPerson {
   birthDate?: string
   birthYear?: number
   careerHistory?: CareerRecord[]
+  executiveCongressServiceHistory?: ExecutiveCongressServiceRecord[]
   education?: EducationRecord[]
   highestDegree?: string
   highestEducationField?: string

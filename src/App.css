@@ -1648,6 +1648,11 @@
   color: #1379a5;
 }
 
+.case-stance-chip--missed {
+  background: rgba(120, 120, 128, 0.16);
+  color: #5c5c61;
+}
+
 .case-stance-chip--not_on_court {
   background: rgba(120, 120, 128, 0.14);
   color: #6e6e73;
@@ -2541,6 +2546,74 @@
   gap: 12px;
 }
 
+.executive-congress-history {
+  display: grid;
+  gap: 12px;
+}
+
+.executive-congress-service {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.executive-congress-service__header h4 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.24;
+  color: var(--ink);
+}
+
+.executive-congress-service__header p {
+  margin-top: 4px;
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+}
+
+.executive-congress-vote-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.executive-congress-vote-item {
+  display: grid;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+}
+
+.executive-congress-vote-item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.executive-congress-vote-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.executive-congress-vote-item__header strong {
+  color: var(--ink);
+  font-size: 0.96rem;
+  line-height: 1.3;
+}
+
+.executive-congress-vote-item__header p,
+.executive-congress-vote-item__meta {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
 .justice-case-item {
   display: grid;
   gap: 8px;
@@ -2951,6 +3024,7 @@
 
   .case-card__meta,
   .case-card__header,
+  .executive-congress-vote-item__header,
   .justice-case-item__header {
     display: grid;
   }
