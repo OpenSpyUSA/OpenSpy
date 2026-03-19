@@ -238,7 +238,8 @@
 }
 
 .source-links a,
-.detail-links a {
+.detail-links a,
+.detail-links span {
   display: inline-flex;
   justify-content: space-between;
   align-items: center;
@@ -258,6 +259,11 @@
 .detail-links a:hover {
   transform: translateY(-1px);
   background: rgba(255, 255, 255, 0.92);
+}
+
+.detail-links span {
+  color: var(--ink-soft);
+  background: rgba(245, 239, 228, 0.34);
 }
 
 .screen--branch {
@@ -2362,6 +2368,26 @@
 .detail-links {
   display: grid;
   gap: 10px;
+}
+
+.detail-links--pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detail-quote-list {
+  display: grid;
+  gap: 8px;
+}
+
+.detail-quote {
+  margin: 0;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, white 14%);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--ink);
+  font-size: 0.86rem;
+  line-height: 1.5;
 }
 
 .justice-case-list {

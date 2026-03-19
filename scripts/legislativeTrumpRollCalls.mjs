@@ -977,6 +977,111 @@ const selectedSenateRollCalls = [
 ]
 
 const senateCandidateExtras = [
+  senate('senate-sessions-motion-to-proceed', 115, 1, 44, 'nominations', {
+    label: 'Jeff Sessions motion to proceed',
+  }),
+  senate('senate-sessions-cloture', 115, 1, 55, 'nominations', {
+    label: 'Jeff Sessions cloture',
+  }),
+  senate('senate-sessions-confirm', 115, 1, 59, 'nominations', {
+    label: 'Jeff Sessions confirmation',
+  }),
+  senate('senate-price-motion-to-proceed', 115, 1, 46, 'health-care', {
+    label: 'Tom Price motion to proceed',
+  }),
+  senate('senate-price-cloture', 115, 1, 60, 'health-care', {
+    label: 'Tom Price cloture',
+  }),
+  senate('senate-price-confirm', 115, 1, 61, 'health-care', {
+    label: 'Tom Price confirmation',
+  }),
+  senate('senate-mnuchin-motion-to-proceed', 115, 1, 48, 'nominations', {
+    label: 'Steven Mnuchin motion to proceed',
+  }),
+  senate('senate-mnuchin-cloture', 115, 1, 62, 'nominations', {
+    label: 'Steven Mnuchin cloture',
+  }),
+  senate('senate-mnuchin-confirm', 115, 1, 63, 'nominations', {
+    label: 'Steven Mnuchin confirmation',
+  }),
+  senate('senate-shulkin-confirm', 115, 1, 64, 'nominations', {
+    label: 'David Shulkin confirmation',
+  }),
+  senate('senate-mcmahon-sba-confirm', 115, 1, 65, 'nominations', {
+    label: 'Linda McMahon SBA confirmation',
+  }),
+  senate('senate-mulvaney-omb-cloture', 115, 1, 67, 'nominations', {
+    label: 'Mick Mulvaney OMB cloture',
+  }),
+  senate('senate-mulvaney-omb-confirm', 115, 1, 68, 'nominations', {
+    label: 'Mick Mulvaney OMB confirmation',
+  }),
+  senate('senate-pruitt-cloture', 115, 1, 69, 'nominations', {
+    label: 'Scott Pruitt cloture',
+  }),
+  senate('senate-pruitt-confirm', 115, 1, 71, 'nominations', {
+    label: 'Scott Pruitt confirmation',
+  }),
+  senate('senate-ross-cloture', 115, 1, 72, 'nominations', {
+    label: 'Wilbur Ross cloture',
+  }),
+  senate('senate-ross-confirm', 115, 1, 73, 'nominations', {
+    label: 'Wilbur Ross confirmation',
+  }),
+  senate('senate-zinke-cloture', 115, 1, 74, 'nominations', {
+    label: 'Ryan Zinke cloture',
+  }),
+  senate('senate-zinke-confirm', 115, 1, 75, 'nominations', {
+    label: 'Ryan Zinke confirmation',
+  }),
+  senate('senate-carson-cloture', 115, 1, 76, 'nominations', {
+    label: 'Ben Carson cloture',
+  }),
+  senate('senate-carson-confirm', 115, 1, 77, 'nominations', {
+    label: 'Ben Carson confirmation',
+  }),
+  senate('senate-perry-cloture', 115, 1, 78, 'nominations', {
+    label: 'Rick Perry cloture',
+  }),
+  senate('senate-perry-confirm', 115, 1, 79, 'nominations', {
+    label: 'Rick Perry confirmation',
+  }),
+  senate('senate-verma-cms-cloture', 115, 1, 85, 'health-care', {
+    label: 'Seema Verma cloture',
+  }),
+  senate('senate-verma-cms-confirm', 115, 1, 86, 'health-care', {
+    label: 'Seema Verma confirmation',
+  }),
+  senate('senate-coats-dni-cloture', 115, 1, 88, 'nominations', {
+    label: 'Dan Coats cloture',
+  }),
+  senate('senate-coats-dni-confirm', 115, 1, 89, 'nominations', {
+    label: 'Dan Coats confirmation',
+  }),
+  senate('senate-friedman-israel-cloture', 115, 1, 95, 'nominations', {
+    label: 'David Friedman cloture',
+  }),
+  senate('senate-friedman-israel-confirm', 115, 1, 96, 'nominations', {
+    label: 'David Friedman confirmation',
+  }),
+  senate('senate-perdue-agriculture-confirm', 115, 1, 112, 'nominations', {
+    label: 'Sonny Perdue confirmation',
+  }),
+  senate('senate-acosta-labor-cloture', 115, 1, 115, 'nominations', {
+    label: 'Alexander Acosta cloture',
+  }),
+  senate('senate-acosta-labor-confirm', 115, 1, 116, 'nominations', {
+    label: 'Alexander Acosta confirmation',
+  }),
+  senate('senate-gottlieb-fda-cloture', 115, 1, 123, 'health-care', {
+    label: 'Scott Gottlieb cloture',
+  }),
+  senate('senate-gottlieb-fda-confirm', 115, 1, 124, 'health-care', {
+    label: 'Scott Gottlieb confirmation',
+  }),
+  senate('senate-wray-fbi-confirm', 115, 1, 181, 'nominations', {
+    label: 'Christopher Wray confirmation',
+  }),
   senate('senate-obamacare-2017-4', 115, 1, 4, 'health-care', {
     label: 'Protect Medicare and Medicaid amendment',
     proTrumpCast: 'Nay',
@@ -1019,8 +1124,68 @@ const senateCandidateExtras = [
     label: 'Energy emergency termination',
     proTrumpCast: 'Nay',
   }),
+  senate('senate-hegseth-motion-to-proceed', 119, 1, 10, 'nominations', {
+    label: 'Pete Hegseth motion to proceed',
+  }),
+  senate('senate-hegseth-cloture', 119, 1, 14, 'nominations', {
+    label: 'Pete Hegseth cloture',
+  }),
+  senate('senate-hegseth-confirm', 119, 1, 15, 'nominations', {
+    label: 'Pete Hegseth confirmation',
+  }),
+  senate('senate-rubio-confirm', 119, 1, 8, 'nominations', {
+    label: 'Marco Rubio confirmation',
+  }),
+  senate('senate-burgum-cloture', 119, 1, 25, 'nominations', {
+    label: 'Doug Burgum cloture',
+  }),
+  senate('senate-burgum-confirm', 119, 1, 26, 'nominations', {
+    label: 'Doug Burgum confirmation',
+  }),
+  senate('senate-wright-cloture', 119, 1, 27, 'nominations', {
+    label: 'Chris Wright cloture',
+  }),
+  senate('senate-wright-confirm', 119, 1, 30, 'nominations', {
+    label: 'Chris Wright confirmation',
+  }),
+  senate('senate-bondi-cloture', 119, 1, 31, 'nominations', {
+    label: 'Pam Bondi cloture',
+  }),
+  senate('senate-bondi-confirm', 119, 1, 33, 'nominations', {
+    label: 'Pam Bondi confirmation',
+  }),
+  senate('senate-turner-cloture', 119, 1, 34, 'nominations', {
+    label: 'Scott Turner cloture',
+  }),
+  senate('senate-turner-confirm', 119, 1, 35, 'nominations', {
+    label: 'Scott Turner confirmation',
+  }),
+  senate('senate-gabbard-motion-to-proceed', 119, 1, 40, 'nominations', {
+    label: 'Tulsi Gabbard motion to proceed',
+  }),
+  senate('senate-rfk-motion-to-proceed', 119, 1, 42, 'health-care', {
+    label: 'Robert F. Kennedy Jr. motion to proceed',
+  }),
+  senate('senate-lutnick-motion-to-proceed', 119, 1, 44, 'nominations', {
+    label: 'Howard Lutnick motion to proceed',
+  }),
+  senate('senate-rollins-motion-to-proceed', 119, 1, 46, 'nominations', {
+    label: 'Brooke Rollins motion to proceed',
+  }),
   senate('senate-rollins-confirm', 119, 1, 53, 'nominations', {
     label: 'Brooke Rollins confirmation',
+  }),
+  senate('senate-loeffler-motion-to-proceed', 119, 1, 48, 'nominations', {
+    label: 'Kelly Loeffler motion to proceed',
+  }),
+  senate('senate-mcmahon-education-motion-to-proceed', 119, 1, 93, 'nominations', {
+    label: 'Linda McMahon motion to proceed',
+  }),
+  senate('senate-mcmahon-education-cloture', 119, 1, 98, 'nominations', {
+    label: 'Linda McMahon cloture',
+  }),
+  senate('senate-mcmahon-education-confirm', 119, 1, 99, 'nominations', {
+    label: 'Linda McMahon confirmation',
   }),
   senate('senate-miran-cea-cloture', 119, 1, 116, 'nominations', {
     label: 'Stephen Miran CEA cloture',

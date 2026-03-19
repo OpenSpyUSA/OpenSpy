@@ -54,6 +54,11 @@ type RouteState = {
   personId: string | null
 }
 
+type SupremeCourtCaseSelection = {
+  caseItem: SupremeCourtCase
+  groupLabel: string
+}
+
 type PartyFilter = Alignment | 'all'
 type ChamberFilter = 'all' | 'house' | 'senate'
 type PresidentPartyTone = 'democratic' | 'republican'
@@ -95,12 +100,244 @@ function getTrumpCaseStanceLabel(side: TrumpCaseSide) {
 function getTrumpCaseTypeLabel(type: SupremeCourtCase['type']) {
   switch (type) {
     case 'merits':
-      return 'Merits'
+      return 'Full decision'
     case 'order':
-      return 'Order'
+      return 'Emergency order'
     case 'procedural':
-      return 'Procedural'
+      return 'Process ruling'
   }
+}
+
+const supremeCourtCaseOpinionOverrides = new Map<string, string>([
+  ['learning-resources-v-trump', 'https://www.supremecourt.gov/opinions/25pdf/24-1287_new_3135.pdf'],
+  ['trump-v-illinois', 'https://www.supremecourt.gov/opinions/25pdf/25a443_new_b07d.pdf'],
+  ['trump-v-jgg', 'https://www.supremecourt.gov/opinions/24pdf/604us2r25_7648.pdf'],
+  ['dhs-v-thuraissigiam', 'https://www.supremecourt.gov/opinions/19pdf/591us1r48_9o6b.pdf'],
+  ['trump-v-sierra-club', 'https://www.supremecourt.gov/opinions/18pdf/19a60_o75p.pdf'],
+  ['dhs-v-new-york-public-charge', 'https://www.supremecourt.gov/opinions/19pdf/19a785_j4ek.pdf'],
+  ['barr-v-east-bay-sanctuary-covenant', 'https://www.supremecourt.gov/opinions/18pdf/19a230_k53l.pdf'],
+  ['trump-v-hawaii', 'https://www.supremecourt.gov/opinions/17pdf/17-965_h315.pdf'],
+  ['trump-v-vance', 'https://www.supremecourt.gov/opinions/19pdf/591us2r59_g3bi.pdf'],
+  ['trump-v-mazars', 'https://www.supremecourt.gov/opinions/19pdf/591us2r60_lkgm.pdf'],
+  ['trump-v-deutsche-bank', 'https://www.supremecourt.gov/opinions/19pdf/591us2r60_lkgm.pdf'],
+])
+
+const supremeCourtCaseDocketOverrides = new Map<string, string>([
+  ['trump-v-east-bay-sanctuary-covenant', 'https://www.supremecourt.gov/docket/docketfiles/html/public/18a615.html'],
+  ['republican-party-of-pa-v-degraffenreid', 'https://www.supremecourt.gov/docket/docketfiles/html/public/20-542.html'],
+  ['texas-v-pennsylvania', 'https://www.supremecourt.gov/search.aspx?filename=%2Fdocket%2Fdocketfiles%2Fhtml%2Fpublic%2F22o155.html'],
+])
+
+const supremeCourtCaseOfficialWording: Record<string, string[]> = {
+  'learning-resources-v-trump': [
+    'THE CHIEF JUSTICE delivered the opinion of the Court with respect to Part II-B...',
+    'JUSTICE BARRETT, concurring.',
+    'JUSTICE GORSUCH, concurring.',
+    'JUSTICE KAGAN, with whom JUSTICE SOTOMAYOR and JUSTICE JACKSON join, concurring in part and concurring in the judgment.',
+    'JUSTICE KAVANAUGH, with whom JUSTICE THOMAS and JUSTICE ALITO join, dissenting.',
+  ],
+  'trump-v-illinois': [
+    'The application for stay is denied.',
+  ],
+  'trump-v-orr': [
+    'The application for stay presented to JUSTICE JACKSON and by her referred to the Court is granted.',
+  ],
+  'trump-v-slaughter': [
+    'The application for stay presented to THE CHIEF JUSTICE and by him referred to the Court is granted.',
+    'The application is also treated as a petition for a writ of certiorari before judgment, and the petition is granted.',
+  ],
+  'trump-v-boyle': [
+    'The application for stay presented to THE CHIEF JUSTICE and by him referred to the Court is granted.',
+    'JUSTICE KAVANAUGH, concurring in the grant of the application for stay.',
+    'JUSTICE KAGAN, with whom JUSTICE SOTOMAYOR and JUSTICE JACKSON join, dissenting from the grant of the application for stay.',
+  ],
+  'mcmahon-v-new-york': [
+    'The application for stay presented to JUSTICE JACKSON and by her referred to the Court is granted.',
+  ],
+  'trump-v-afge': [
+    'The application for stay presented to Justice Kagan and by her referred to the Court is granted.',
+    'JUSTICE SOTOMAYOR, concurring in the grant of stay.',
+    'JUSTICE JACKSON, dissenting from the grant of application for stay.',
+  ],
+  'trump-v-casa': [
+    'BARRETT, J., delivered the opinion of the Court, in which ROBERTS, C. J., and THOMAS, ALITO, GORSUCH, and KAVANAUGH, JJ., joined.',
+  ],
+  'dhs-v-dvd': [
+    'The application for stay presented to JUSTICE JACKSON and by her referred to the Court is granted.',
+  ],
+  'noem-v-doe': [
+    'The application for stay presented to JUSTICE JACKSON and by her referred to the Court is granted.',
+    'JUSTICE SOTOMAYOR joins, dissenting from the grant of the application for a stay.',
+  ],
+  'trump-v-wilcox': [
+    'The application for stay presented to THE CHIEF JUSTICE and by him referred to the Court is granted.',
+  ],
+  'aarp-v-trump': [
+    'The Court ordered "[t]he Government" not to remove a "putative class of detainees" until this Court issues a superseding order.',
+    'JUSTICE ALITO, with whom JUSTICE THOMAS joins, dissenting.',
+  ],
+  'trump-v-jgg': [
+    'The application to vacate the orders issued by the United States District Court for the District of Columbia is granted.',
+  ],
+  'trump-v-united-states': [
+    'ROBERTS, C. J., delivered the opinion of the Court, in which THOMAS, ALITO, GORSUCH, and KAVANAUGH, JJ., joined in full...',
+  ],
+  'trump-v-new-york': [
+    'PER CURIAM. Every ten years, the Nation undertakes an "Enumeration" of its population...',
+    'JUSTICE BREYER, with whom JUSTICE SOTOMAYOR and JUSTICE KAGAN join, dissenting.',
+  ],
+  'dhs-v-thuraissigiam': [
+    'ALITO, J., delivered the opinion of the Court, in which ROBERTS, C. J., and THOMAS, GORSUCH, and KAVANAUGH, JJ., joined.',
+  ],
+  'trump-v-sierra-club': [
+    'The application for stay presented to JUSTICE KAGAN and by her referred to the Court is granted.',
+  ],
+  'wolf-v-innovation-law-lab': [
+    'Application (19A960) granted by the Court.',
+    'The application for stay presented to Justice Kagan and by her referred to the Court is granted...',
+  ],
+  'dhs-v-new-york-public-charge': [
+    'The application for stay presented to JUSTICE GINSBURG and by her referred to the Court is granted.',
+    'JUSTICE GORSUCH, with whom JUSTICE THOMAS joins, concurring in the grant of stay.',
+  ],
+  'barr-v-east-bay-sanctuary-covenant': [
+    'The application for stay presented to JUSTICE KAGAN and by her referred to the Court is granted.',
+  ],
+  'dhs-v-regents': [
+    'THE CHIEF JUSTICE delivered the opinion of the Court, except as to Part IV...',
+  ],
+  'department-of-commerce-v-new-york': [
+    'ROBERTS, C. J., delivered the opinion for a unanimous Court with respect to Parts I and II...',
+  ],
+  'nielsen-v-preap': [
+    'JUSTICE ALITO delivered the opinion of the Court with respect to Parts I, III-A, III-B-1, and IV...',
+  ],
+  'trump-v-east-bay-sanctuary-covenant': [
+    'The application for stay presented to Justice Kagan and by her referred to the Court is denied.',
+    'Justice Thomas, Justice Alito, Justice Gorsuch, and Justice Kavanaugh would grant the application for stay.',
+  ],
+  'trump-v-hawaii': [
+    'ROBERTS, C. J., delivered the opinion of the Court, in which KENNEDY, THOMAS, ALITO, and GORSUCH, JJ., joined.',
+  ],
+  'trump-v-hawaii-2017-stay': [
+    'The application for stay of mandate presented to Justice Kennedy and by him referred to the Court is granted...',
+    'Justice Thomas, with whom Justice Alito and Justice Gorsuch join, concurring in part and dissenting in part.',
+  ],
+  'trump-v-irap': [
+    'Application (16A1190) and application (16A1191) are GRANTED IN PART.',
+    'Justice Thomas, with whom Justice Alito and Justice Gorsuch join, concurring in part and dissenting in part.',
+  ],
+  'trump-v-new-york-criminal-stay': [
+    'Application (24A666) for stay presented to Justice Sotomayor and by her referred to the Court is denied...',
+    'Justice Thomas, Justice Alito, Justice Gorsuch, and Justice Kavanaugh would grant the application.',
+  ],
+  'republican-party-of-pa-v-boockvar-expedition': [
+    'The motion to expedite consideration of the petition for a writ of certiorari is denied.',
+    'Statement of JUSTICE ALITO, with whom JUSTICE THOMAS and JUSTICE GORSUCH join.',
+  ],
+  'trump-v-anderson': [
+    'Because the Constitution makes Congress, rather than the States, responsible for enforcing Section 3 against federal officeholders and candidates, we reverse.',
+  ],
+  'trump-v-thompson': [
+    'The application for stay of mandate and injunction pending review presented to THE CHIEF JUSTICE and by him referred to the Court is denied.',
+  ],
+  'republican-party-of-pa-v-degraffenreid': [
+    'The petitions for writs of certiorari are denied.',
+  ],
+  'trump-v-vance': [
+    'ROBERTS, C. J., delivered the opinion of the Court, in which GINSBURG, BREYER, SOTOMAYOR, and KAGAN, JJ., joined.',
+  ],
+  'trump-v-mazars': [
+    'ROBERTS, C. J., delivered the opinion of the Court, in which GINSBURG, BREYER, SOTOMAYOR, KAGAN, GORSUCH, and KAVANAUGH, JJ., joined.',
+  ],
+  'trump-v-deutsche-bank': [
+    'ROBERTS, C. J., delivered the opinion of the Court, in which GINSBURG, BREYER, SOTOMAYOR, KAGAN, GORSUCH, and KAVANAUGH, JJ., joined.',
+  ],
+  'texas-v-pennsylvania': [
+    "The State of Texas's motion for leave to file a bill of complaint is denied for lack of standing under Article III of the Constitution.",
+    'Statement of Justice Alito, with whom Justice Thomas joins: I would therefore grant the motion to file the bill of complaint but would not grant other relief.',
+  ],
+}
+
+function isSupremeCourtOpinionUrl(url: string) {
+  return url.includes('/opinions/') || url.includes('/orders/courtorders/')
+}
+
+function isSupremeCourtDocketUrl(url: string) {
+  return (
+    url.includes('/docket/docketfiles/html/public/') ||
+    url.includes('filename=%2Fdocket%2Fdocketfiles%2Fhtml%2Fpublic') ||
+    url.includes('filename=/docket/docketfiles/html/public/')
+  )
+}
+
+function extractSupremeCourtDocketId(url: string) {
+  const decoded = decodeURIComponent(url)
+  const docketMatch = decoded.match(/\/docket\/docketfiles\/html\/public\/([^./?]+)\.html/i)
+
+  if (docketMatch?.[1]) {
+    return docketMatch[1]
+  }
+
+  const opinionMatch = decoded.match(/\/opinions\/[^/]+\/([0-9a-z-]+)(?:_[^/]+)?\.pdf/i)
+
+  if (opinionMatch?.[1]) {
+    return opinionMatch[1]
+  }
+
+  return null
+}
+
+function buildSupremeCourtDocketUrl(docketId: string) {
+  return `https://www.supremecourt.gov/docket/docketfiles/html/public/${docketId}.html`
+}
+
+function getSupremeCourtCaseOpinionUrl(caseItem: SupremeCourtCase) {
+  return supremeCourtCaseOpinionOverrides.get(caseItem.id) ??
+    (isSupremeCourtOpinionUrl(caseItem.sourceUrl) ? caseItem.sourceUrl : null)
+}
+
+function getSupremeCourtCaseDocketUrl(caseItem: SupremeCourtCase) {
+  const override = supremeCourtCaseDocketOverrides.get(caseItem.id)
+
+  if (override) {
+    return override
+  }
+
+  if (isSupremeCourtDocketUrl(caseItem.sourceUrl)) {
+    return caseItem.sourceUrl
+  }
+
+  const docketId = extractSupremeCourtDocketId(caseItem.sourceUrl)
+  return docketId ? buildSupremeCourtDocketUrl(docketId) : null
+}
+
+function SupremeCourtCaseLinks({ caseItem }: { caseItem: SupremeCourtCase }) {
+  const opinionUrl = getSupremeCourtCaseOpinionUrl(caseItem)
+  const docketUrl = getSupremeCourtCaseDocketUrl(caseItem)
+
+  return (
+    <div className="detail-links detail-links--pair">
+      {opinionUrl ? (
+        <a href={opinionUrl} rel="noreferrer" target="_blank">
+          Opinion
+        </a>
+      ) : (
+        <span className="detail-link-disabled">Opinion unavailable</span>
+      )}
+      {docketUrl ? (
+        <a href={docketUrl} rel="noreferrer" target="_blank">
+          Docket
+        </a>
+      ) : (
+        <span className="detail-link-disabled">Docket unavailable</span>
+      )}
+    </div>
+  )
+}
+
+function getSupremeCourtOfficialWording(caseItem: SupremeCourtCase) {
+  return supremeCourtCaseOfficialWording[caseItem.id] ?? []
 }
 
 function formatRollCallCategory(category: string) {
@@ -743,17 +980,19 @@ function buildDetailFacts(
 function SupremeCourtCaseMatrix({
   cases,
   eyebrow,
-  title,
   justices,
+  onOpenCase,
   onOpenPerson,
+  selectedCaseId,
   selectedPersonId,
   showScore = true,
 }: {
   cases: SupremeCourtCase[]
   eyebrow: string
-  title: string
   justices: GovernmentPerson[]
+  onOpenCase: (caseId: string) => void
   onOpenPerson: (personId: string) => void
+  selectedCaseId: string | null
   selectedPersonId: string | null
   showScore?: boolean
 }) {
@@ -769,10 +1008,9 @@ function SupremeCourtCaseMatrix({
     <section className="section-card case-section">
       <div className="section-card__header case-section__header">
         <div>
-          <p className="eyebrow">{eyebrow}</p>
-          <h2>{title}</h2>
+          <h2 className="case-section__title">{eyebrow}</h2>
         </div>
-        <p>{cases.length} Supreme Court cases. Click any justice row for the profile or any case header for the official source.</p>
+        <p>{cases.length} Supreme Court cases. Click any justice row for the profile or any case header for the case card.</p>
       </div>
 
       <div className="vote-matrix">
@@ -802,20 +1040,27 @@ function SupremeCourtCaseMatrix({
                   <span>{justices.length} justices</span>
                   <strong>{sortedCases.length} cases</strong>
                 </th>
-                {sortedCases.map((caseItem) => (
-                  <th className="vote-matrix__event" key={caseItem.id} scope="col">
-                    <a
-                      className="vote-matrix__event-link"
-                      href={caseItem.sourceUrl}
-                      rel="noreferrer"
-                      target="_blank"
-                      title={`${caseItem.caseName} • ${formatCaseDate(caseItem.date)} • ${caseItem.powerTag} • ${getTrumpCaseTypeLabel(caseItem.type)}`}
+                {sortedCases.map((caseItem) => {
+                  const isSelectedCase = selectedCaseId === caseItem.id
+
+                  return (
+                    <th
+                      className={`vote-matrix__event${isSelectedCase ? ' is-selected' : ''}`}
+                      key={caseItem.id}
+                      scope="col"
                     >
-                      <span className="vote-matrix__event-date">{formatCaseDate(caseItem.date)}</span>
-                      <span className="vote-matrix__event-category">{caseItem.powerTag}</span>
-                    </a>
-                  </th>
-                ))}
+                      <button
+                        className={`vote-matrix__event-link${isSelectedCase ? ' is-selected' : ''}`}
+                        onClick={() => onOpenCase(caseItem.id)}
+                        title={`${caseItem.caseName} • ${formatCaseDate(caseItem.date)} • ${caseItem.powerTag} • ${getTrumpCaseTypeLabel(caseItem.type)}`}
+                        type="button"
+                      >
+                        <span className="vote-matrix__event-date">{formatCaseDate(caseItem.date)}</span>
+                        <span className="vote-matrix__event-category">{caseItem.powerTag}</span>
+                      </button>
+                    </th>
+                  )
+                })}
               </tr>
             </thead>
             <tbody>
@@ -999,16 +1244,20 @@ function DetailPanel({
   person,
   rollCall,
   section,
+  supremeCourtCaseSelection,
   supremeCourtPersonalCases,
   supremeCourtCases,
+  judicialJustices,
 }: {
   branch: GovernmentBranch
   onClose: () => void
   person: GovernmentPerson | null
   rollCall: LegislativeTrumpRollCall | null
   section: BranchSection | null
+  supremeCourtCaseSelection: SupremeCourtCaseSelection | null
   supremeCourtPersonalCases: SupremeCourtCase[]
   supremeCourtCases: SupremeCourtCase[]
+  judicialJustices: GovernmentPerson[]
 }) {
   if (rollCall) {
     const voteTotals = formatRollCallVoteTotals(rollCall)
@@ -1101,6 +1350,103 @@ function DetailPanel({
     )
   }
 
+  if (supremeCourtCaseSelection) {
+    const { caseItem, groupLabel } = supremeCourtCaseSelection
+    const officialWording = getSupremeCourtOfficialWording(caseItem)
+    const proJustices = judicialJustices
+      .filter((justice) => caseItem.justiceStances[justice.id] === 'pro')
+      .map((justice) => getJusticeShortName(justice.name))
+    const antiJustices = judicialJustices
+      .filter((justice) => caseItem.justiceStances[justice.id] === 'anti')
+      .map((justice) => getJusticeShortName(justice.name))
+    const notOnCourtJustices = judicialJustices
+      .filter((justice) => caseItem.justiceStances[justice.id] === 'not_on_court')
+      .map((justice) => getJusticeShortName(justice.name))
+
+    return (
+      <aside className="detail-panel detail-panel--filled">
+        <button className="detail-close" onClick={onClose} type="button">
+          Close
+        </button>
+        <div className="detail-header detail-header--roll-call">
+          <div className="detail-header__copy">
+            <p className="eyebrow">Supreme Court Case</p>
+            <div className="detail-header__name-row">
+              <h2>{caseItem.caseName}</h2>
+            </div>
+            <p className="detail-title">
+              {formatCaseDate(caseItem.date)} • {getTrumpCaseTypeLabel(caseItem.type)}
+            </p>
+          </div>
+        </div>
+
+        <div className="detail-tags">
+          <span className="detail-tag">{groupLabel}</span>
+          <span className="detail-tag">{caseItem.powerTag}</span>
+          <span className="detail-tag">{getTrumpCaseTypeLabel(caseItem.type)}</span>
+        </div>
+
+        <p className="detail-description">{caseItem.issue}</p>
+
+        <div className="detail-facts">
+          <div className="fact-row">
+            <span>Collection</span>
+            <strong>{groupLabel}</strong>
+          </div>
+          <div className="fact-row">
+            <span>Tag</span>
+            <strong>{caseItem.powerTag}</strong>
+          </div>
+          <div className="fact-row">
+            <span>Type</span>
+            <strong>{getTrumpCaseTypeLabel(caseItem.type)}</strong>
+          </div>
+          <div className="fact-row">
+            <span>Current Court lineup</span>
+            <strong>
+              {proJustices.length} pro • {antiJustices.length} not pro • {notOnCourtJustices.length} not on Court
+            </strong>
+          </div>
+        </div>
+
+        <section className="detail-block">
+          <h3>Result</h3>
+          <p>{caseItem.result}</p>
+        </section>
+
+        {officialWording.length > 0 ? (
+          <section className="detail-block">
+            <h3>Official wording</h3>
+            <div className="detail-quote-list">
+              {officialWording.map((quote, index) => (
+                <p className="detail-quote" key={`${caseItem.id}-${index}`}>
+                  {quote}
+                </p>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        <section className="detail-block">
+          <h3>Current Court lineup</h3>
+          <p>
+            <strong>Pro Trump:</strong> {proJustices.length > 0 ? proJustices.join(', ') : 'None'}
+          </p>
+          <p>
+            <strong>Not pro Trump:</strong> {antiJustices.length > 0 ? antiJustices.join(', ') : 'None'}
+          </p>
+          {notOnCourtJustices.length > 0 ? (
+            <p>
+              <strong>Not on Court:</strong> {notOnCourtJustices.join(', ')}
+            </p>
+          ) : null}
+        </section>
+
+        <SupremeCourtCaseLinks caseItem={caseItem} />
+      </aside>
+    )
+  }
+
   if (!person || !section) {
     return (
       <aside className="detail-panel detail-panel--empty">
@@ -1108,8 +1454,8 @@ function DetailPanel({
           <p className="eyebrow">Profile Drawer</p>
           <h2>Select a person or roll call</h2>
           <p>
-            Click any person row, profile card, or Trump-linked roll call to open
-            the detail view here.
+            Click any person row, profile card, Supreme Court case, or Trump-linked roll
+            call to open the detail view here.
           </p>
         </div>
       </aside>
@@ -1248,9 +1594,7 @@ function DetailPanel({
                   <p>
                     <strong>Result:</strong> {caseItem.result}
                   </p>
-                  <a href={caseItem.sourceUrl} rel="noreferrer" target="_blank">
-                    Official source
-                  </a>
+                  <SupremeCourtCaseLinks caseItem={caseItem} />
                 </article>
               )
             })}
@@ -1282,9 +1626,7 @@ function DetailPanel({
                   <p>
                     <strong>Result:</strong> {caseItem.result}
                   </p>
-                  <a href={caseItem.sourceUrl} rel="noreferrer" target="_blank">
-                    Official source
-                  </a>
+                  <SupremeCourtCaseLinks caseItem={caseItem} />
                 </article>
               )
             })}
@@ -1518,6 +1860,7 @@ function App() {
   const [chamberFilter, setChamberFilter] = useState<ChamberFilter>('all')
   const [selectedStateCode, setSelectedStateCode] = useState<string | null>(null)
   const [selectedRollCallId, setSelectedRollCallId] = useState<string | null>(null)
+  const [selectedSupremeCourtCaseId, setSelectedSupremeCourtCaseId] = useState<string | null>(null)
 
   const deferredSearch = useDeferredValue(searchValue)
   const branches = dataset?.branches ?? []
@@ -1643,6 +1986,17 @@ function App() {
     selectedBranch?.id === 'legislative' && selectedRollCallId
       ? visibleRollCallEvents.find((event) => event.id === selectedRollCallId) ?? null
       : null
+  const selectedSupremeCourtCase =
+    selectedBranch?.id === 'judicial' && selectedSupremeCourtCaseId
+      ? (
+          [
+            { cases: supremeCourtCases, groupLabel: 'Trump Administration Cases' },
+            { cases: supremeCourtPersonalCases, groupLabel: 'Trump Personal Cases' },
+          ] as Array<{ cases: SupremeCourtCase[]; groupLabel: string }>
+        )
+          .flatMap(({ cases, groupLabel }) => cases.map((caseItem) => ({ caseItem, groupLabel })))
+          .find(({ caseItem }) => caseItem.id === selectedSupremeCourtCaseId) ?? null
+      : null
 
   useEffect(() => {
     let active = true
@@ -1681,6 +2035,10 @@ function App() {
 
     if (nextRoute.branchId !== 'legislative') {
       setSelectedRollCallId(null)
+    }
+
+    if (nextRoute.branchId !== 'judicial') {
+      setSelectedSupremeCourtCaseId(null)
     }
 
     setRoute(nextRoute)
@@ -1726,6 +2084,10 @@ function App() {
       setSelectedRollCallId(null)
     }
 
+    if (branchId !== 'judicial') {
+      setSelectedSupremeCourtCaseId(null)
+    }
+
     const nextHash = toHash(branchId, personId)
 
     if (window.location.hash === nextHash) {
@@ -1746,12 +2108,18 @@ function App() {
     }
 
     setSelectedRollCallId(null)
+    setSelectedSupremeCourtCaseId(null)
     startTransition(() => navigateTo(selectedBranch.id, personId))
   }
 
   function closePerson() {
     if (selectedRollCallId) {
       setSelectedRollCallId(null)
+      return
+    }
+
+    if (selectedSupremeCourtCaseId) {
+      setSelectedSupremeCourtCaseId(null)
       return
     }
 
@@ -1764,9 +2132,19 @@ function App() {
 
   function openRollCall(rollCallId: string) {
     setSelectedRollCallId(rollCallId)
+    setSelectedSupremeCourtCaseId(null)
 
     if (selectedBranch?.id === 'legislative' && route.personId) {
       startTransition(() => navigateTo('legislative'))
+    }
+  }
+
+  function openSupremeCourtCase(caseId: string) {
+    setSelectedSupremeCourtCaseId(caseId)
+    setSelectedRollCallId(null)
+
+    if (selectedBranch?.id === 'judicial' && route.personId) {
+      startTransition(() => navigateTo('judicial'))
     }
   }
 
@@ -1995,9 +2373,10 @@ function App() {
                   <SupremeCourtCaseMatrix
                     cases={supremeCourtCases}
                     eyebrow="Trump Administration Cases"
-                    title="How The Nine Justices Lined Up"
                     justices={judicialJustices}
+                    onOpenCase={openSupremeCourtCase}
                     onOpenPerson={openPerson}
+                    selectedCaseId={selectedSupremeCourtCaseId}
                     selectedPersonId={selectedPerson?.id ?? null}
                   />
                 ) : null}
@@ -2005,9 +2384,10 @@ function App() {
                   <SupremeCourtCaseMatrix
                     cases={supremeCourtPersonalCases}
                     eyebrow="Trump Personal Cases"
-                    title="How The Nine Justices Lined Up"
                     justices={judicialJustices}
+                    onOpenCase={openSupremeCourtCase}
                     onOpenPerson={openPerson}
+                    selectedCaseId={selectedSupremeCourtCaseId}
                     selectedPersonId={selectedPerson?.id ?? null}
                     showScore={false}
                   />
@@ -2019,10 +2399,12 @@ function App() {
 
         <DetailPanel
           branch={selectedBranch}
+          judicialJustices={judicialJustices}
           onClose={closePerson}
           person={selectedPerson}
           rollCall={selectedRollCall}
           section={selectedSection}
+          supremeCourtCaseSelection={selectedSupremeCourtCase}
           supremeCourtPersonalCases={supremeCourtPersonalCases}
           supremeCourtCases={supremeCourtCases}
         />

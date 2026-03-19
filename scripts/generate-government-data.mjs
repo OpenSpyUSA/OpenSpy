@@ -1925,8 +1925,7 @@ const supremeCourtTrumpAdministrationCases = [
       'judicial-ketanji-brown-jackson': 'anti',
     },
     powerTag: 'Passports',
-    result:
-      'The Court granted the administration stay relief; Jackson dissented, joined by Sotomayor and Kagan.',
+    result: 'The Court granted the administration stay relief.',
     sourceUrl: 'https://www.supremecourt.gov/opinions/25pdf/25a319_i4dj.pdf',
   },
   {
@@ -1992,8 +1991,7 @@ const supremeCourtTrumpAdministrationCases = [
       'judicial-ketanji-brown-jackson': 'anti',
     },
     powerTag: 'Education',
-    result:
-      'The Court granted the administration stay relief; Sotomayor dissented, joined by Kagan and Jackson.',
+    result: 'The Court granted the administration stay relief.',
     sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1203_new_6j37.pdf',
   },
   {
@@ -2061,8 +2059,7 @@ const supremeCourtTrumpAdministrationCases = [
       'judicial-ketanji-brown-jackson': 'anti',
     },
     powerTag: 'Deportation',
-    result:
-      'The Court granted the administration stay relief; Sotomayor dissented, joined by Kagan and Jackson.',
+    result: 'The Court granted the administration stay relief.',
     sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1153_l5gm.pdf',
   },
   {
@@ -2084,8 +2081,7 @@ const supremeCourtTrumpAdministrationCases = [
       'judicial-ketanji-brown-jackson': 'anti',
     },
     powerTag: 'Immigration',
-    result:
-      'The Court granted the administration stay relief; Jackson dissented, joined by Sotomayor.',
+    result: 'The Court granted the administration stay relief.',
     sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1079_p86b.pdf',
   },
   {
@@ -2268,7 +2264,7 @@ const supremeCourtTrumpAdministrationCases = [
     },
     powerTag: 'Immigration',
     result:
-      'The Court granted the administration’s stay application and allowed the policy to remain in effect during the appeal; Sotomayor would have denied.',
+      'The Court granted the administration’s stay application and allowed the policy to remain in effect during the appeal.',
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a960.html',
   },
   {
@@ -2290,8 +2286,7 @@ const supremeCourtTrumpAdministrationCases = [
       'judicial-ketanji-brown-jackson': 'not_on_court',
     },
     powerTag: 'Immigration',
-    result:
-      'The Court granted the stay and allowed the public-charge rule to take effect pending appeal; Ginsburg, Breyer, Sotomayor, and Kagan would have denied.',
+    result: 'The Court granted the stay and allowed the public-charge rule to take effect pending appeal.',
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a785.html',
   },
   {
@@ -2313,8 +2308,7 @@ const supremeCourtTrumpAdministrationCases = [
       'judicial-ketanji-brown-jackson': 'not_on_court',
     },
     powerTag: 'Asylum',
-    result:
-      'The Court granted the stay and let the asylum rule take effect nationwide during the appeal; Sotomayor, joined by Ginsburg, dissented.',
+    result: 'The Court granted the stay and let the asylum rule take effect nationwide during the appeal.',
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a230.html',
   },
   {
@@ -2405,8 +2399,7 @@ const supremeCourtTrumpAdministrationCases = [
       'judicial-ketanji-brown-jackson': 'not_on_court',
     },
     powerTag: 'Asylum',
-    result:
-      'The Court denied the stay request; Thomas, Alito, Gorsuch, and Kavanaugh would have granted it.',
+    result: 'The Court denied the stay request.',
     sourceUrl: 'https://www.supremecourt.gov/orders/courtorders/122118zr_986b.pdf',
   },
   {
@@ -2499,8 +2492,7 @@ const supremeCourtTrumpPersonalCases = [
       'judicial-ketanji-brown-jackson': 'anti',
     },
     powerTag: 'Criminal',
-    result:
-      "The Court denied Trump's stay application; Thomas, Alito, Gorsuch, and Kavanaugh would have granted it.",
+    result: "The Court denied Trump's stay application.",
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/24a666.html',
   },
   {
@@ -2522,8 +2514,7 @@ const supremeCourtTrumpPersonalCases = [
       'judicial-ketanji-brown-jackson': 'not_on_court',
     },
     powerTag: 'Election',
-    result:
-      'The Court denied expedition before the election; Alito, joined by Thomas and Gorsuch, would have moved faster, and Barrett took no part.',
+    result: 'The Court denied expedition before the election.',
     sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/20-542_i3dj.pdf',
   },
   {
@@ -2590,8 +2581,7 @@ const supremeCourtTrumpPersonalCases = [
       'judicial-ketanji-brown-jackson': 'not_on_court',
     },
     powerTag: 'Election',
-    result:
-      'The Court denied certiorari; Thomas dissented, and Alito, joined by Gorsuch, separately dissented from the denial.',
+    result: 'The Court denied certiorari.',
     sourceUrl: 'https://www.supremecourt.gov/opinions/20pdf/20-542_2c83.pdf',
   },
   {
@@ -2681,8 +2671,7 @@ const supremeCourtTrumpPersonalCases = [
       'judicial-ketanji-brown-jackson': 'not_on_court',
     },
     powerTag: 'Election',
-    result:
-      'The Court refused the case for lack of standing; Alito, joined by Thomas, said only that they would have allowed the bill of complaint to be filed, without granting other relief.',
+    result: 'The Court refused the case for lack of standing.',
     sourceUrl:
       'https://www.supremecourt.gov/search.aspx?filename=%2Fdocket%2Fdocketfiles%2Fhtml%2Fpublic%2F22o155.html',
   },
