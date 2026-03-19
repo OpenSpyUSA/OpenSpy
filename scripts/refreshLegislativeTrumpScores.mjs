@@ -6,10 +6,6 @@ import {
   houseTrumpRollCallPool,
   senateTrumpRollCallPool,
 } from './legislativeTrumpRollCalls.mjs'
-import {
-  getLegislativeRollCallWeight,
-  LEGISLATIVE_WEIGHTING_NOTE,
-} from './legislativeTrumpWeights.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const datasetPath = resolve(__dirname, '../public/data/governmentData.json')
@@ -118,10 +114,6 @@ function clampTrumpScore(score) {
 
 function clampTrumpScoreToSingleDecimal(score) {
   return Number(clampTrumpScore(score).toFixed(1))
-}
-
-function formatWeightedValue(value) {
-  return Number(value.toFixed(2)).toString()
 }
 
 function uniqueStrings(items) {
@@ -519,9 +511,6 @@ async function main() {
       proVotes: 0,
       rollCallPositions: {},
       sampleSize: 0,
-      weightedAntiVotes: 0,
-      weightedProVotes: 0,
-      weightedSampleSize: 0,
     })
   }
 
@@ -558,17 +547,13 @@ async function main() {
 
         const isProTrump =
           normalizeLegislativeCast(cast) === normalizeLegislativeCast(snapshot.proTrumpCast)
-        const weight = getLegislativeRollCallWeight(snapshot)
         metrics.sampleSize += 1
-        metrics.weightedSampleSize += weight
         metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
 
         if (isProTrump) {
           metrics.proVotes += 1
-          metrics.weightedProVotes += weight
         } else {
           metrics.antiVotes += 1
-          metrics.weightedAntiVotes += weight
         }
 
         if (snapshot.highlight && metrics.evidence.length < 4) {
@@ -616,17 +601,13 @@ async function main() {
       const isProTrump =
         normalizeLegislativeCast(matchedEntry.cast) ===
         normalizeLegislativeCast(snapshot.proTrumpCast)
-      const weight = getLegislativeRollCallWeight(snapshot)
       metrics.sampleSize += 1
-      metrics.weightedSampleSize += weight
       metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
 
       if (isProTrump) {
         metrics.proVotes += 1
-        metrics.weightedProVotes += weight
       } else {
         metrics.antiVotes += 1
-        metrics.weightedAntiVotes += weight
       }
 
       if (snapshot.highlight && metrics.evidence.length < 4) {
@@ -649,13 +630,12 @@ async function main() {
     }
 
     const derivedScore =
-      metrics.weightedSampleSize === 0
+      metrics.sampleSize === 0
         ? 0
-        : clampTrumpScoreToSingleDecimal((metrics.weightedProVotes / metrics.weightedSampleSize) * 10)
+        : clampTrumpScoreToSingleDecimal((metrics.proVotes / metrics.sampleSize) * 10)
     const confidence = getLegislativeTrumpConfidence(metrics.sampleSize, metrics.availableEvents)
     const noteParts = [
-      `Score is derived from weighted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls on this site: ${formatWeightedValue(metrics.weightedProVotes)}/${formatWeightedValue(metrics.weightedSampleSize)} weighted vote-equivalents on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
-      LEGISLATIVE_WEIGHTING_NOTE,
+      `Score is derived from high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls on this site: ${metrics.proVotes}/${metrics.sampleSize} counted votes on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
     ]
 
     if (metrics.notInOfficeCount > 0) {
@@ -672,10 +652,8 @@ async function main() {
       trumpAvailableEvents: metrics.availableEvents,
       trumpConfidence: confidence,
       trumpEvidence: uniqueStrings([
-        `${metrics.proVotes} raw Pro Trump votes and ${metrics.antiVotes} raw Not pro Trump votes across ${metrics.sampleSize} counted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
-        `${formatWeightedValue(metrics.weightedProVotes)} weighted Pro Trump vote-equivalents and ${formatWeightedValue(metrics.weightedAntiVotes)} weighted Not pro Trump vote-equivalents across ${formatWeightedValue(metrics.weightedSampleSize)} weighted counted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
+        `${metrics.proVotes} Pro Trump votes and ${metrics.antiVotes} Not pro Trump votes across ${metrics.sampleSize} counted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
         `Sample size: ${metrics.sampleSize} of ${metrics.availableEvents} high-signal scored votes. Confidence: ${confidence}.`,
-        LEGISLATIVE_WEIGHTING_NOTE,
         metrics.notInOfficeCount > 0
           ? `Not in office for ${metrics.notInOfficeCount} high-signal scored votes.`
           : null,
@@ -718,7 +696,6 @@ async function main() {
       sourceUrl: snapshot.sourceUrl,
       title: snapshot.title,
       trumpOutcome: snapshot.trumpOutcome,
-      weight: getLegislativeRollCallWeight(snapshot),
       yeaTotal: snapshot.yeaTotal,
     })),
     senateCandidateCount: senateTrumpRollCallPool.length,

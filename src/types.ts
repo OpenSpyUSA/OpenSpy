@@ -80,7 +80,6 @@ export interface LegislativeTrumpRollCall {
   sourceUrl: string
   title: string
   trumpOutcome?: 'anti' | 'pro'
-  weight: number
   yeaTotal?: number
 }
 

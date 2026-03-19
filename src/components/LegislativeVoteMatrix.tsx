@@ -72,10 +72,6 @@ function formatRollCallVoteTotals(event: LegislativeTrumpRollCall) {
   return `${event.yeaTotal}Y ${event.nayTotal}N`
 }
 
-function formatRollCallWeight(event: LegislativeTrumpRollCall) {
-  return `Weight ${event.weight.toFixed(2)}`
-}
-
 function formatRollCallSignalTier(event: LegislativeTrumpRollCall) {
   return event.signalTier === 'broad_admin_related'
     ? 'Broad administration-related'
@@ -213,7 +209,6 @@ export function LegislativeVoteMatrix({
                 (() => {
                   const countsLabel = formatRollCallVoteTotals(event)
                   const isSelected = selectedRollCallId === event.id
-                  const weightLabel = formatRollCallWeight(event)
                   const scopeLabel = formatRollCallSignalTier(event)
 
                   return (
@@ -232,7 +227,7 @@ export function LegislativeVoteMatrix({
                         onClick={() => onOpenRollCall(event.id)}
                         title={`${event.label} • ${formatRollCallMatrixDateLabel(event)} • ${scopeLabel} • ${getRollCallOutcomeLabel(event.trumpOutcome)}${
                           countsLabel ? ` • ${countsLabel}` : ''
-                        }${event.scoreIncluded ? ` • ${weightLabel}` : ' • Browser only'}`}
+                        }${event.scoreIncluded ? ' • Counts in Trump score' : ' • Browser only'}`}
                         type="button"
                       >
                         <span className="vote-matrix__event-date">
