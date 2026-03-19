@@ -1118,11 +1118,26 @@ const senateCandidateExtras = [
   senate('senate-nielsen-dhs-confirm', 115, 1, 305, 'immigration', {
     label: 'Kirstjen Nielsen confirmation',
   }),
+  senate('senate-azar-hhs-cloture', 115, 2, 20, 'health-care', {
+    label: 'Alex Azar cloture',
+  }),
+  senate('senate-azar-hhs-confirm', 115, 2, 21, 'health-care', {
+    label: 'Alex Azar confirmation',
+  }),
+  senate('senate-powell-fed-cloture', 115, 2, 18, 'nominations', {
+    label: 'Jerome Powell cloture',
+  }),
+  senate('senate-powell-fed-confirm', 115, 2, 19, 'nominations', {
+    label: 'Jerome Powell confirmation',
+  }),
   senate('senate-pompeo-state-cloture', 115, 2, 83, 'nominations', {
     label: 'Mike Pompeo State cloture',
   }),
   senate('senate-pompeo-state-confirm', 115, 2, 84, 'nominations', {
     label: 'Mike Pompeo State confirmation',
+  }),
+  senate('senate-grenell-germany-confirm', 115, 2, 85, 'nominations', {
+    label: 'Richard Grenell confirmation',
   }),
   senate('senate-haspel-cia-cloture', 115, 2, 100, 'nominations', {
     label: 'Gina Haspel cloture',
@@ -1130,11 +1145,80 @@ const senateCandidateExtras = [
   senate('senate-haspel-cia-confirm', 115, 2, 101, 'nominations', {
     label: 'Gina Haspel confirmation',
   }),
+  senate('senate-wilkie-va-confirm', 115, 2, 163, 'nominations', {
+    label: 'Robert Wilkie confirmation',
+  }),
+  senate('senate-bridenstine-nasa-cloture', 115, 2, 78, 'nominations', {
+    label: 'James Bridenstine cloture',
+  }),
+  senate('senate-bridenstine-nasa-confirm', 115, 2, 80, 'nominations', {
+    label: 'James Bridenstine confirmation',
+  }),
+  senate('senate-jelena-mcwilliams-fdic-cloture', 115, 2, 107, 'nominations', {
+    label: 'Jelena McWilliams cloture',
+  }),
+  senate('senate-jelena-mcwilliams-fdic-confirm', 115, 2, 109, 'nominations', {
+    label: 'Jelena McWilliams confirmation',
+  }),
+  senate('senate-quarles-fed-cloture', 115, 2, 157, 'nominations', {
+    label: 'Randal Quarles cloture',
+  }),
+  senate('senate-quarles-fed-confirm', 115, 2, 158, 'nominations', {
+    label: 'Randal Quarles confirmation',
+  }),
+  senate('senate-clarida-fed-cloture', 115, 2, 196, 'nominations', {
+    label: 'Richard Clarida cloture',
+  }),
+  senate('senate-clarida-fed-confirm', 115, 2, 197, 'nominations', {
+    label: 'Richard Clarida confirmation',
+  }),
+  senate('senate-roisman-sec-cloture', 115, 2, 201, 'nominations', {
+    label: 'Elad Roisman cloture',
+  }),
+  senate('senate-roisman-sec-confirm', 115, 2, 202, 'nominations', {
+    label: 'Elad Roisman confirmation',
+  }),
+  senate('senate-rettig-irs-cloture', 115, 2, 205, 'nominations', {
+    label: 'Charles Rettig cloture',
+  }),
+  senate('senate-rettig-irs-confirm', 115, 2, 206, 'nominations', {
+    label: 'Charles Rettig confirmation',
+  }),
+  senate('senate-kraninger-cfpb-cloture', 115, 2, 252, 'nominations', {
+    label: 'Kathleen Kraninger cloture',
+  }),
+  senate('senate-kraninger-cfpb-confirm', 115, 2, 255, 'nominations', {
+    label: 'Kathleen Kraninger confirmation',
+  }),
+  senate('senate-mcnamee-ferc-cloture', 115, 2, 253, 'nominations', {
+    label: 'Bernard McNamee cloture',
+  }),
+  senate('senate-mcnamee-ferc-confirm', 115, 2, 254, 'nominations', {
+    label: 'Bernard McNamee confirmation',
+  }),
+  senate('senate-muzinich-treasury-cloture', 115, 2, 256, 'nominations', {
+    label: 'Justin Muzinich cloture',
+  }),
+  senate('senate-muzinich-treasury-confirm', 115, 2, 257, 'nominations', {
+    label: 'Justin Muzinich confirmation',
+  }),
   senate('senate-barr-ag-cloture', 116, 1, 23, 'nominations', {
     label: 'William Barr cloture',
   }),
   senate('senate-barr-ag-confirm', 116, 1, 24, 'nominations', {
     label: 'William Barr confirmation',
+  }),
+  senate('senate-wheeler-epa-cloture', 116, 1, 32, 'nominations', {
+    label: 'Andrew Wheeler EPA cloture',
+  }),
+  senate('senate-wheeler-epa-confirm', 116, 1, 33, 'nominations', {
+    label: 'Andrew Wheeler EPA confirmation',
+  }),
+  senate('senate-calabria-fhfa-cloture', 116, 1, 63, 'nominations', {
+    label: 'Mark Calabria cloture',
+  }),
+  senate('senate-calabria-fhfa-confirm', 116, 1, 64, 'nominations', {
+    label: 'Mark Calabria confirmation',
   }),
   senate('senate-bernhardt-interior-cloture', 116, 1, 76, 'nominations', {
     label: 'David Bernhardt cloture',
@@ -1142,11 +1226,164 @@ const senateCandidateExtras = [
   senate('senate-bernhardt-interior-confirm', 116, 1, 77, 'nominations', {
     label: 'David Bernhardt confirmation',
   }),
+  senate('senate-kimberly-reed-exim-cloture', 116, 1, 96, 'nominations', {
+    label: 'Kimberly Reed cloture',
+  }),
+  senate('senate-kimberly-reed-exim-confirm', 116, 1, 100, 'nominations', {
+    label: 'Kimberly Reed confirmation',
+  }),
+  senate('senate-jeffrey-rosen-dag-cloture', 116, 1, 113, 'nominations', {
+    label: 'Jeffrey Rosen cloture',
+  }),
+  senate('senate-jeffrey-rosen-dag-confirm', 116, 1, 116, 'nominations', {
+    label: 'Jeffrey Rosen confirmation',
+  }),
+  senate('senate-tarbert-cftc-chair-cloture', 116, 1, 135, 'nominations', {
+    label: 'Heath Tarbert cloture',
+  }),
+  senate('senate-tarbert-cftc-chair-confirm', 116, 1, 138, 'nominations', {
+    label: 'Heath Tarbert confirmation',
+  }),
+  senate('senate-peter-wright-epa-cloture', 116, 1, 202, 'nominations', {
+    label: 'Peter Wright cloture',
+  }),
+  senate('senate-peter-wright-epa-confirm', 116, 1, 203, 'nominations', {
+    label: 'Peter Wright confirmation',
+  }),
   senate('senate-esper-defense-cloture', 116, 1, 219, 'nominations', {
     label: 'Mark Esper cloture',
   }),
   senate('senate-esper-defense-confirm', 116, 1, 220, 'nominations', {
     label: 'Mark Esper confirmation',
+  }),
+  senate('senate-stephen-dickson-faa-cloture', 116, 1, 221, 'nominations', {
+    label: 'Stephen Dickson cloture',
+  }),
+  senate('senate-stephen-dickson-faa-confirm', 116, 1, 225, 'nominations', {
+    label: 'Stephen Dickson confirmation',
+  }),
+  senate('senate-kelly-craft-un-cloture', 116, 1, 252, 'nominations', {
+    label: 'Kelly Craft U.N. ambassador cloture',
+  }),
+  senate('senate-kelly-craft-un-confirm', 116, 1, 259, 'nominations', {
+    label: 'Kelly Craft U.N. ambassador confirmation',
+  }),
+  senate('senate-kelly-craft-ga-cloture', 116, 1, 263, 'nominations', {
+    label: 'Kelly Craft U.N. sessions cloture',
+  }),
+  senate('senate-kelly-craft-ga-confirm', 116, 1, 264, 'nominations', {
+    label: 'Kelly Craft U.N. sessions confirmation',
+  }),
+  senate('senate-andrew-saul-ssa-cloture', 116, 1, 131, 'nominations', {
+    label: 'Andrew Saul cloture',
+  }),
+  senate('senate-andrew-saul-ssa-confirm', 116, 1, 133, 'nominations', {
+    label: 'Andrew Saul confirmation',
+  }),
+  senate('senate-scalia-labor-cloture', 116, 1, 309, 'nominations', {
+    label: 'Eugene Scalia cloture',
+  }),
+  senate('senate-scalia-labor-confirm', 116, 1, 313, 'nominations', {
+    label: 'Eugene Scalia confirmation',
+  }),
+  senate('senate-stephen-hahn-fda-cloture', 116, 1, 393, 'health-care', {
+    label: 'Stephen Hahn cloture',
+  }),
+  senate('senate-stephen-hahn-fda-confirm', 116, 1, 397, 'health-care', {
+    label: 'Stephen Hahn confirmation',
+  }),
+  senate('senate-stephen-biegun-confirm', 116, 1, 426, 'nominations', {
+    label: 'Stephen Biegun confirmation',
+  }),
+  senate('senate-brouillette-energy-cloture', 116, 1, 366, 'nominations', {
+    label: 'Dan Brouillette cloture',
+  }),
+  senate('senate-brouillette-energy-confirm', 116, 1, 367, 'nominations', {
+    label: 'Dan Brouillette confirmation',
+  }),
+  senate('senate-chad-wolf-cloture', 116, 1, 353, 'immigration', {
+    label: 'Chad Wolf cloture',
+  }),
+  senate('senate-chad-wolf-confirm', 116, 1, 354, 'immigration', {
+    label: 'Chad Wolf confirmation',
+  }),
+  senate('senate-carranza-sba-cloture', 116, 2, 1, 'nominations', {
+    label: 'Jovita Carranza cloture',
+  }),
+  senate('senate-carranza-sba-confirm', 116, 2, 2, 'nominations', {
+    label: 'Jovita Carranza confirmation',
+  }),
+  senate('senate-paul-ray-oira-cloture', 116, 2, 9, 'nominations', {
+    label: 'Paul Ray cloture',
+  }),
+  senate('senate-paul-ray-oira-confirm', 116, 2, 10, 'nominations', {
+    label: 'Paul Ray confirmation',
+  }),
+  senate('senate-peter-gaynor-fema-cloture', 116, 2, 11, 'nominations', {
+    label: 'Peter Gaynor cloture',
+  }),
+  senate('senate-peter-gaynor-fema-confirm', 116, 2, 12, 'nominations', {
+    label: 'Peter Gaynor confirmation',
+  }),
+  senate('senate-ratcliffe-dni-confirm-2020', 116, 2, 101, 'nominations', {
+    label: 'John Ratcliffe DNI confirmation',
+  }),
+  senate('senate-evanina-ncsc-cloture', 116, 2, 82, 'nominations', {
+    label: 'William Evanina cloture',
+  }),
+  senate('senate-evanina-ncsc-confirm', 116, 2, 83, 'nominations', {
+    label: 'William Evanina confirmation',
+  }),
+  senate('senate-james-trainor-fec-cloture', 116, 2, 95, 'nominations', {
+    label: 'James Trainor cloture',
+  }),
+  senate('senate-james-trainor-fec-confirm', 116, 2, 96, 'nominations', {
+    label: 'James Trainor confirmation',
+  }),
+  senate('senate-michael-pack-cloture', 116, 2, 112, 'nominations', {
+    label: 'Michael Pack cloture',
+  }),
+  senate('senate-michael-pack-confirm', 116, 2, 113, 'nominations', {
+    label: 'Michael Pack confirmation',
+  }),
+  senate('senate-waller-fed-cloture', 116, 2, 247, 'nominations', {
+    label: 'Christopher Waller cloture',
+  }),
+  senate('senate-waller-fed-confirm', 116, 2, 251, 'nominations', {
+    label: 'Christopher Waller confirmation',
+  }),
+  senate('senate-simington-fcc-cloture', 116, 2, 255, 'nominations', {
+    label: 'Nathan Simington cloture',
+  }),
+  senate('senate-simington-fcc-confirm', 116, 2, 257, 'nominations', {
+    label: 'Nathan Simington confirmation',
+  }),
+  senate('senate-keith-bass-confirm', 119, 2, 1, 'nominations', {
+    label: 'Keith Bass confirmation',
+  }),
+  senate('senate-joshua-simmons-confirm', 119, 2, 2, 'nominations', {
+    label: 'Joshua Simmons confirmation',
+  }),
+  senate('senate-sara-bailey-confirm', 119, 2, 3, 'nominations', {
+    label: 'Sara Bailey confirmation',
+  }),
+  senate('senate-daniel-burrows-cloture', 119, 2, 33, 'nominations', {
+    label: 'Daniel Burrows cloture',
+  }),
+  senate('senate-daniel-burrows-confirm', 119, 2, 34, 'nominations', {
+    label: 'Daniel Burrows confirmation',
+  }),
+  senate('senate-john-deleeuw-cloture', 119, 2, 40, 'nominations', {
+    label: 'John DeLeeuw cloture',
+  }),
+  senate('senate-john-deleeuw-confirm', 119, 2, 41, 'nominations', {
+    label: 'John DeLeeuw confirmation',
+  }),
+  senate('senate-ryan-mccormack-cloture', 119, 2, 42, 'nominations', {
+    label: 'Ryan McCormack cloture',
+  }),
+  senate('senate-ryan-mccormack-confirm', 119, 2, 43, 'nominations', {
+    label: 'Ryan McCormack confirmation',
   }),
   senate('senate-obamacare-2017-4', 115, 1, 4, 'health-care', {
     label: 'Protect Medicare and Medicaid amendment',

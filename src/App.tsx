@@ -112,32 +112,21 @@ const supremeCourtCaseOpinionOverrides = new Map<string, string>([
   ['learning-resources-v-trump', 'https://www.supremecourt.gov/opinions/25pdf/24-1287_new_3135.pdf'],
   ['trump-v-illinois', 'https://www.supremecourt.gov/opinions/25pdf/25a443_new_b07d.pdf'],
   ['trump-v-jgg', 'https://www.supremecourt.gov/opinions/24pdf/604us2r25_7648.pdf'],
-  ['trump-v-sierra-club-2019-stay', 'https://www.supremecourt.gov/opinions/18pdf/19a60_o75p.pdf'],
   ['dhs-v-thuraissigiam', 'https://www.supremecourt.gov/opinions/19pdf/591us1r48_9o6b.pdf'],
   ['trump-v-sierra-club', 'https://www.supremecourt.gov/opinions/19pdf/19a60_bqm1.pdf'],
   ['dhs-v-new-york-public-charge', 'https://www.supremecourt.gov/opinions/19pdf/19a785_j4ek.pdf'],
   ['barr-v-east-bay-sanctuary-covenant', 'https://www.supremecourt.gov/opinions/18pdf/19a230_k53l.pdf'],
-  ['trump-v-hawaii', 'https://www.supremecourt.gov/opinions/boundvolumes/585BV.pdf#page=699'],
+  ['trump-v-hawaii', 'https://www.supremecourt.gov/opinions/preliminaryprint/585US2PP_final.pdf#page=172'],
   ['trump-v-vance', 'https://www.supremecourt.gov/opinions/19pdf/591us2r59_g3bi.pdf'],
   ['trump-v-mazars', 'https://www.supremecourt.gov/opinions/19pdf/591us2r60_lkgm.pdf'],
   ['trump-v-deutsche-bank', 'https://www.supremecourt.gov/opinions/19pdf/591us2r60_lkgm.pdf'],
 ])
 
 const supremeCourtCaseDocketOverrides = new Map<string, string>([
-  ['aarp-v-trump', 'https://www.supremecourt.gov/docket/docketfiles/html/public/24a1007.html'],
-  ['aarp-v-trump-interim-order', 'https://www.supremecourt.gov/docket/docketfiles/html/public/24a1007.html'],
-  ['trump-v-sierra-club-2019-stay', 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a60.html'],
   ['trump-v-east-bay-sanctuary-covenant', 'https://www.supremecourt.gov/docket/docketfiles/html/public/18a615.html'],
   ['republican-party-of-pa-v-degraffenreid', 'https://www.supremecourt.gov/docket/docketfiles/html/public/20-542.html'],
   ['texas-v-pennsylvania', 'https://www.supremecourt.gov/search.aspx?filename=%2Fdocket%2Fdocketfiles%2Fhtml%2Fpublic%2F22o155.html'],
 ])
-
-const supremeCourtCaseOpinionMeta: Partial<Record<string, { label: string, note?: string }>> = {
-  'trump-v-deutsche-bank': {
-    label: 'Opinion (Mazars companion)',
-    note: 'The Supreme Court published this consolidated merits opinion under the lead case Trump v. Mazars USA, LLP.',
-  },
-}
 
 const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   'learning-resources-v-trump': [
@@ -149,9 +138,13 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   ],
   'trump-v-illinois': [
     'The application for stay is denied.',
+    'Justice Kavanaugh, concurring in the judgment.',
+    'Justice Alito, with whom Justice Thomas joins, dissenting.',
+    'Justice Gorsuch, dissenting.',
   ],
   'trump-v-orr': [
     'The application for stay presented to JUSTICE JACKSON and by her referred to the Court is granted.',
+    'JUSTICE JACKSON, with whom JUSTICE SOTOMAYOR and JUSTICE KAGAN join, dissenting from the grant of application for stay.',
   ],
   'trump-v-slaughter': [
     'The application for stay presented to THE CHIEF JUSTICE and by him referred to the Court is granted.',
@@ -332,10 +325,21 @@ const confirmedSupremeCourtJusticeIdsByCase: Record<string, string[]> = {
     'judicial-samuel-a-alito-jr',
     'judicial-neil-m-gorsuch',
   ],
+  'trump-v-illinois': [
+    'judicial-clarence-thomas',
+    'judicial-samuel-a-alito-jr',
+    'judicial-neil-m-gorsuch',
+    'judicial-brett-m-kavanaugh',
+  ],
   'trump-v-irap': [
     'judicial-clarence-thomas',
     'judicial-samuel-a-alito-jr',
     'judicial-neil-m-gorsuch',
+  ],
+  'trump-v-orr': [
+    'judicial-sonia-sotomayor',
+    'judicial-elena-kagan',
+    'judicial-ketanji-brown-jackson',
   ],
   'trump-v-sierra-club': [
     'judicial-sonia-sotomayor',

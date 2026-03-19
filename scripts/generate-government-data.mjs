@@ -2108,11 +2108,11 @@ const supremeCourtTrumpAdministrationCases = [
   },
   {
     caseName: 'A.A.R.P. v. Trump',
-    date: '2025-04-19',
+    date: '2025-05-16',
     id: 'aarp-v-trump',
     type: 'order',
     issue:
-      "Alien Enemies Act removals. The case addressed emergency relief against deportations tied to Trump's March 2025 proclamation.",
+      "Alien Enemies Act removals. The case asked whether detainees could obtain injunction relief against removals tied to Trump's March 2025 proclamation while the litigation continued.",
     justiceStances: {
       'judicial-john-g-roberts-jr': 'anti',
       'judicial-clarence-thomas': 'pro',
@@ -2126,7 +2126,30 @@ const supremeCourtTrumpAdministrationCases = [
     },
     powerTag: 'Deportation',
     result:
-      'The Court temporarily barred the Government from removing the putative class until further order.',
+      'The Court granted an injunction pending further proceedings, vacated the Fifth Circuit, and remanded.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1007_g2bh.pdf',
+  },
+  {
+    caseName: 'A.A.R.P. v. Trump',
+    date: '2025-04-19',
+    id: 'aarp-v-trump-interim-order',
+    type: 'order',
+    issue:
+      "Alien Enemies Act removals. The case asked whether the Court should immediately halt removals tied to Trump's March 2025 proclamation while emergency briefing continued.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Deportation',
+    result:
+      'The Court ordered the Government not to remove any putative class member until further order.',
     sourceUrl: 'https://www.supremecourt.gov/opinions/24pdf/24a1007_22p3.pdf',
   },
   {
@@ -2243,6 +2266,29 @@ const supremeCourtTrumpAdministrationCases = [
     result:
       'The Court denied a motion to lift its stay, leaving the administration free to keep using the funds while the case proceeded.',
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a60.html',
+  },
+  {
+    caseName: 'Trump v. Sierra Club',
+    date: '2019-07-26',
+    id: 'trump-v-sierra-club-2019-stay',
+    type: 'order',
+    issue:
+      'Border wall funding transfer. The case asked whether Trump could begin using diverted military funds for wall construction while the appeal continued.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Appropriations',
+    result:
+      'The Court granted the administration stay application and let the funding transfer proceed while the appeal continued.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/18pdf/19a60_o75p.pdf',
   },
   {
     caseName: 'Wolf v. Innovation Law Lab',
