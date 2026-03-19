@@ -541,14 +541,15 @@ async function main() {
           continue
         }
 
+        const isProTrump =
+          normalizeLegislativeCast(cast) === normalizeLegislativeCast(snapshot.proTrumpCast)
+        metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
+
         if (snapshot.scoreIncluded === false) {
           continue
         }
 
-        const isProTrump =
-          normalizeLegislativeCast(cast) === normalizeLegislativeCast(snapshot.proTrumpCast)
         metrics.sampleSize += 1
-        metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
 
         if (isProTrump) {
           metrics.proVotes += 1
@@ -594,15 +595,16 @@ async function main() {
         continue
       }
 
+      const isProTrump =
+        normalizeLegislativeCast(matchedEntry.cast) ===
+        normalizeLegislativeCast(snapshot.proTrumpCast)
+      metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
+
       if (snapshot.scoreIncluded === false) {
         continue
       }
 
-      const isProTrump =
-        normalizeLegislativeCast(matchedEntry.cast) ===
-        normalizeLegislativeCast(snapshot.proTrumpCast)
       metrics.sampleSize += 1
-      metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
 
       if (isProTrump) {
         metrics.proVotes += 1

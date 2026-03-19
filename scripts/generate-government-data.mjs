@@ -3484,12 +3484,14 @@ async function buildTrumpRelationshipContext(senators, representatives) {
           continue
         }
 
+        const isProTrump =
+          normalizeLegislativeCast(cast) === normalizeLegislativeCast(snapshot.proTrumpCast)
+        metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
+
         if (snapshot.scoreIncluded === false) {
           continue
         }
 
-        const isProTrump =
-          normalizeLegislativeCast(cast) === normalizeLegislativeCast(snapshot.proTrumpCast)
         if (isProTrump) {
           metrics.proVotes += 1
         } else {
@@ -3497,7 +3499,6 @@ async function buildTrumpRelationshipContext(senators, representatives) {
         }
 
         metrics.sampleSize += 1
-        metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
 
         if (snapshot.highlight && metrics.evidence.length < 4) {
           metrics.evidence.push(
@@ -3537,13 +3538,15 @@ async function buildTrumpRelationshipContext(senators, representatives) {
         continue
       }
 
+      const isProTrump =
+        normalizeLegislativeCast(matchedEntry.cast) ===
+        normalizeLegislativeCast(snapshot.proTrumpCast)
+      metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
+
       if (snapshot.scoreIncluded === false) {
         continue
       }
 
-      const isProTrump =
-        normalizeLegislativeCast(matchedEntry.cast) ===
-        normalizeLegislativeCast(snapshot.proTrumpCast)
       if (isProTrump) {
         metrics.proVotes += 1
       } else {
@@ -3551,7 +3554,6 @@ async function buildTrumpRelationshipContext(senators, representatives) {
       }
 
       metrics.sampleSize += 1
-      metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
 
       if (snapshot.highlight && metrics.evidence.length < 4) {
         metrics.evidence.push(
