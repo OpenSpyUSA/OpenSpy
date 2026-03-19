@@ -177,13 +177,8 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
     'The application for stay presented to THE CHIEF JUSTICE and by him referred to the Court is granted.',
   ],
   'aarp-v-trump': [
-    'The application for an injunction pending further proceedings is granted.',
-    'JUSTICE KAVANAUGH, concurring.',
+    'The Court ordered "[t]he Government" not to remove a "putative class of detainees" until this Court issues a superseding order.',
     'JUSTICE ALITO, with whom JUSTICE THOMAS joins, dissenting.',
-  ],
-  'aarp-v-trump-interim-order': [
-    'The Government is directed not to remove any member of the putative class of detainees from the United States until further order of this Court.',
-    'Justice Thomas and Justice Alito dissent from the Court’s order.',
   ],
   'trump-v-jgg': [
     'The application to vacate the orders issued by the United States District Court for the District of Columbia is granted.',
@@ -193,19 +188,13 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   ],
   'trump-v-new-york': [
     'PER CURIAM. Every ten years, the Nation undertakes an "Enumeration" of its population...',
-    'Justice Breyer, with whom Justice Sotomayor and Justice Kagan join, dissenting.',
+    'JUSTICE BREYER, with whom JUSTICE SOTOMAYOR and JUSTICE KAGAN join, dissenting.',
   ],
   'dhs-v-thuraissigiam': [
     'ALITO, J., delivered the opinion of the Court, in which ROBERTS, C. J., and THOMAS, GORSUCH, and KAVANAUGH, JJ., joined.',
   ],
   'trump-v-sierra-club': [
-    'The motion to lift stay is denied.',
-    'JUSTICE BREYER, with whom JUSTICE GINSBURG, JUSTICE SOTOMAYOR, and JUSTICE KAGAN join, dissenting from denial of motion to lift stay.',
-  ],
-  'trump-v-sierra-club-2019-stay': [
     'The application for stay presented to JUSTICE KAGAN and by her referred to the Court is granted.',
-    'JUSTICE GINSBURG, JUSTICE SOTOMAYOR, and JUSTICE KAGAN would deny the application.',
-    'JUSTICE BREYER, concurring in part and dissenting in part from grant of stay.',
   ],
   'wolf-v-innovation-law-lab': [
     'Application (19A960) granted by the Court.',
@@ -232,7 +221,7 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
     'Justice Thomas, Justice Alito, Justice Gorsuch, and Justice Kavanaugh would grant the application for stay.',
   ],
   'trump-v-hawaii': [
-    'Roberts, C. J., delivered the opinion of the Court, in which Kennedy, Thomas, Alito, and Gorsuch, JJ., joined.',
+    'ROBERTS, C. J., delivered the opinion of the Court, in which KENNEDY, THOMAS, ALITO, and GORSUCH, JJ., joined.',
   ],
   'trump-v-hawaii-2017-stay': [
     'The application for stay of mandate presented to Justice Kennedy and by him referred to the Court is granted...',
@@ -251,16 +240,13 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
     'Statement of JUSTICE ALITO, with whom JUSTICE THOMAS and JUSTICE GORSUCH join.',
   ],
   'trump-v-anderson': [
-    "Because the Constitution makes Congress, rather than the States, responsible for enforcing Section 3 against federal officeholders and candidates, the Colorado Supreme Court erred in ordering former President Trump excluded from Colorado's 2024 Presidential primary ballot.",
+    'Because the Constitution makes Congress, rather than the States, responsible for enforcing Section 3 against federal officeholders and candidates, we reverse.',
   ],
   'trump-v-thompson': [
     'The application for stay of mandate and injunction pending review presented to THE CHIEF JUSTICE and by him referred to the Court is denied.',
-    'JUSTICE THOMAS would grant the application.',
-    'Statement of JUSTICE KAVANAUGH respecting denial of application.',
   ],
   'republican-party-of-pa-v-degraffenreid': [
     'The petitions for writs of certiorari are denied.',
-    'THOMAS, J., dissenting.',
   ],
   'trump-v-vance': [
     'ROBERTS, C. J., delivered the opinion of the Court, in which GINSBURG, BREYER, SOTOMAYOR, and KAGAN, JJ., joined.',
@@ -274,84 +260,6 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   'texas-v-pennsylvania': [
     "The State of Texas's motion for leave to file a bill of complaint is denied for lack of standing under Article III of the Constitution.",
     'Statement of Justice Alito, with whom Justice Thomas joins: I would therefore grant the motion to file the bill of complaint but would not grant other relief.',
-  ],
-}
-
-const inferredSupremeCourtCaseIds = new Set<string>([
-  'aarp-v-trump',
-  'aarp-v-trump-interim-order',
-  'barr-v-east-bay-sanctuary-covenant',
-  'dhs-v-dvd',
-  'mcmahon-v-new-york',
-  'republican-party-of-pa-v-boockvar-expedition',
-  'republican-party-of-pa-v-degraffenreid',
-  'texas-v-pennsylvania',
-  'trump-v-hawaii-2017-stay',
-  'trump-v-illinois',
-  'trump-v-irap',
-  'trump-v-jgg',
-  'trump-v-orr',
-  'trump-v-sierra-club',
-  'trump-v-sierra-club-2019-stay',
-  'trump-v-thompson',
-  'trump-v-wilcox',
-  'wolf-v-innovation-law-lab',
-])
-
-const confirmedSupremeCourtJusticeIdsByCase: Record<string, string[]> = {
-  'aarp-v-trump': [
-    'judicial-clarence-thomas',
-    'judicial-samuel-a-alito-jr',
-    'judicial-brett-m-kavanaugh',
-  ],
-  'aarp-v-trump-interim-order': [
-    'judicial-clarence-thomas',
-    'judicial-samuel-a-alito-jr',
-  ],
-  'republican-party-of-pa-v-boockvar-expedition': [
-    'judicial-clarence-thomas',
-    'judicial-samuel-a-alito-jr',
-    'judicial-neil-m-gorsuch',
-  ],
-  'republican-party-of-pa-v-degraffenreid': [
-    'judicial-clarence-thomas',
-  ],
-  'texas-v-pennsylvania': [
-    'judicial-clarence-thomas',
-    'judicial-samuel-a-alito-jr',
-  ],
-  'trump-v-hawaii-2017-stay': [
-    'judicial-clarence-thomas',
-    'judicial-samuel-a-alito-jr',
-    'judicial-neil-m-gorsuch',
-  ],
-  'trump-v-illinois': [
-    'judicial-clarence-thomas',
-    'judicial-samuel-a-alito-jr',
-    'judicial-neil-m-gorsuch',
-    'judicial-brett-m-kavanaugh',
-  ],
-  'trump-v-irap': [
-    'judicial-clarence-thomas',
-    'judicial-samuel-a-alito-jr',
-    'judicial-neil-m-gorsuch',
-  ],
-  'trump-v-orr': [
-    'judicial-sonia-sotomayor',
-    'judicial-elena-kagan',
-    'judicial-ketanji-brown-jackson',
-  ],
-  'trump-v-sierra-club': [
-    'judicial-sonia-sotomayor',
-    'judicial-elena-kagan',
-  ],
-  'trump-v-sierra-club-2019-stay': [
-    'judicial-sonia-sotomayor',
-    'judicial-elena-kagan',
-  ],
-  'trump-v-thompson': [
-    'judicial-clarence-thomas',
-    'judicial-brett-m-kavanaugh',
   ],
 }
 
@@ -411,30 +319,24 @@ function getSupremeCourtCaseDocketUrl(caseItem: SupremeCourtCase) {
 function SupremeCourtCaseLinks({ caseItem }: { caseItem: SupremeCourtCase }) {
   const opinionUrl = getSupremeCourtCaseOpinionUrl(caseItem)
   const docketUrl = getSupremeCourtCaseDocketUrl(caseItem)
-  const opinionMeta = supremeCourtCaseOpinionMeta[caseItem.id]
 
   return (
-    <>
-      <div className="detail-links detail-links--pair">
-        {opinionUrl ? (
-          <a href={opinionUrl} rel="noreferrer" target="_blank">
-            {opinionMeta?.label ?? 'Opinion'}
-          </a>
-        ) : (
-          <span className="detail-link-disabled">Opinion unavailable</span>
-        )}
-        {docketUrl ? (
-          <a href={docketUrl} rel="noreferrer" target="_blank">
-            Docket
-          </a>
-        ) : (
-          <span className="detail-link-disabled">Docket unavailable</span>
-        )}
-      </div>
-      {opinionMeta?.note ? (
-        <p className="detail-links-note">{opinionMeta.note}</p>
-      ) : null}
-    </>
+    <div className="detail-links detail-links--pair">
+      {opinionUrl ? (
+        <a href={opinionUrl} rel="noreferrer" target="_blank">
+          Opinion
+        </a>
+      ) : (
+        <span className="detail-link-disabled">Opinion unavailable</span>
+      )}
+      {docketUrl ? (
+        <a href={docketUrl} rel="noreferrer" target="_blank">
+          Docket
+        </a>
+      ) : (
+        <span className="detail-link-disabled">Docket unavailable</span>
+      )}
+    </div>
   )
 }
 
@@ -1232,18 +1134,11 @@ function SupremeCourtCaseMatrix({
                     </th>
                     {sortedCases.map((caseItem) => {
                       const stance = caseItem.justiceStances[justice.id] ?? 'not_on_court'
-                      const confirmedJusticeIds = confirmedSupremeCourtJusticeIdsByCase[caseItem.id] ?? []
-                      const isInferred = (
-                        inferredSupremeCourtCaseIds.has(caseItem.id) &&
-                        stance !== 'not_on_court' &&
-                        !confirmedJusticeIds.includes(justice.id)
-                      )
-                      const titleSuffix = isInferred ? ' • Inferred lineup' : ''
                       return (
                         <td className="vote-matrix__cell" key={`${justice.id}-${caseItem.id}`}>
                           <span
-                            className={`vote-cell vote-cell--${stance}${isInferred ? ' vote-cell--inferred' : ''}`}
-                            title={`${justice.name} • ${caseItem.caseName} • ${getTrumpCaseStanceLabel(stance)}${titleSuffix}`}
+                            className={`vote-cell vote-cell--${stance}`}
+                            title={`${justice.name} • ${caseItem.caseName} • ${getTrumpCaseStanceLabel(stance)}`}
                           />
                         </td>
                       )
