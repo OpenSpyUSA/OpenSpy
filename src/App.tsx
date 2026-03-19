@@ -1055,11 +1055,6 @@ function DetailPanel({
           <p>{narrative.stage}</p>
         </section>
 
-        <section className="detail-block">
-          <h3>Why it counts here</h3>
-          <p>{narrative.trumpLink}</p>
-        </section>
-
         {rollCall.title !== rollCall.label ? (
           <section className="detail-block">
             <h3>Official title</h3>
