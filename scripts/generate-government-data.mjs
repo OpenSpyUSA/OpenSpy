@@ -2232,6 +2232,29 @@ const supremeCourtTrumpPowerCases = [
 
 const supremeCourtTrumpPersonalCases = [
   {
+    caseName: 'Trump v. New York',
+    date: '2025-01-09',
+    id: 'trump-v-new-york-criminal-stay',
+    type: 'order',
+    issue:
+      'State criminal sentencing stay. The case asked whether Trump could halt sentencing in the New York criminal case while his immunity and evidentiary objections continued on appeal.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'anti',
+    },
+    powerTag: 'Criminal',
+    result:
+      "The Court denied Trump's stay application; Thomas, Alito, Gorsuch, and Kavanaugh would have granted it.",
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/24a666.html',
+  },
+  {
     caseName: 'Trump v. Anderson',
     date: '2024-03-04',
     id: 'trump-v-anderson',
@@ -2320,6 +2343,29 @@ const supremeCourtTrumpPersonalCases = [
     result:
       "The Court rejected Trump's categorical position and sent the dispute back under a new separation-of-powers test.",
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-715.html',
+  },
+  {
+    caseName: 'Trump v. Deutsche Bank AG',
+    date: '2020-07-09',
+    id: 'trump-v-deutsche-bank',
+    type: 'merits',
+    issue:
+      "Congressional subpoenas to Trump's lenders. The case asked whether House committees could obtain Trump-related financial records from Deutsche Bank and Capital One.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Finance',
+    result:
+      "The Court rejected Trump's categorical position and vacated the judgment, remanding under the same separation-of-powers framework used in Mazars.",
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-760.html',
   },
 ]
 
