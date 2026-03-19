@@ -86,12 +86,12 @@ function getJusticeShortName(name: string) {
   return parts[parts.length - 1] ?? cleaned
 }
 
-function getTrumpCaseStanceLabel(side: TrumpCaseSide) {
+function getTrumpCaseStanceLabel(side: TrumpCaseSide, inferred = false) {
   switch (side) {
     case 'pro':
-      return 'Pro Trump'
+      return inferred ? 'Pro Trump?' : 'Pro Trump'
     case 'anti':
-      return 'Not pro Trump'
+      return inferred ? 'Not pro Trump?' : 'Not pro Trump'
     case 'not_on_court':
       return 'Not on Court'
   }
@@ -244,9 +244,12 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   ],
   'trump-v-thompson': [
     'The application for stay of mandate and injunction pending review presented to THE CHIEF JUSTICE and by him referred to the Court is denied.',
+    'JUSTICE THOMAS would grant the application.',
+    'Statement of JUSTICE KAVANAUGH respecting the denial of the application.',
   ],
   'republican-party-of-pa-v-degraffenreid': [
     'The petitions for writs of certiorari are denied.',
+    'THOMAS, J., dissenting.',
   ],
   'trump-v-vance': [
     'ROBERTS, C. J., delivered the opinion of the Court, in which GINSBURG, BREYER, SOTOMAYOR, and KAGAN, JJ., joined.',
@@ -262,6 +265,140 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
     'Statement of Justice Alito, with whom Justice Thomas joins: I would therefore grant the motion to file the bill of complaint but would not grant other relief.',
   ],
 }
+
+const inferredSupremeCourtCaseIds = new Set<string>([
+  'aarp-v-trump',
+  'aarp-v-trump-interim-order',
+  'barr-v-east-bay-sanctuary-covenant',
+  'dhs-v-dvd',
+  'dhs-v-new-york-public-charge',
+  'mcmahon-v-new-york',
+  'noem-v-doe',
+  'republican-party-of-pa-v-boockvar-expedition',
+  'republican-party-of-pa-v-degraffenreid',
+  'texas-v-pennsylvania',
+  'trump-v-afge',
+  'trump-v-east-bay-sanctuary-covenant',
+  'trump-v-hawaii-2017-stay',
+  'trump-v-illinois',
+  'trump-v-irap',
+  'trump-v-jgg',
+  'trump-v-new-york-criminal-stay',
+  'trump-v-orr',
+  'trump-v-sierra-club',
+  'trump-v-sierra-club-2019-stay',
+  'trump-v-slaughter',
+  'trump-v-thompson',
+  'trump-v-wilcox',
+  'trump-v-boyle',
+  'wolf-v-innovation-law-lab',
+])
+
+const confirmedSupremeCourtJusticeIdsByCase = new Map<string, Set<string>>([
+  [
+    'aarp-v-trump',
+    new Set([
+      'judicial-clarence-thomas',
+      'judicial-samuel-a-alito-jr',
+      'judicial-brett-m-kavanaugh',
+    ]),
+  ],
+  [
+    'aarp-v-trump-interim-order',
+    new Set(['judicial-clarence-thomas', 'judicial-samuel-a-alito-jr']),
+  ],
+  [
+    'dhs-v-new-york-public-charge',
+    new Set(['judicial-clarence-thomas', 'judicial-neil-m-gorsuch']),
+  ],
+  [
+    'noem-v-doe',
+    new Set(['judicial-sonia-sotomayor']),
+  ],
+  [
+    'republican-party-of-pa-v-boockvar-expedition',
+    new Set([
+      'judicial-clarence-thomas',
+      'judicial-samuel-a-alito-jr',
+      'judicial-neil-m-gorsuch',
+    ]),
+  ],
+  [
+    'republican-party-of-pa-v-degraffenreid',
+    new Set(['judicial-clarence-thomas']),
+  ],
+  [
+    'texas-v-pennsylvania',
+    new Set(['judicial-clarence-thomas', 'judicial-samuel-a-alito-jr']),
+  ],
+  [
+    'trump-v-afge',
+    new Set(['judicial-sonia-sotomayor', 'judicial-ketanji-brown-jackson']),
+  ],
+  [
+    'trump-v-east-bay-sanctuary-covenant',
+    new Set([
+      'judicial-clarence-thomas',
+      'judicial-samuel-a-alito-jr',
+      'judicial-neil-m-gorsuch',
+      'judicial-brett-m-kavanaugh',
+    ]),
+  ],
+  [
+    'trump-v-hawaii-2017-stay',
+    new Set([
+      'judicial-clarence-thomas',
+      'judicial-samuel-a-alito-jr',
+      'judicial-neil-m-gorsuch',
+    ]),
+  ],
+  [
+    'trump-v-illinois',
+    new Set([
+      'judicial-clarence-thomas',
+      'judicial-samuel-a-alito-jr',
+      'judicial-neil-m-gorsuch',
+      'judicial-brett-m-kavanaugh',
+    ]),
+  ],
+  [
+    'trump-v-irap',
+    new Set([
+      'judicial-clarence-thomas',
+      'judicial-samuel-a-alito-jr',
+      'judicial-neil-m-gorsuch',
+    ]),
+  ],
+  [
+    'trump-v-new-york-criminal-stay',
+    new Set([
+      'judicial-clarence-thomas',
+      'judicial-samuel-a-alito-jr',
+      'judicial-neil-m-gorsuch',
+      'judicial-brett-m-kavanaugh',
+    ]),
+  ],
+  [
+    'trump-v-orr',
+    new Set([
+      'judicial-sonia-sotomayor',
+      'judicial-elena-kagan',
+      'judicial-ketanji-brown-jackson',
+    ]),
+  ],
+  [
+    'trump-v-sierra-club',
+    new Set(['judicial-sonia-sotomayor', 'judicial-elena-kagan']),
+  ],
+  [
+    'trump-v-sierra-club-2019-stay',
+    new Set(['judicial-sonia-sotomayor', 'judicial-elena-kagan']),
+  ],
+  [
+    'trump-v-thompson',
+    new Set(['judicial-clarence-thomas', 'judicial-brett-m-kavanaugh']),
+  ],
+])
 
 function isSupremeCourtOpinionUrl(url: string) {
   return url.includes('/opinions/') || url.includes('/orders/courtorders/')
@@ -342,6 +479,62 @@ function SupremeCourtCaseLinks({ caseItem }: { caseItem: SupremeCourtCase }) {
 
 function getSupremeCourtOfficialWording(caseItem: SupremeCourtCase) {
   return supremeCourtCaseOfficialWording[caseItem.id] ?? []
+}
+
+function isInferredSupremeCourtJusticeStance(caseItem: SupremeCourtCase, justiceId: string) {
+  const stance = caseItem.justiceStances[justiceId] ?? 'not_on_court'
+
+  if (stance === 'not_on_court' || !inferredSupremeCourtCaseIds.has(caseItem.id)) {
+    return false
+  }
+
+  return !confirmedSupremeCourtJusticeIdsByCase.get(caseItem.id)?.has(justiceId)
+}
+
+function getSupremeCourtJusticeLineupBySide(
+  caseItem: SupremeCourtCase,
+  judicialJustices: GovernmentPerson[],
+  side: Exclude<TrumpCaseSide, 'not_on_court'>,
+) {
+  return judicialJustices
+    .filter((justice) => caseItem.justiceStances[justice.id] === side)
+    .map((justice) => ({
+      inferred: isInferredSupremeCourtJusticeStance(caseItem, justice.id),
+      name: getJusticeShortName(justice.name),
+    }))
+}
+
+function getSupremeCourtNotOnCourtLineup(caseItem: SupremeCourtCase, judicialJustices: GovernmentPerson[]) {
+  return judicialJustices
+    .filter((justice) => caseItem.justiceStances[justice.id] === 'not_on_court')
+    .map((justice) => getJusticeShortName(justice.name))
+}
+
+function formatSupremeCourtJusticeList(
+  lineup: Array<{
+    inferred: boolean
+    name: string
+  }>,
+) {
+  return lineup.length > 0
+    ? lineup.map(({ inferred, name }) => `${name}${inferred ? '?' : ''}`).join(', ')
+    : 'None'
+}
+
+function formatSupremeCourtLineupCount(
+  countLabel: string,
+  confirmedCount: number,
+  inferredCount: number,
+) {
+  if (confirmedCount > 0 && inferredCount > 0) {
+    return `${confirmedCount} ${countLabel} + ${inferredCount} ${countLabel}?`
+  }
+
+  if (inferredCount > 0) {
+    return `${inferredCount} ${countLabel}?`
+  }
+
+  return `${confirmedCount} ${countLabel}`
 }
 
 function formatRollCallCategory(category: string) {
@@ -1117,11 +1310,12 @@ function SupremeCourtCaseMatrix({
                     </th>
                     {sortedCases.map((caseItem) => {
                       const stance = caseItem.justiceStances[justice.id] ?? 'not_on_court'
+                      const inferred = isInferredSupremeCourtJusticeStance(caseItem, justice.id)
                       return (
                         <td className="vote-matrix__cell" key={`${justice.id}-${caseItem.id}`}>
                           <span
-                            className={`vote-cell vote-cell--${stance}`}
-                            title={`${justice.name} • ${caseItem.caseName} • ${getTrumpCaseStanceLabel(stance)}`}
+                            className={`vote-cell vote-cell--${stance}${inferred ? ' vote-cell--inferred' : ''}`}
+                            title={`${justice.name} • ${caseItem.caseName} • ${getTrumpCaseStanceLabel(stance, inferred)}`}
                           />
                         </td>
                       )
@@ -1357,15 +1551,13 @@ function DetailPanel({
   if (supremeCourtCaseSelection) {
     const { caseItem, groupLabel } = supremeCourtCaseSelection
     const officialWording = getSupremeCourtOfficialWording(caseItem)
-    const proJustices = judicialJustices
-      .filter((justice) => caseItem.justiceStances[justice.id] === 'pro')
-      .map((justice) => getJusticeShortName(justice.name))
-    const antiJustices = judicialJustices
-      .filter((justice) => caseItem.justiceStances[justice.id] === 'anti')
-      .map((justice) => getJusticeShortName(justice.name))
-    const notOnCourtJustices = judicialJustices
-      .filter((justice) => caseItem.justiceStances[justice.id] === 'not_on_court')
-      .map((justice) => getJusticeShortName(justice.name))
+    const proJustices = getSupremeCourtJusticeLineupBySide(caseItem, judicialJustices, 'pro')
+    const antiJustices = getSupremeCourtJusticeLineupBySide(caseItem, judicialJustices, 'anti')
+    const notOnCourtJustices = getSupremeCourtNotOnCourtLineup(caseItem, judicialJustices)
+    const confirmedProCount = proJustices.filter((justice) => !justice.inferred).length
+    const inferredProCount = proJustices.length - confirmedProCount
+    const confirmedAntiCount = antiJustices.filter((justice) => !justice.inferred).length
+    const inferredAntiCount = antiJustices.length - confirmedAntiCount
 
     return (
       <aside className="detail-panel detail-panel--filled">
@@ -1408,7 +1600,9 @@ function DetailPanel({
           <div className="fact-row">
             <span>Current Court lineup</span>
             <strong>
-              {proJustices.length} pro • {antiJustices.length} not pro • {notOnCourtJustices.length} not on Court
+              {formatSupremeCourtLineupCount('pro', confirmedProCount, inferredProCount)} •{' '}
+              {formatSupremeCourtLineupCount('not pro', confirmedAntiCount, inferredAntiCount)} •{' '}
+              {notOnCourtJustices.length} not on Court
             </strong>
           </div>
         </div>
@@ -1434,10 +1628,10 @@ function DetailPanel({
         <section className="detail-block">
           <h3>Current Court lineup</h3>
           <p>
-            <strong>Pro Trump:</strong> {proJustices.length > 0 ? proJustices.join(', ') : 'None'}
+            <strong>Pro Trump:</strong> {formatSupremeCourtJusticeList(proJustices)}
           </p>
           <p>
-            <strong>Not pro Trump:</strong> {antiJustices.length > 0 ? antiJustices.join(', ') : 'None'}
+            <strong>Not pro Trump:</strong> {formatSupremeCourtJusticeList(antiJustices)}
           </p>
           {notOnCourtJustices.length > 0 ? (
             <p>
@@ -1580,6 +1774,7 @@ function DetailPanel({
           <div className="justice-case-list">
             {judicialCases.map((caseItem) => {
               const stance = caseItem.justiceStances[person.id]
+              const inferred = isInferredSupremeCourtJusticeStance(caseItem, person.id)
 
               return (
                 <article className="justice-case-item" key={`${person.id}-${caseItem.id}`}>
@@ -1591,7 +1786,7 @@ function DetailPanel({
                       </p>
                     </div>
                     <span className={`case-stance-chip case-stance-chip--${stance}`}>
-                      {getTrumpCaseStanceLabel(stance)}
+                      {getTrumpCaseStanceLabel(stance, inferred)}
                     </span>
                   </div>
                   <p>{caseItem.issue}</p>
@@ -1612,6 +1807,7 @@ function DetailPanel({
           <div className="justice-case-list">
             {judicialPersonalCases.map((caseItem) => {
               const stance = caseItem.justiceStances[person.id]
+              const inferred = isInferredSupremeCourtJusticeStance(caseItem, person.id)
 
               return (
                 <article className="justice-case-item" key={`${person.id}-${caseItem.id}`}>
@@ -1623,7 +1819,7 @@ function DetailPanel({
                       </p>
                     </div>
                     <span className={`case-stance-chip case-stance-chip--${stance}`}>
-                      {getTrumpCaseStanceLabel(stance)}
+                      {getTrumpCaseStanceLabel(stance, inferred)}
                     </span>
                   </div>
                   <p>{caseItem.issue}</p>
