@@ -2945,10 +2945,6 @@ function clampTrumpScoreToSingleDecimal(score) {
   return Math.max(0, Math.min(10, Math.round((score + Number.EPSILON) * 10) / 10))
 }
 
-function formatWeightedValue(value) {
-  return Number(value.toFixed(2)).toString()
-}
-
 function judicialTrumpLabelFromScore(score) {
   if (score >= 9) {
     return 'Very often pro-Trump in selected cases'
@@ -3458,9 +3454,6 @@ async function buildTrumpRelationshipContext(senators, representatives) {
       proVotes: 0,
       rollCallPositions: {},
       sampleSize: 0,
-      weightedAntiVotes: 0,
-      weightedProVotes: 0,
-      weightedSampleSize: 0,
     })
   }
 
