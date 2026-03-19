@@ -1226,7 +1226,7 @@ function DetailPanel({
 
       {judicialCases.length > 0 ? (
         <section className="detail-block">
-          <h3>Administration Cases</h3>
+          <h3>Trump Administration Cases</h3>
           <div className="justice-case-list">
             {judicialCases.map((caseItem) => {
               const stance = caseItem.justiceStances[person.id]
@@ -1260,7 +1260,7 @@ function DetailPanel({
 
       {judicialPersonalCases.length > 0 ? (
         <section className="detail-block">
-          <h3>Personal Cases</h3>
+          <h3>Trump Personal Cases</h3>
           <div className="justice-case-list">
             {judicialPersonalCases.map((caseItem) => {
               const stance = caseItem.justiceStances[person.id]
@@ -1994,7 +1994,7 @@ function App() {
                 {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
                   <SupremeCourtCaseMatrix
                     cases={supremeCourtCases}
-                    eyebrow="Administration Cases"
+                    eyebrow="Trump Administration Cases"
                     title="How The Nine Justices Lined Up"
                     justices={judicialJustices}
                     onOpenPerson={openPerson}
@@ -2004,7 +2004,7 @@ function App() {
                 {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
                   <SupremeCourtCaseMatrix
                     cases={supremeCourtPersonalCases}
-                    eyebrow="Personal Cases"
+                    eyebrow="Trump Personal Cases"
                     title="How The Nine Justices Lined Up"
                     justices={judicialJustices}
                     onOpenPerson={openPerson}
