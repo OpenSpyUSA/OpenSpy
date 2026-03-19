@@ -66,6 +66,7 @@ type AudienceMode = 'citizen' | 'observer'
 
 const JUDICIAL_INFERENCE_NOTE =
   "A ? means this justice's stance is inferred from the Court's result or a partial public statement, rather than fully listed justice-by-justice in the official text."
+const AUDIENCE_MODE_STORAGE_KEY = 'open-spy-audience-mode'
 
 const HOME_AUDIENCE_COPY: Record<
   AudienceMode,
@@ -85,6 +86,27 @@ const HOME_AUDIENCE_COPY: Record<
     eyebrow: 'Observer View',
     title: "Let's spy on the U.S. government.",
   },
+}
+
+function isAudienceMode(value: string | null): value is AudienceMode {
+  return value === 'citizen' || value === 'observer'
+}
+
+function readStoredAudienceMode() {
+  try {
+    const storedValue = window.localStorage.getItem(AUDIENCE_MODE_STORAGE_KEY)
+    return isAudienceMode(storedValue) ? storedValue : null
+  } catch {
+    return null
+  }
+}
+
+function storeAudienceMode(mode: AudienceMode) {
+  try {
+    window.localStorage.setItem(AUDIENCE_MODE_STORAGE_KEY, mode)
+  } catch {
+    // Ignore storage failures and keep the in-memory selection.
+  }
 }
 
 function createPartyCounts(): Record<Alignment, number> {
@@ -2195,7 +2217,7 @@ function App() {
   const datasetUrl = `${import.meta.env.BASE_URL}data/governmentData.json`
   const [dataset, setDataset] = useState<GovernmentDataset | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [audienceMode, setAudienceMode] = useState<AudienceMode | null>(null)
+  const [audienceMode, setAudienceMode] = useState<AudienceMode | null>(() => readStoredAudienceMode())
   const [route, setRoute] = useState<RouteState>(() => parseHash(window.location.hash))
   const [isResettingLegislative, setIsResettingLegislative] = useState(false)
   const [searchValue, setSearchValue] = useState('')
@@ -2519,8 +2541,13 @@ function App() {
     startTransition(() => navigateTo('legislative'))
   }
 
+  function handleAudienceSelect(mode: AudienceMode) {
+    storeAudienceMode(mode)
+    setAudienceMode(mode)
+  }
+
   if (!audienceMode) {
-    return <EntryGate onSelect={setAudienceMode} />
+    return <EntryGate onSelect={handleAudienceSelect} />
   }
 
   if (loadError) {
