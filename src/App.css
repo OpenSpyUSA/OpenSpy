@@ -1099,10 +1099,19 @@
     rgba(255, 255, 255, 0.72);
 }
 
+.agency-directory__source-copy {
+  display: grid;
+  gap: 8px;
+}
+
 .agency-directory__source p {
   margin: 0;
   max-width: 56ch;
   color: var(--ink-soft);
+}
+
+.agency-directory__vpn-note {
+  color: #8a5a00;
 }
 
 .agency-directory__source a {

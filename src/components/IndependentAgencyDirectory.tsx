@@ -104,9 +104,15 @@ export function IndependentAgencyDirectory({
       </div>
 
       <div className="agency-directory__source">
-        <p>
-          This is a site taxonomy for readability, not an official federal taxonomy.
-        </p>
+        <div className="agency-directory__source-copy">
+          <p>
+            This is a site taxonomy for readability, not an official federal taxonomy.
+          </p>
+          <p className="agency-directory__vpn-note">
+            Some official agency websites may deny access outside the United States. If a
+            link is blocked, try a U.S. VPN.
+          </p>
+        </div>
         <a href={INDEPENDENT_AGENCY_SOURCE_URL} rel="noreferrer" target="_blank">
           {INDEPENDENT_AGENCY_SOURCE_LABEL}
         </a>
