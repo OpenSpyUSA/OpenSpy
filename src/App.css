@@ -671,6 +671,11 @@
   align-items: start;
 }
 
+.case-section__title {
+  font-size: clamp(2.1rem, 3vw, 3.05rem);
+  line-height: 0.98;
+}
+
 .vacancy-section {
   gap: 20px;
 }
@@ -777,20 +782,24 @@
   min-height: 28px;
   padding: 0 10px;
   border-radius: 999px;
-  border: 1px solid rgba(17, 34, 58, 0.08);
+  border: 1px solid rgba(29, 29, 31, 0.08);
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
 
 .vote-matrix__scope-pill--scored {
-  background: color-mix(in srgb, var(--republican) 8%, rgba(255, 255, 255, 0.92));
-  color: color-mix(in srgb, var(--republican) 74%, var(--ink));
+  background: rgba(29, 29, 31, 0.08);
+  border-color: rgba(29, 29, 31, 0.12);
+  color: var(--ink);
+  font-weight: 800;
 }
 
 .vote-matrix__scope-pill--broad {
-  background: color-mix(in srgb, var(--democratic) 8%, rgba(255, 255, 255, 0.92));
-  color: color-mix(in srgb, var(--democratic) 74%, var(--ink));
+  background: rgba(29, 29, 31, 0.04);
+  border-color: rgba(29, 29, 31, 0.08);
+  color: rgba(29, 29, 31, 0.58);
+  font-weight: 700;
 }
 
 .vote-matrix__legend {
@@ -965,15 +974,16 @@
   font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: color-mix(in srgb, var(--event-tone) 72%, var(--ink-soft));
+  color: var(--ink-soft);
 }
 
 .vote-matrix__event-scope--scored {
-  color: color-mix(in srgb, var(--republican) 72%, var(--ink-soft));
+  color: var(--ink);
+  font-weight: 800;
 }
 
 .vote-matrix__event-scope--broad {
-  color: color-mix(in srgb, var(--democratic) 72%, var(--ink-soft));
+  color: rgba(29, 29, 31, 0.56);
 }
 
 .vote-matrix__event-counts {
