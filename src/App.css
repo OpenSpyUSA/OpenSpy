@@ -115,7 +115,8 @@
 .entry-choice {
   appearance: none;
   display: grid;
-  gap: 8px;
+  place-items: center;
+  min-height: 220px;
   padding: 22px;
   border-radius: 26px;
   border: 1px solid rgba(17, 34, 58, 0.1);
@@ -123,7 +124,7 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.68)),
     rgba(255, 255, 255, 0.72);
   color: var(--ink);
-  text-align: left;
+  text-align: center;
   cursor: pointer;
   transition:
     transform 180ms ease,
@@ -141,15 +142,12 @@
     0 18px 34px rgba(15, 23, 42, 0.08);
 }
 
-.entry-choice strong {
+.entry-choice__label {
   font-family: var(--display);
-  font-size: 1.28rem;
-  line-height: 1.02;
+  font-size: clamp(2.9rem, 8vw, 5.8rem);
+  line-height: 0.9;
   letter-spacing: -0.04em;
-}
-
-.entry-choice span:last-child {
-  color: var(--ink-soft);
+  font-weight: 700;
 }
 
 .entry-choice--citizen {
@@ -162,19 +160,6 @@
   background:
     radial-gradient(circle at top left, rgba(255, 90, 82, 0.12), transparent 30%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 247, 246, 0.82));
-}
-
-.entry-choice__eyebrow {
-  display: inline-flex;
-  width: fit-content;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid rgba(17, 34, 58, 0.08);
 }
 
 .hero-pills {

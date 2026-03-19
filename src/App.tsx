@@ -1536,30 +1536,21 @@ function EntryGate({ onSelect }: { onSelect: (mode: AudienceMode) => void }) {
   return (
     <main className="screen screen--entry">
       <section className="hero-card hero-card--entry">
-        <p className="eyebrow">OpenSpy USA</p>
         <h1>Are you a U.S. citizen?</h1>
-        <p className="hero-copy">
-          Choose the intro that fits you. The site content stays the same, but the welcome line
-          shifts with the audience.
-        </p>
         <div className="entry-actions">
           <button
             className="entry-choice entry-choice--citizen"
             onClick={() => onSelect('citizen')}
             type="button"
           >
-            <span className="entry-choice__eyebrow">Yes</span>
-            <strong>Let&apos;s see your government.</strong>
-            <span>Enter with a citizen-facing introduction.</span>
+            <strong className="entry-choice__label">YES</strong>
           </button>
           <button
             className="entry-choice entry-choice--observer"
             onClick={() => onSelect('observer')}
             type="button"
           >
-            <span className="entry-choice__eyebrow">No</span>
-            <strong>Let&apos;s spy on the U.S. government.</strong>
-            <span>Enter with an outside-observer introduction.</span>
+            <strong className="entry-choice__label">NO</strong>
           </button>
         </div>
       </section>
