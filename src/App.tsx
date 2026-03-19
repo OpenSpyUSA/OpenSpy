@@ -62,6 +62,30 @@ type SupremeCourtCaseSelection = {
 type PartyFilter = Alignment | 'all'
 type ChamberFilter = 'all' | 'house' | 'senate'
 type PresidentPartyTone = 'democratic' | 'republican'
+type AudienceMode = 'citizen' | 'observer'
+
+const JUDICIAL_INFERENCE_NOTE =
+  "A ? means this justice's stance is inferred from the Court's result or a partial public statement, rather than fully listed justice-by-justice in the official text."
+
+const HOME_AUDIENCE_COPY: Record<
+  AudienceMode,
+  {
+    copy: string
+    eyebrow: string
+    title: string
+  }
+> = {
+  citizen: {
+    copy: 'Open the executive, legislative, and judicial branches to trace the people, power, and public-facing machinery of the U.S. government.',
+    eyebrow: 'Citizen View',
+    title: "Let's see your government.",
+  },
+  observer: {
+    copy: 'Open the executive, legislative, and judicial branches to trace the people, power, and public-facing machinery of the U.S. government from the outside in.',
+    eyebrow: 'Observer View',
+    title: "Let's spy on the U.S. government.",
+  },
+}
 
 function createPartyCounts(): Record<Alignment, number> {
   return {
@@ -94,6 +118,8 @@ function getTrumpCaseStanceLabel(side: TrumpCaseSide, inferred = false) {
       return inferred ? 'Not pro Trump?' : 'Not pro Trump'
     case 'not_on_court':
       return 'Not on Court'
+    case 'took_no_part':
+      return 'Took no part'
   }
 }
 
@@ -106,6 +132,29 @@ function getTrumpCaseTypeLabel(type: SupremeCourtCase['type']) {
     case 'procedural':
       return 'Process ruling'
   }
+}
+
+function getSupremeCourtCaseOutcomeSide(caseItem: SupremeCourtCase) {
+  let proCount = 0
+  let antiCount = 0
+
+  for (const side of Object.values(caseItem.justiceStances)) {
+    if (side === 'pro') {
+      proCount += 1
+    } else if (side === 'anti') {
+      antiCount += 1
+    }
+  }
+
+  if (proCount > antiCount) {
+    return 'pro' as const
+  }
+
+  if (antiCount > proCount) {
+    return 'anti' as const
+  }
+
+  return null
 }
 
 const supremeCourtCaseOpinionOverrides = new Map<string, string>([
@@ -149,6 +198,7 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   'trump-v-slaughter': [
     'The application for stay presented to THE CHIEF JUSTICE and by him referred to the Court is granted.',
     'The application is also treated as a petition for a writ of certiorari before judgment, and the petition is granted.',
+    'JUSTICE KAGAN, with whom JUSTICE SOTOMAYOR and JUSTICE JACKSON join, dissenting from the grant of the application for stay.',
   ],
   'trump-v-boyle': [
     'The application for stay presented to THE CHIEF JUSTICE and by him referred to the Court is granted.',
@@ -157,6 +207,7 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   ],
   'mcmahon-v-new-york': [
     'The application for stay presented to JUSTICE JACKSON and by her referred to the Court is granted.',
+    'JUSTICE SOTOMAYOR, with whom JUSTICE KAGAN and JUSTICE JACKSON join, dissenting.',
   ],
   'trump-v-afge': [
     'The application for stay presented to Justice Kagan and by her referred to the Court is granted.',
@@ -168,13 +219,15 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   ],
   'dhs-v-dvd': [
     'The application for stay presented to JUSTICE JACKSON and by her referred to the Court is granted.',
+    'JUSTICE SOTOMAYOR, with whom JUSTICE KAGAN and JUSTICE JACKSON join, dissenting.',
   ],
   'noem-v-doe': [
     'The application for stay presented to JUSTICE JACKSON and by her referred to the Court is granted.',
-    'JUSTICE SOTOMAYOR joins, dissenting from the grant of the application for a stay.',
+    'JUSTICE JACKSON, with whom JUSTICE SOTOMAYOR joins, dissenting from the grant of the application for a stay.',
   ],
   'trump-v-wilcox': [
     'The application for stay presented to THE CHIEF JUSTICE and by him referred to the Court is granted.',
+    'JUSTICE KAGAN, with whom JUSTICE SOTOMAYOR and JUSTICE JACKSON join, dissenting from the grant of the application for stay.',
   ],
   'aarp-v-trump': [
     'The Court ordered "[t]he Government" not to remove a "putative class of detainees" until this Court issues a superseding order.',
@@ -182,6 +235,8 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   ],
   'trump-v-jgg': [
     'The application to vacate the orders issued by the United States District Court for the District of Columbia is granted.',
+    'Justice Kavanaugh, concurring.',
+    'Justice Sotomayor, with whom Justice Kagan and Justice Jackson join, and with whom Justice Barrett joins as to Parts II and III-B, dissenting.',
   ],
   'trump-v-united-states': [
     'ROBERTS, C. J., delivered the opinion of the Court, in which THOMAS, ALITO, GORSUCH, and KAVANAUGH, JJ., joined in full...',
@@ -202,10 +257,12 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   ],
   'dhs-v-new-york-public-charge': [
     'The application for stay presented to JUSTICE GINSBURG and by her referred to the Court is granted.',
+    'JUSTICE KAGAN would deny the application.',
     'JUSTICE GORSUCH, with whom JUSTICE THOMAS joins, concurring in the grant of stay.',
   ],
   'barr-v-east-bay-sanctuary-covenant': [
     'The application for stay presented to JUSTICE KAGAN and by her referred to the Court is granted.',
+    'JUSTICE SOTOMAYOR, with whom JUSTICE GINSBURG joins, dissenting from grant of stay.',
   ],
   'dhs-v-regents': [
     'THE CHIEF JUSTICE delivered the opinion of the Court, except as to Part IV...',
@@ -237,6 +294,7 @@ const supremeCourtCaseOfficialWording: Record<string, string[]> = {
   ],
   'republican-party-of-pa-v-boockvar-expedition': [
     'The motion to expedite consideration of the petition for a writ of certiorari is denied.',
+    'JUSTICE BARRETT took no part in the consideration or decision of this motion.',
     'Statement of JUSTICE ALITO, with whom JUSTICE THOMAS and JUSTICE GORSUCH join.',
   ],
   'trump-v-anderson': [
@@ -309,11 +367,15 @@ const confirmedSupremeCourtJusticeIdsByCase = new Map<string, Set<string>>([
   ],
   [
     'dhs-v-new-york-public-charge',
-    new Set(['judicial-clarence-thomas', 'judicial-neil-m-gorsuch']),
+    new Set([
+      'judicial-clarence-thomas',
+      'judicial-elena-kagan',
+      'judicial-neil-m-gorsuch',
+    ]),
   ],
   [
     'noem-v-doe',
-    new Set(['judicial-sonia-sotomayor']),
+    new Set(['judicial-sonia-sotomayor', 'judicial-ketanji-brown-jackson']),
   ],
   [
     'republican-party-of-pa-v-boockvar-expedition',
@@ -334,6 +396,31 @@ const confirmedSupremeCourtJusticeIdsByCase = new Map<string, Set<string>>([
   [
     'trump-v-afge',
     new Set(['judicial-sonia-sotomayor', 'judicial-ketanji-brown-jackson']),
+  ],
+  [
+    'dhs-v-dvd',
+    new Set([
+      'judicial-sonia-sotomayor',
+      'judicial-elena-kagan',
+      'judicial-ketanji-brown-jackson',
+    ]),
+  ],
+  [
+    'mcmahon-v-new-york',
+    new Set([
+      'judicial-sonia-sotomayor',
+      'judicial-elena-kagan',
+      'judicial-ketanji-brown-jackson',
+    ]),
+  ],
+  [
+    'trump-v-boyle',
+    new Set([
+      'judicial-sonia-sotomayor',
+      'judicial-elena-kagan',
+      'judicial-brett-m-kavanaugh',
+      'judicial-ketanji-brown-jackson',
+    ]),
   ],
   [
     'trump-v-east-bay-sanctuary-covenant',
@@ -387,6 +474,16 @@ const confirmedSupremeCourtJusticeIdsByCase = new Map<string, Set<string>>([
     ]),
   ],
   [
+    'trump-v-jgg',
+    new Set([
+      'judicial-sonia-sotomayor',
+      'judicial-elena-kagan',
+      'judicial-brett-m-kavanaugh',
+      'judicial-amy-coney-barrett',
+      'judicial-ketanji-brown-jackson',
+    ]),
+  ],
+  [
     'trump-v-sierra-club',
     new Set(['judicial-sonia-sotomayor', 'judicial-elena-kagan']),
   ],
@@ -395,8 +492,28 @@ const confirmedSupremeCourtJusticeIdsByCase = new Map<string, Set<string>>([
     new Set(['judicial-sonia-sotomayor', 'judicial-elena-kagan']),
   ],
   [
+    'trump-v-slaughter',
+    new Set([
+      'judicial-sonia-sotomayor',
+      'judicial-elena-kagan',
+      'judicial-ketanji-brown-jackson',
+    ]),
+  ],
+  [
+    'trump-v-wilcox',
+    new Set([
+      'judicial-sonia-sotomayor',
+      'judicial-elena-kagan',
+      'judicial-ketanji-brown-jackson',
+    ]),
+  ],
+  [
     'trump-v-thompson',
     new Set(['judicial-clarence-thomas', 'judicial-brett-m-kavanaugh']),
+  ],
+  [
+    'barr-v-east-bay-sanctuary-covenant',
+    new Set(['judicial-sonia-sotomayor']),
   ],
 ])
 
@@ -484,57 +601,15 @@ function getSupremeCourtOfficialWording(caseItem: SupremeCourtCase) {
 function isInferredSupremeCourtJusticeStance(caseItem: SupremeCourtCase, justiceId: string) {
   const stance = caseItem.justiceStances[justiceId] ?? 'not_on_court'
 
-  if (stance === 'not_on_court' || !inferredSupremeCourtCaseIds.has(caseItem.id)) {
+  if (
+    stance === 'not_on_court' ||
+    stance === 'took_no_part' ||
+    !inferredSupremeCourtCaseIds.has(caseItem.id)
+  ) {
     return false
   }
 
   return !confirmedSupremeCourtJusticeIdsByCase.get(caseItem.id)?.has(justiceId)
-}
-
-function getSupremeCourtJusticeLineupBySide(
-  caseItem: SupremeCourtCase,
-  judicialJustices: GovernmentPerson[],
-  side: Exclude<TrumpCaseSide, 'not_on_court'>,
-) {
-  return judicialJustices
-    .filter((justice) => caseItem.justiceStances[justice.id] === side)
-    .map((justice) => ({
-      inferred: isInferredSupremeCourtJusticeStance(caseItem, justice.id),
-      name: getJusticeShortName(justice.name),
-    }))
-}
-
-function getSupremeCourtNotOnCourtLineup(caseItem: SupremeCourtCase, judicialJustices: GovernmentPerson[]) {
-  return judicialJustices
-    .filter((justice) => caseItem.justiceStances[justice.id] === 'not_on_court')
-    .map((justice) => getJusticeShortName(justice.name))
-}
-
-function formatSupremeCourtJusticeList(
-  lineup: Array<{
-    inferred: boolean
-    name: string
-  }>,
-) {
-  return lineup.length > 0
-    ? lineup.map(({ inferred, name }) => `${name}${inferred ? '?' : ''}`).join(', ')
-    : 'None'
-}
-
-function formatSupremeCourtLineupCount(
-  countLabel: string,
-  confirmedCount: number,
-  inferredCount: number,
-) {
-  if (confirmedCount > 0 && inferredCount > 0) {
-    return `${confirmedCount} ${countLabel} + ${inferredCount} ${countLabel}?`
-  }
-
-  if (inferredCount > 0) {
-    return `${inferredCount} ${countLabel}?`
-  }
-
-  return `${confirmedCount} ${countLabel}`
 }
 
 function formatRollCallCategory(category: string) {
@@ -797,6 +872,54 @@ function comparePeopleByAgeAscending(left: GovernmentPerson, right: GovernmentPe
   }
 
   return left.name.localeCompare(right.name)
+}
+
+function getLegislativeServiceStartYear(person: GovernmentPerson) {
+  if (person.branchId !== 'legislative') {
+    return null
+  }
+
+  const rolePatterns =
+    person.sectionId === 'senate'
+      ? [/u\.s\. senator/i, /\bsenator\b/i]
+      : [/u\.s\. representative/i, /\bdelegate\b/i, /resident commissioner/i]
+
+  const roleRecord = [...(person.careerHistory ?? [])]
+    .reverse()
+    .find((record) =>
+      rolePatterns.some((pattern) => pattern.test(record.label) || pattern.test(record.summary)),
+    )
+
+  const startYearText =
+    person.roleSinceYear ??
+    extractYearFromText(roleRecord?.startDate) ??
+    extractYearFromText(roleRecord?.summary)
+  const startYear = startYearText ? Number.parseInt(startYearText, 10) : Number.NaN
+
+  return Number.isFinite(startYear) ? startYear : null
+}
+
+function compareLegislativePeopleByService(left: GovernmentPerson, right: GovernmentPerson) {
+  const leftStartYear = getLegislativeServiceStartYear(left)
+  const rightStartYear = getLegislativeServiceStartYear(right)
+
+  if (leftStartYear == null && rightStartYear == null) {
+    return comparePeopleByAgeAscending(left, right)
+  }
+
+  if (leftStartYear == null) {
+    return 1
+  }
+
+  if (rightStartYear == null) {
+    return -1
+  }
+
+  if (leftStartYear !== rightStartYear) {
+    return leftStartYear - rightStartYear
+  }
+
+  return comparePeopleByAgeAscending(left, right)
 }
 
 function normalizeSearchText(value?: string | null) {
@@ -1212,7 +1335,9 @@ function SupremeCourtCaseMatrix({
 
       <div className="vote-matrix">
         <div className="vote-matrix__header">
-          <p className="vote-matrix__axes">Rows follow the current Court. Newest cases on the left.</p>
+          <p className="vote-matrix__axes">
+            A &quot;?&quot; means this justice&apos;s stance is inferred from the Court&apos;s result or a partial public statement.
+          </p>
           <div className="vote-matrix__legend" aria-label="Case matrix legend">
             <span className="vote-matrix__legend-item">
               <i className="vote-cell vote-cell--pro" />
@@ -1225,6 +1350,10 @@ function SupremeCourtCaseMatrix({
             <span className="vote-matrix__legend-item">
               <i className="vote-cell vote-cell--not_on_court" />
               Not on Court
+            </span>
+            <span className="vote-matrix__legend-item">
+              <i className="vote-cell vote-cell--took_no_part" />
+              Took no part
             </span>
           </div>
         </div>
@@ -1239,15 +1368,20 @@ function SupremeCourtCaseMatrix({
                 </th>
                 {sortedCases.map((caseItem) => {
                   const isSelectedCase = selectedCaseId === caseItem.id
+                  const outcomeSide = getSupremeCourtCaseOutcomeSide(caseItem)
 
                   return (
                     <th
-                      className={`vote-matrix__event${isSelectedCase ? ' is-selected' : ''}`}
+                      className={`vote-matrix__event${
+                        outcomeSide ? ` vote-matrix__event--${outcomeSide}` : ''
+                      }${isSelectedCase ? ' is-selected' : ''}`}
                       key={caseItem.id}
                       scope="col"
                     >
                       <button
-                        className={`vote-matrix__event-link${isSelectedCase ? ' is-selected' : ''}`}
+                        className={`vote-matrix__event-link${
+                          outcomeSide ? ` vote-matrix__event-link--${outcomeSide}` : ''
+                        }${isSelectedCase ? ' is-selected' : ''}`}
                         onClick={() => onOpenCase(caseItem.id)}
                         title={`${caseItem.caseName} • ${formatCaseDate(caseItem.date)} • ${caseItem.powerTag} • ${getTrumpCaseTypeLabel(caseItem.type)}`}
                         type="button"
@@ -1332,14 +1466,23 @@ function SupremeCourtCaseMatrix({
 }
 
 function HomeView({
+  audienceMode,
   data,
   onBranchSelect,
 }: {
+  audienceMode: AudienceMode
   data: GovernmentDataset
   onBranchSelect: (branchId: BranchId) => void
 }) {
+  const homeCopy = HOME_AUDIENCE_COPY[audienceMode]
+
   return (
     <main className="screen screen--home">
+      <section className="hero-card hero-card--intro">
+        <p className="eyebrow">{homeCopy.eyebrow}</p>
+        <h1>{homeCopy.title}</h1>
+        <p className="hero-copy">{homeCopy.copy}</p>
+      </section>
       <section className="branch-orbit" aria-label="Three branches of government">
         {data.branches.map((branch) => {
           const count = data.people.filter((person) =>
@@ -1362,6 +1505,41 @@ function HomeView({
             </button>
           )
         })}
+      </section>
+    </main>
+  )
+}
+
+function EntryGate({ onSelect }: { onSelect: (mode: AudienceMode) => void }) {
+  return (
+    <main className="screen screen--entry">
+      <section className="hero-card hero-card--entry">
+        <p className="eyebrow">OpenSpy USA</p>
+        <h1>Are you a U.S. citizen?</h1>
+        <p className="hero-copy">
+          Choose the intro that fits you. The site content stays the same, but the welcome line
+          shifts with the audience.
+        </p>
+        <div className="entry-actions">
+          <button
+            className="entry-choice entry-choice--citizen"
+            onClick={() => onSelect('citizen')}
+            type="button"
+          >
+            <span className="entry-choice__eyebrow">Yes</span>
+            <strong>Let&apos;s see your government.</strong>
+            <span>Enter with a citizen-facing introduction.</span>
+          </button>
+          <button
+            className="entry-choice entry-choice--observer"
+            onClick={() => onSelect('observer')}
+            type="button"
+          >
+            <span className="entry-choice__eyebrow">No</span>
+            <strong>Let&apos;s spy on the U.S. government.</strong>
+            <span>Enter with an outside-observer introduction.</span>
+          </button>
+        </div>
       </section>
     </main>
   )
@@ -1445,7 +1623,6 @@ function DetailPanel({
   supremeCourtCaseSelection,
   supremeCourtPersonalCases,
   supremeCourtCases,
-  judicialJustices,
 }: {
   branch: GovernmentBranch
   onClose: () => void
@@ -1455,7 +1632,6 @@ function DetailPanel({
   supremeCourtCaseSelection: SupremeCourtCaseSelection | null
   supremeCourtPersonalCases: SupremeCourtCase[]
   supremeCourtCases: SupremeCourtCase[]
-  judicialJustices: GovernmentPerson[]
 }) {
   if (rollCall) {
     const voteTotals = formatRollCallVoteTotals(rollCall)
@@ -1551,13 +1727,6 @@ function DetailPanel({
   if (supremeCourtCaseSelection) {
     const { caseItem, groupLabel } = supremeCourtCaseSelection
     const officialWording = getSupremeCourtOfficialWording(caseItem)
-    const proJustices = getSupremeCourtJusticeLineupBySide(caseItem, judicialJustices, 'pro')
-    const antiJustices = getSupremeCourtJusticeLineupBySide(caseItem, judicialJustices, 'anti')
-    const notOnCourtJustices = getSupremeCourtNotOnCourtLineup(caseItem, judicialJustices)
-    const confirmedProCount = proJustices.filter((justice) => !justice.inferred).length
-    const inferredProCount = proJustices.length - confirmedProCount
-    const confirmedAntiCount = antiJustices.filter((justice) => !justice.inferred).length
-    const inferredAntiCount = antiJustices.length - confirmedAntiCount
 
     return (
       <aside className="detail-panel detail-panel--filled">
@@ -1576,12 +1745,6 @@ function DetailPanel({
           </div>
         </div>
 
-        <div className="detail-tags">
-          <span className="detail-tag">{groupLabel}</span>
-          <span className="detail-tag">{caseItem.powerTag}</span>
-          <span className="detail-tag">{getTrumpCaseTypeLabel(caseItem.type)}</span>
-        </div>
-
         <p className="detail-description">{caseItem.issue}</p>
 
         <div className="detail-facts">
@@ -1596,14 +1759,6 @@ function DetailPanel({
           <div className="fact-row">
             <span>Type</span>
             <strong>{getTrumpCaseTypeLabel(caseItem.type)}</strong>
-          </div>
-          <div className="fact-row">
-            <span>Current Court lineup</span>
-            <strong>
-              {formatSupremeCourtLineupCount('pro', confirmedProCount, inferredProCount)} •{' '}
-              {formatSupremeCourtLineupCount('not pro', confirmedAntiCount, inferredAntiCount)} •{' '}
-              {notOnCourtJustices.length} not on Court
-            </strong>
           </div>
         </div>
 
@@ -1624,21 +1779,6 @@ function DetailPanel({
             </div>
           </section>
         ) : null}
-
-        <section className="detail-block">
-          <h3>Current Court lineup</h3>
-          <p>
-            <strong>Pro Trump:</strong> {formatSupremeCourtJusticeList(proJustices)}
-          </p>
-          <p>
-            <strong>Not pro Trump:</strong> {formatSupremeCourtJusticeList(antiJustices)}
-          </p>
-          {notOnCourtJustices.length > 0 ? (
-            <p>
-              <strong>Not on Court:</strong> {notOnCourtJustices.join(', ')}
-            </p>
-          ) : null}
-        </section>
 
         <SupremeCourtCaseLinks caseItem={caseItem} />
       </aside>
@@ -1771,6 +1911,7 @@ function DetailPanel({
       {judicialCases.length > 0 ? (
         <section className="detail-block">
           <h3>Trump Administration Cases</h3>
+          <p className="detail-note">{JUDICIAL_INFERENCE_NOTE}</p>
           <div className="justice-case-list">
             {judicialCases.map((caseItem) => {
               const stance = caseItem.justiceStances[person.id]
@@ -1804,6 +1945,7 @@ function DetailPanel({
       {judicialPersonalCases.length > 0 ? (
         <section className="detail-block">
           <h3>Trump Personal Cases</h3>
+          <p className="detail-note">{JUDICIAL_INFERENCE_NOTE}</p>
           <div className="justice-case-list">
             {judicialPersonalCases.map((caseItem) => {
               const stance = caseItem.justiceStances[person.id]
@@ -2053,6 +2195,7 @@ function App() {
   const datasetUrl = `${import.meta.env.BASE_URL}data/governmentData.json`
   const [dataset, setDataset] = useState<GovernmentDataset | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [audienceMode, setAudienceMode] = useState<AudienceMode | null>(null)
   const [route, setRoute] = useState<RouteState>(() => parseHash(window.location.hash))
   const [isResettingLegislative, setIsResettingLegislative] = useState(false)
   const [searchValue, setSearchValue] = useState('')
@@ -2115,7 +2258,7 @@ function App() {
                   }
                 }
 
-                return comparePeopleByAgeAscending(left, right)
+                return compareLegislativePeopleByService(left, right)
               })
             : selectedBranch.id === 'executive' && section.id === 'independent-agencies'
               ? [...filteredPeople].sort((left, right) => {
@@ -2376,6 +2519,10 @@ function App() {
     startTransition(() => navigateTo('legislative'))
   }
 
+  if (!audienceMode) {
+    return <EntryGate onSelect={setAudienceMode} />
+  }
+
   if (loadError) {
     return (
       <main className="screen screen--home">
@@ -2404,7 +2551,7 @@ function App() {
   }
 
   if (!selectedBranch) {
-    return <HomeView data={dataset} onBranchSelect={openBranch} />
+    return <HomeView audienceMode={audienceMode} data={dataset} onBranchSelect={openBranch} />
   }
 
   return (
@@ -2613,7 +2760,6 @@ function App() {
 
         <DetailPanel
           branch={selectedBranch}
-          judicialJustices={judicialJustices}
           onClose={closePerson}
           person={selectedPerson}
           rollCall={selectedRollCall}

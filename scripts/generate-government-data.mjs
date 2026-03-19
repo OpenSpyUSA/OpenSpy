@@ -2556,7 +2556,7 @@ const supremeCourtTrumpPersonalCases = [
       'judicial-elena-kagan': 'anti',
       'judicial-neil-m-gorsuch': 'pro',
       'judicial-brett-m-kavanaugh': 'anti',
-      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-amy-coney-barrett': 'took_no_part',
       'judicial-ketanji-brown-jackson': 'not_on_court',
     },
     powerTag: 'Election',

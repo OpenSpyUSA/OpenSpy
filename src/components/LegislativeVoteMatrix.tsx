@@ -164,8 +164,9 @@ export function LegislativeVoteMatrix({
           <p className="eyebrow">Vote matrix</p>
           <h3>{chamberLabel} Trump-linked roll calls</h3>
           <p className="vote-matrix__axes">
-            Rows sorted by age. Newest votes on the left. <strong>Direct</strong> votes affect the
-            Trump score. <strong>Broader</strong> votes are shown for context only.
+            Rows sorted by service length, from longer-serving to newer members. Newest votes on
+            the left. <strong>Direct</strong> votes affect the Trump score. <strong>Broader</strong>{' '}
+            votes are shown for context only.
           </p>
           <div className="vote-matrix__scope-summary" aria-label="Roll-call scope summary">
             <span className="vote-matrix__scope-pill vote-matrix__scope-pill--scored">

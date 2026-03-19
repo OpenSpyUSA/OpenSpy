@@ -10,6 +10,12 @@
   gap: 28px;
 }
 
+.screen--entry {
+  display: grid;
+  align-items: center;
+  min-height: calc(100svh - var(--safe-top) - var(--safe-bottom) - 84px);
+}
+
 .hero-card,
 .source-card,
 .branch-banner,
@@ -29,6 +35,19 @@
   border-radius: 36px;
   position: relative;
   overflow: hidden;
+}
+
+.hero-card--intro h1 {
+  max-width: 14ch;
+}
+
+.hero-card--entry {
+  max-width: 940px;
+  margin: 0 auto;
+}
+
+.hero-card--entry h1 {
+  max-width: 11ch;
 }
 
 .hero-card::before {
@@ -84,6 +103,78 @@
   max-width: 60ch;
   margin-top: 18px;
   font-size: 1.05rem;
+}
+
+.entry-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 28px;
+}
+
+.entry-choice {
+  appearance: none;
+  display: grid;
+  gap: 8px;
+  padding: 22px;
+  border-radius: 26px;
+  border: 1px solid rgba(17, 34, 58, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.68)),
+    rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+.entry-choice:hover,
+.entry-choice:focus-visible {
+  transform: translateY(-2px);
+  border-color: rgba(29, 29, 31, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 18px 34px rgba(15, 23, 42, 0.08);
+}
+
+.entry-choice strong {
+  font-family: var(--display);
+  font-size: 1.28rem;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.entry-choice span:last-child {
+  color: var(--ink-soft);
+}
+
+.entry-choice--citizen {
+  background:
+    radial-gradient(circle at top left, rgba(52, 120, 246, 0.14), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 248, 255, 0.8));
+}
+
+.entry-choice--observer {
+  background:
+    radial-gradient(circle at top left, rgba(255, 90, 82, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 247, 246, 0.82));
+}
+
+.entry-choice__eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(17, 34, 58, 0.08);
 }
 
 .hero-pills {
@@ -149,6 +240,7 @@
 .back-link:focus-visible,
 .case-card a:focus-visible,
 .case-justice-button:focus-visible,
+.entry-choice:focus-visible,
 .mini-member:focus-visible,
 .person-card:focus-visible,
 .state-focus__clear:focus-visible,
@@ -894,9 +986,10 @@
 .vote-matrix__corner {
   top: 0;
   z-index: 4;
-  min-width: 240px;
-  padding: 12px 14px;
-  text-align: left;
+  min-width: 248px;
+  padding: 0 16px;
+  vertical-align: middle;
+  text-align: center;
 }
 
 .vote-matrix__corner span,
@@ -906,13 +999,20 @@
 
 .vote-matrix__corner span {
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: 0.94rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.18;
+  text-transform: none;
 }
 
 .vote-matrix__corner strong {
-  margin-top: 4px;
+  margin-top: 8px;
   color: var(--ink);
-  font-size: 1rem;
+  font-size: 1.86rem;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
 }
 
 .vote-matrix__event {
@@ -1145,6 +1245,12 @@
 
 .vote-cell--missed {
   background: rgba(120, 120, 128, 0.38);
+}
+
+.vote-cell--took_no_part {
+  background:
+    radial-gradient(circle at center, rgba(110, 110, 115, 0.72) 0 30%, transparent 31% 100%),
+    rgba(120, 120, 128, 0.12);
 }
 
 .vote-cell--not_in_office,
@@ -1560,6 +1666,11 @@
 .case-stance-chip--not_on_court {
   background: rgba(120, 120, 128, 0.14);
   color: #6e6e73;
+}
+
+.case-stance-chip--took_no_part {
+  background: rgba(120, 120, 128, 0.16);
+  color: #5c5c61;
 }
 
 .map-card {
@@ -2374,6 +2485,11 @@
   overflow-wrap: anywhere;
 }
 
+.detail-note {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
 .detail-block a {
   color: var(--ink);
   text-decoration-color: rgba(29, 29, 31, 0.24);
@@ -2584,6 +2700,10 @@
 
   .people-grid--legislative {
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  }
+
+  .entry-actions {
+    grid-template-columns: 1fr;
   }
 
   .detail-panel--filled {

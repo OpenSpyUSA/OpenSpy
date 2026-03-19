@@ -47,7 +47,7 @@ export interface DisclosureTrade {
   type: string
 }
 
-export type TrumpCaseSide = 'anti' | 'not_on_court' | 'pro'
+export type TrumpCaseSide = 'anti' | 'not_on_court' | 'pro' | 'took_no_part'
 
 export interface SupremeCourtCase {
   caseName: string
