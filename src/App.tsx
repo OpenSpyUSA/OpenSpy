@@ -2260,7 +2260,7 @@ function DetailPanel({
             </a>
           </p>
         ) : null}
-        {person.branchId === 'legislative' ? null : <p>{person.wealthNote}</p>}
+        {person.branchId !== 'legislative' && person.wealthNote ? <p>{person.wealthNote}</p> : null}
         {person.financialFilingDate ? (
           <p>
             <strong>Latest annual filing date:</strong> {person.financialFilingDate}

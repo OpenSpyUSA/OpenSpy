@@ -1,3 +1,9 @@
+const positionRecord = (label, summary) => ({
+  category: 'position',
+  label,
+  summary,
+})
+
 export const manualCareerHistoryById = {
   'executive-donald-j-trump': [
     {
@@ -11850,5 +11856,869 @@ export const manualCareerHistoryById = {
       label: 'Associate Justice',
       summary: '2022-present: Associate justice of the Supreme Court.',
     },
+  ],
+  'executive-john-jovanovic-export-import-bank-of-the-united-states': [
+    positionRecord(
+      'Mercuria Energy Group',
+      '2010s: Managed investment and business-building work across North and South America in the private energy sector.',
+    ),
+    positionRecord(
+      'U.S. International Development Finance Corporation',
+      'Early 2020s: Served as regional head and managing director for the Aegean and Western Balkans, opened DFC’s first overseas office, and worked on financing alternatives to Chinese and Russian influence.',
+    ),
+    positionRecord(
+      'Asplundh',
+      '2020s: Served as chief strategy officer, overseeing growth initiatives, digital innovation, corporate development, and external affairs.',
+    ),
+    positionRecord(
+      'Export-Import Bank of the United States',
+      '2025-present: Confirmed as president and chairman of EXIM.',
+    ),
+  ],
+  'executive-jeffery-s-hall-farm-credit-administration': [
+    positionRecord(
+      'Agricultural policy and Senate staff',
+      '1980s-1994: Worked in Kentucky agricultural policy and served as agriculture legislative assistant to Senator Mitch McConnell.',
+    ),
+    positionRecord(
+      'University of Kentucky College of Agriculture',
+      '1994-2001: Advised the dean on state and federal legislative issues and managed the Ag-Project 2000 economic-development initiative.',
+    ),
+    positionRecord(
+      'USDA Farm Service Agency and Capstone Group',
+      '2001-2015: Led Kentucky operations for USDA’s Farm Service Agency and later co-founded The Capstone Group.',
+    ),
+    positionRecord(
+      'Farm Credit Administration',
+      '2015-present: Joined the FCA board, also served on the Farm Credit System Insurance Corporation board, and became chairman and CEO in 2025.',
+    ),
+  ],
+  'executive-kyle-s-hauptman-national-credit-union-administration': [
+    positionRecord(
+      'Lehman Brothers and Jefferies',
+      '1990s-2000s: Worked as a bond trader in New York, Tokyo, and Sydney before becoming a senior vice president at Jefferies.',
+    ),
+    positionRecord(
+      'Main Street Growth Project and SEC advisory work',
+      '2010s: Led the Main Street Growth Project and served on the SEC Advisory Committee on Small and Emerging Companies.',
+    ),
+    positionRecord(
+      'Senate staff and Trump transition',
+      '2010s: Served as Senator Tom Cotton’s economic-policy advisor, staff director for a Senate Banking subcommittee, and a member of Trump’s 2016 transition team.',
+    ),
+    positionRecord(
+      'National Credit Union Administration',
+      '2020-present: Confirmed to the NCUA Board in 2020 and designated chairman in 2025.',
+    ),
+  ],
+  'executive-laura-dibella-federal-maritime-commission': [
+    positionRecord(
+      'Nassau County and Port of Fernandina',
+      '2010s: Led local economic-development work in Nassau County and later became the first full-time executive director of the Port of Fernandina.',
+    ),
+    positionRecord(
+      'Florida seaport policy',
+      '2010s-2020s: Worked with the Florida Harbor Pilots Association on port-improvement and commerce legislation tied to Florida’s seaports.',
+    ),
+    positionRecord(
+      'Florida commerce leadership and private practice',
+      '2023-2025: Served as Florida’s first female secretary of commerce, led Enterprise Florida, and then worked as a government-affairs advisor at Adams and Reese.',
+    ),
+    positionRecord(
+      'Federal Maritime Commission',
+      '2026-present: Confirmed in late 2025, sworn in in January 2026, and designated chairman later that month.',
+    ),
+  ],
+  'executive-michael-m-kubayanda-postal-regulatory-commission': [
+    positionRecord(
+      'House Oversight Committee',
+      '2000s: Served as counsel to the House Committee on Oversight and Government Reform.',
+    ),
+    positionRecord(
+      'USPS Office of Inspector General',
+      '2010s: Worked in the OIG research group and later as director of government relations, focusing on postal economics, analytics, privacy, and innovation.',
+    ),
+    positionRecord(
+      'Private-sector technology work',
+      'Late 2010s: Served as a board member and privacy officer for a digital-health startup.',
+    ),
+    positionRecord(
+      'Postal Regulatory Commission',
+      '2018-present: Joined the Commission in 2018, became vice chairman in 2019, and has served as chairman since 2021.',
+    ),
+  ],
+  'executive-patrick-fuchs-surface-transportation-board': [
+    positionRecord(
+      'Early public-service roles',
+      '2000s: Worked at the State Department, the Government Accountability Office, and the National Center for Freight and Infrastructure Research and Education.',
+    ),
+    positionRecord(
+      'Office of Management and Budget',
+      'Early 2010s: Served as a policy analyst and Presidential Management Fellow handling railroad and maritime regulatory reviews.',
+    ),
+    positionRecord(
+      'Senate Commerce Committee',
+      '2010s: Served as a senior professional staff member for Chairman John Thune and helped develop major rail, maritime, and transportation-safety legislation.',
+    ),
+    positionRecord(
+      'Surface Transportation Board',
+      '2019-present: Sworn in as a board member in 2019, reconfirmed in 2024, and designated chairman in 2025.',
+    ),
+  ],
+  'executive-don-moul-tennessee-valley-authority': [
+    positionRecord(
+      'Utility and nuclear operations',
+      '1980s-2010s: Built a multi-decade power-operations career at companies including American Electric Power, Duquesne Light, FirstEnergy, GPU Nuclear, and PSE&G.',
+    ),
+    positionRecord(
+      'NextEra Energy',
+      'Late 2010s-2021: Served as executive vice president and chief nuclear officer, overseeing the company’s nuclear fleet and decommissioning work.',
+    ),
+    positionRecord(
+      'TVA chief operating officer',
+      '2021-2025: Joined TVA as executive vice president and chief operating officer, overseeing coal, gas, hydro, transmission, and power-supply functions.',
+    ),
+    positionRecord(
+      'Tennessee Valley Authority',
+      '2025-present: Appointed by TVA’s board as president and chief executive officer.',
+    ),
+  ],
+  'executive-marco-m-rajkovich-federal-mine-safety-and-health-review-commission': [
+    positionRecord(
+      'U.S. Steel Mining Company',
+      '1980s: Started in mining as a summer engineering student and later worked as an engineer and foreman.',
+    ),
+    positionRecord(
+      'Private legal practice',
+      '1990s-2010s: Spent nearly two decades at Wyatt Tarrant & Combs before becoming a partner at Rajkovich, Williams, Kilpatrick & True.',
+    ),
+    positionRecord(
+      'Federal Mine Safety and Health Review Commission',
+      '2019-2024: Served as chairman from 2019 to 2021 and then as commissioner from 2021 to 2024.',
+    ),
+    positionRecord(
+      'Return to FMSHRC leadership',
+      '2024-present: Served as commission counsel in 2024-2025 and returned as chairman in 2025.',
+    ),
+  ],
+  'executive-anna-davis-federal-mediation-and-conciliation-service': [
+    positionRecord(
+      'FMCS counsel roles',
+      'By 2022: Appeared in FMCS and Federal Register materials as deputy general counsel.',
+    ),
+    positionRecord(
+      'Ethics and FOIA oversight',
+      '2023-2024: Served in FMCS legal leadership roles including designated agency ethics official and chief FOIA officer.',
+    ),
+    positionRecord(
+      'General Counsel',
+      'By 2024: FMCS materials identified her as the agency’s general counsel.',
+    ),
+    positionRecord(
+      'Federal Mediation and Conciliation Service',
+      '2025-present: Serves as general counsel performing the duties of the director.',
+    ),
+  ],
+  'executive-marvin-e-kaplan-national-labor-relations-board': [
+    positionRecord(
+      'Private practice and Labor Department work',
+      '2000s: Worked at McDowell Rice Smith & Buchanan and later in the Labor Department’s Office of Labor-Management Standards.',
+    ),
+    positionRecord(
+      'House labor and oversight counsel',
+      '2010s: Served as counsel on the House Oversight and Government Reform Committee and as policy counsel for the House Education and the Workforce Committee.',
+    ),
+    positionRecord(
+      'Occupational Safety and Health Review Commission',
+      'Mid-2010s: Served as chief counsel to the chairman of OSHRC.',
+    ),
+    positionRecord(
+      'National Labor Relations Board',
+      '2017-2025: Served on the NLRB, including stints as chairman in 2017-2018 and again in 2025.',
+    ),
+  ],
+  'executive-loren-sweatt-national-mediation-board': [
+    positionRecord(
+      'House labor-policy staff work',
+      '2000s-2010s: Spent about 15 years as a senior policy advisor on the House Committee on Education and the Workforce.',
+    ),
+    positionRecord(
+      'Occupational Safety and Health Administration',
+      '2010s-2020s: Served for nearly four years as principal deputy assistant secretary at OSHA.',
+    ),
+    positionRecord(
+      'Senate HELP Committee',
+      'Early 2020s: Served as a senior professional staff member on the Senate Health, Education, Labor, and Pensions Committee.',
+    ),
+    positionRecord(
+      'National Mediation Board',
+      '2024-present: Confirmed as a board member in 2024 and later became chair.',
+    ),
+  ],
+  'executive-jonathan-snare-occupational-safety-and-health-review-commission': [
+    positionRecord(
+      'Private law practice',
+      '1990s-2003: Worked in private practice in Dallas before entering federal service.',
+    ),
+    positionRecord(
+      'Department of Labor leadership roles',
+      '2003-2009: Held senior Labor Department roles including deputy assistant secretary, acting assistant secretary for OSHA, deputy solicitor, and acting solicitor of labor.',
+    ),
+    positionRecord(
+      'Morgan Lewis',
+      '2009-2024: Partner in the Washington office of Morgan Lewis, focused largely on workplace safety and health matters.',
+    ),
+    positionRecord(
+      'Occupational Safety and Health Review Commission',
+      '2025-present: Confirmed and sworn in as an OSHRC commissioner in 2025.',
+    ),
+  ],
+  'executive-rochelle-garza-united-states-commission-on-civil-rights': [
+    positionRecord(
+      'Civil-rights legal practice',
+      '2010s: Built a legal career focused on immigration, family, criminal, and constitutional law.',
+    ),
+    positionRecord(
+      'Reproductive-rights litigation',
+      '2010s: Became nationally known for Garza v. Hargan, which secured abortion access for an immigrant teen in federal custody.',
+    ),
+    positionRecord(
+      'Texas Civil Rights Project',
+      '2020s: Served as president of the Texas Civil Rights Project.',
+    ),
+    positionRecord(
+      'Public office and civil-rights leadership',
+      '2022-present: Was the Democratic nominee for Texas attorney general in 2022 and later joined the U.S. Commission on Civil Rights, where she became chair.',
+    ),
+  ],
+  'executive-edward-forst-general-services-administration': [
+    positionRecord(
+      'Finance and investment career',
+      '1980s-2020s: Built a multi-decade career in finance, real estate, senior management, academia, and government.',
+    ),
+    positionRecord(
+      'Goldman Sachs',
+      '1990s-2000s: Served as a general partner, management committee member, co-CEO of Goldman Sachs Asset Management, and later chief administrative officer.',
+    ),
+    positionRecord(
+      'Senior management outside Wall Street',
+      '2010s-2020s: Held major executive roles beyond Goldman, including work tied to institutional real-estate and operations leadership.',
+    ),
+    positionRecord(
+      'General Services Administration',
+      '2025-present: Confirmed and sworn in as administrator of the GSA.',
+    ),
+  ],
+  'executive-eric-ueland-office-of-government-ethics': [
+    positionRecord(
+      'Senate Republican leadership staff',
+      '1990s-2000s: Held multiple Capitol Hill roles including chief of staff to Senate Republican leaders and staff director for the Senate Budget and Rules Committees.',
+    ),
+    positionRecord(
+      'Development and foreign-affairs posts',
+      '2000s-2010s: Served at the Millennium Challenge Corporation and later in senior State Department roles tied to civilian security, democracy, human rights, and foreign assistance.',
+    ),
+    positionRecord(
+      'Trump White House and OMB',
+      '2019-2025: Served in the first Trump White House as director of legislative affairs and deputy director of the Domestic Policy Council, then returned as OMB deputy director for management.',
+    ),
+    positionRecord(
+      'Office of Government Ethics',
+      '2025-present: Performing the duties of the director of OGE.',
+    ),
+  ],
+  'executive-mary-anne-carter-national-foundation-on-the-arts-and-the-humanities': [
+    positionRecord(
+      'Policy and communications work',
+      'Before joining the federal government: Worked in public policy analysis, issue tracking, and communications.',
+    ),
+    positionRecord(
+      'National Endowment for the Arts senior leadership',
+      '2010s: Served as senior deputy chairman of the NEA.',
+    ),
+    positionRecord(
+      'Acting and confirmed chair in Trump’s first term',
+      '2018-2021: First served as acting chairman and then as Senate-confirmed chairman of the NEA.',
+    ),
+    positionRecord(
+      'Return to NEA leadership',
+      '2025-present: Returned as chairman of the NEA.',
+    ),
+  ],
+  'executive-ho-nieh-nuclear-regulatory-commission': [
+    positionRecord(
+      'Knolls Atomic Power Laboratory and Navy nuclear training',
+      'Early career: Worked as a civilian instructor for the Navy’s Nuclear Power Program.',
+    ),
+    positionRecord(
+      'International nuclear-safety work',
+      'Before returning to U.S. regulation: Served as communications advisor to the International Atomic Energy Agency and later led the OECD Nuclear Energy Agency’s Division of Nuclear Safety Technology and Regulation.',
+    ),
+    positionRecord(
+      'NRC staff leadership',
+      '1997-2021: Joined the NRC as a resident inspector and rose through senior roles including chief of staff to a commissioner, regional leadership posts, and director of the Office of Nuclear Reactor Regulation.',
+    ),
+    positionRecord(
+      'Southern Nuclear and NRC chairmanship',
+      '2021-present: Served in regulatory-affairs leadership at Southern Nuclear before returning to government as an NRC commissioner in late 2025 and chairman in early 2026.',
+    ),
+  ],
+  'executive-patricia-l-lee-defense-nuclear-facilities-safety-board': [
+    positionRecord(
+      'Centers for Disease Control and Prevention',
+      'Early career: Spent nearly a decade evaluating the health and environmental impact of DOE nuclear-weapons facilities.',
+    ),
+    positionRecord(
+      'Savannah River National Laboratory',
+      '2000s-2020s: Served for more than two decades in radiation-protection and nuclear-safety roles, most recently as portfolio manager for the laboratory’s digital enterprise.',
+    ),
+    positionRecord(
+      'DOE headquarters advisory roles',
+      'Later career: Held technical-advisor assignments to DOE’s Office of Environmental Management and served as a liaison to the Defense Nuclear Facilities Safety Board.',
+    ),
+    positionRecord(
+      'Defense Nuclear Facilities Safety Board',
+      '2020s-present: Joined the board after more than 30 years in nuclear-safety and radiation-protection work.',
+    ),
+  ],
+  'executive-craig-t-brown-selective-service-system': [
+    positionRecord(
+      'U.S. Navy and Navy Reserve',
+      'Career-long military service: Served for more than 29 years in the Navy and Navy Reserve, including multiple commands and a deployment command in Kuwait.',
+    ),
+    positionRecord(
+      'Defense contracting and program management',
+      'Pre-2018: Worked for more than 20 years as a DoD contractor supporting joint, Army, and Navy programs.',
+    ),
+    positionRecord(
+      'Selective Service senior executive',
+      '2018-2020: Joined the Selective Service System and entered the Senior Executive Service.',
+    ),
+    positionRecord(
+      'Selective Service System',
+      '2021-present: Became acting director in January 2021 and has overseen the agency’s headquarters, data center, regional offices, and mobilization readiness.',
+    ),
+  ],
+  'executive-erhard-r-chorle-railroad-retirement-board': [
+    positionRecord(
+      'Illinois state government legal and regulatory roles',
+      'Early career: Served as senior assistant to the Illinois labor director, deputy secretary of state, and Illinois state securities commissioner.',
+    ),
+    positionRecord(
+      'Governor Jim Edgar administration and pension oversight',
+      '1990s: Served as executive assistant for financial and regulatory affairs to Governor Jim Edgar and chaired the Illinois State Board of Investment.',
+    ),
+    positionRecord(
+      'Private legal practice',
+      'Before joining the RRB: Was a partner in the corporate and business-counseling practice at Pedersen & Houpt in Chicago.',
+    ),
+    positionRecord(
+      'Railroad Retirement Board',
+      '2019-present: Appointed and confirmed as chairman of the Board.',
+    ),
+  ],
+  'executive-sara-aviel-inter-american-foundation': [
+    positionRecord(
+      'International development NGOs and Yale teaching',
+      'Early career: Worked in field and headquarters roles at CARE, Mercy Corps, and Root Capital, and later taught international development and humanitarian relief at Yale.',
+    ),
+    positionRecord(
+      'Treasury and White House international economic policy',
+      '2009-2012: Served as senior advisor to Treasury Secretary Timothy Geithner and then as director for international economic affairs at the National Economic Council and National Security Council.',
+    ),
+    positionRecord(
+      'World Bank and OMB',
+      '2012-2017: Served as U.S. alternate executive director at the World Bank Group and later as chief of staff and executive associate director at the Office of Management and Budget.',
+    ),
+    positionRecord(
+      'Inter-American Foundation',
+      '2022-present: Became president and CEO of the Inter-American Foundation after additional development-policy work at CSIS, Brookings, and through her own firm.',
+    ),
+  ],
+  'executive-thomas-r-hardy-trade-and-development-agency': [
+    positionRecord(
+      'USTDA congressional and public affairs',
+      'By 2018: Served as the agency’s director for congressional and public affairs.',
+    ),
+    positionRecord(
+      'Acting director in Trump’s first term',
+      '2017-2020: Led USTDA as acting director during the first Trump administration.',
+    ),
+    positionRecord(
+      'Program-management leadership',
+      '2020s: Served as director for program management and as a member of the agency’s executive committee overseeing regional teams and project portfolios.',
+    ),
+    positionRecord(
+      'Return to agency leadership',
+      '2020s-present: Returned as acting director of USTDA.',
+    ),
+  ],
+  'executive-eric-ueland-united-states-agency-for-international-development': [
+    positionRecord(
+      'Senate and Republican policy leadership',
+      '1990s-2000s: Built his career in senior Senate roles, including chief of staff to Republican leaders and staff director for the Budget and Rules Committees.',
+    ),
+    positionRecord(
+      'Private-sector and foreign-assistance roles',
+      '2007-2021: Worked at the Duberstein Group, then served in the first Trump administration and at the State Department on legislative affairs and foreign-assistance issues.',
+    ),
+    positionRecord(
+      'OMB and OGE',
+      '2025: Returned to government as OMB deputy director for management and also served as acting director of the Office of Government Ethics.',
+    ),
+    positionRecord(
+      'United States Agency for International Development',
+      'Late 2025-present: Began performing the duties of the USAID administrator and chief operating officer.',
+    ),
+  ],
+  'executive-travis-hill-federal-deposit-insurance-corporation': [
+    positionRecord(
+      'Regions Financial Corporation',
+      '2011-2013: Worked as a policy analyst at Regions Financial.',
+    ),
+    positionRecord(
+      'Senate Banking Committee',
+      '2013-2018: Served as senior counsel on the Senate Banking, Housing, and Urban Affairs Committee and worked on bipartisan banking legislation.',
+    ),
+    positionRecord(
+      'FDIC policy leadership',
+      '2018-2022: Served first as senior advisor to the chairman and then as deputy to the chairman for policy.',
+    ),
+    positionRecord(
+      'Federal Deposit Insurance Corporation',
+      '2023-present: Became FDIC vice chairman in 2023, acting chairman in January 2025, and chairman in January 2026.',
+    ),
+  ],
+  'executive-amy-a-karpel-united-states-international-trade-commission': [
+    positionRecord(
+      'Stewart and Stewart',
+      'Early career: Worked as an associate attorney on antidumping and countervailing-duty matters and related trade appeals.',
+    ),
+    positionRecord(
+      'Office of the U.S. Trade Representative',
+      'More than 13 years: Worked on trade negotiations and WTO disputes, including as chief counsel for negotiations, legislation, and administrative law.',
+    ),
+    positionRecord(
+      'U.S. International Trade Commission commissioner',
+      '2019-present: Confirmed in 2019 and sworn in as a USITC commissioner that year.',
+    ),
+    positionRecord(
+      'United States International Trade Commission chair',
+      '2024-present: Designated chair in June 2024.',
+    ),
+  ],
+  'executive-roger-harris-national-railroad-passenger-corporation-amtrak': [
+    positionRecord(
+      'Airline and commercial strategy roles',
+      'Earlier career: Held commercial and strategic leadership roles at Delta Air Lines, Sun Country Airlines, GMAC Financial Services, Northwest Airlines, and KLM.',
+    ),
+    positionRecord(
+      'Aeromexico',
+      'Before Amtrak: Served as senior vice president of revenue, distribution, and alliances.',
+    ),
+    positionRecord(
+      'Amtrak commercial leadership',
+      '2019-2022: Joined Amtrak in 2019 and rose to executive vice president, marketing and revenue, and chief commercial officer.',
+    ),
+    positionRecord(
+      'National Railroad Passenger Corporation',
+      '2022-present: Assumed the role of Amtrak president in July 2022.',
+    ),
+  ],
+  'executive-david-steiner-united-states-postal-service': [
+    positionRecord(
+      'Phelps Dunbar',
+      'Earlier career: Practiced law and became a partner at Phelps Dunbar.',
+    ),
+    positionRecord(
+      'Waste Management',
+      '2000-2016: Joined the company in 2000, rose through general counsel and chief financial officer, and served as chief executive officer from 2004 to 2016.',
+    ),
+    positionRecord(
+      'Corporate and nonprofit boards',
+      '2017-2025: Held board roles including lead independent director of FedEx and director positions at several major companies.',
+    ),
+    positionRecord(
+      'United States Postal Service',
+      '2025-present: Appointed by the USPS Board of Governors and began serving as the 76th postmaster general and chief executive officer in July 2025.',
+    ),
+  ],
+  'executive-andrea-r-lucas-equal-employment-opportunity-commission': [
+    positionRecord(
+      'Employment law practice',
+      'Before EEOC: Worked as a senior associate at Gibson, Dunn & Crutcher focused on employment law.',
+    ),
+    positionRecord(
+      'Equal Employment Opportunity Commission commissioner',
+      '2020-present: Nominated by Donald Trump in 2020 and confirmed later that year.',
+    ),
+    positionRecord(
+      'Acting chair',
+      '2025-present: Designated acting chair by President Trump on January 20, 2025.',
+    ),
+    positionRecord(
+      'Renomination',
+      '2025: Renominated for another EEOC term in March 2025.',
+    ),
+  ],
+  'executive-colleen-kiko-federal-labor-relations-authority': [
+    positionRecord(
+      'Early federal labor-relations work',
+      '1979-2002: Worked in the FLRA’s predecessor agency and then in its regional office and headquarters after the modern FLRA opened in 1979.',
+    ),
+    positionRecord(
+      'Employees’ Compensation Appeals Board and FLRA general counsel',
+      '2002-2017: Served as an ECAB judge, with a break from 2005 to 2008 to serve as FLRA general counsel.',
+    ),
+    positionRecord(
+      'Federal Labor Relations Authority member',
+      '2017-present: Returned to the FLRA as a member in December 2017.',
+    ),
+    positionRecord(
+      'Federal Labor Relations Authority chairmanship',
+      '2017-2021 and 2025-present: Served as chair in the first Trump term and again beginning February 2025.',
+    ),
+  ],
+  'executive-andrew-fois-administrative-conference-of-the-united-states': [
+    positionRecord(
+      'Justice Department and federal prosecution',
+      '1980s-1990s: Served in multiple Justice Department roles including assistant U.S. attorney in Washington and later assistant attorney general for legislative affairs.',
+    ),
+    positionRecord(
+      'Capitol Hill and private practice',
+      '1990s-2000s: Worked as chief counsel to a House Judiciary subcommittee, then held roles at the National Crime Prevention Council, in solo practice, and at Venable.',
+    ),
+    positionRecord(
+      'District government and federal courts administration',
+      '2010s: Served as deputy attorney general for public safety in the D.C. Attorney General’s office and later as an attorney advisor in the Administrative Office of the U.S. Courts.',
+    ),
+    positionRecord(
+      'Administrative Conference of the United States',
+      '2022-present: Senate-confirmed chair of ACUS.',
+    ),
+  ],
+  'executive-shana-m-broussard-federal-election-commission': [
+    positionRecord(
+      'Louisiana legal work',
+      'Earlier career: Served as a New Orleans assistant district attorney and later as deputy disciplinary counsel at the Louisiana Attorney Disciplinary Board.',
+    ),
+    positionRecord(
+      'IRS and FEC counsel roles',
+      '2008-2020: Worked in the IRS Office of Professional Responsibility and then at the FEC, including as counsel to Commissioner Steven Walther.',
+    ),
+    positionRecord(
+      'Federal Election Commission commissioner',
+      '2020-present: Nominated by President Trump and confirmed in December 2020 as the first Black FEC commissioner.',
+    ),
+    positionRecord(
+      'Federal Election Commission chair',
+      '2021 and 2025-present: Served as chair in 2021 and again beginning in July 2025.',
+    ),
+  ],
+  'executive-michael-f-gerber-federal-retirement-thrift-investment-board': [
+    positionRecord(
+      'Law and corporate practice',
+      'Early career: Began in corporate and securities law at what is now Faegre Drinker Biddle & Reath.',
+    ),
+    positionRecord(
+      'Pennsylvania public service',
+      '2000s: Served in the Pennsylvania House of Representatives and later as a trustee of the State Employees’ Retirement System.',
+    ),
+    positionRecord(
+      'Investment management',
+      '2010s-2020s: Worked at FS Investments, became a partner and senior advisor there, and also co-founded Intrinsic Capital Partners.',
+    ),
+    positionRecord(
+      'Federal Retirement Thrift Investment Board',
+      '2022-present: Confirmed to the FRTIB in 2022 and designated chair that same year.',
+    ),
+  ],
+  'executive-henry-kerner-merit-systems-protection-board': [
+    positionRecord(
+      'Prosecution',
+      'Before entering congressional oversight work: Spent roughly 18 years as a career prosecutor, much of that time in Compton, California.',
+    ),
+    positionRecord(
+      'House Oversight Committee',
+      '2011-2017: Joined the House Oversight and Government Reform Committee and worked on investigations and whistleblower matters.',
+    ),
+    positionRecord(
+      'Office of Special Counsel',
+      '2017-2023: Served as U.S. special counsel overseeing whistleblower and prohibited-personnel-practice cases.',
+    ),
+    positionRecord(
+      'Merit Systems Protection Board',
+      '2024-present: Joined the MSPB and now serves as vice chairman and acting chairman.',
+    ),
+  ],
+  'executive-will-scharf-national-capital-planning-commission': [
+    positionRecord(
+      'Clerkship, prosecution, and Missouri policy work',
+      'Early legal career: Built experience through appellate clerkships, service as an assistant U.S. attorney, and policy work in Missouri state government.',
+    ),
+    positionRecord(
+      'Trump legal work',
+      '2020s: Joined Donald Trump’s legal team and became involved in major Trump-era litigation and presidential-power cases.',
+    ),
+    positionRecord(
+      'White House staff role',
+      '2025-present: Became White House staff secretary in January 2025.',
+    ),
+    positionRecord(
+      'National Capital Planning Commission',
+      '2025-present: Appointed to the NCPC and named chair in July 2025.',
+    ),
+  ],
+  'executive-scott-kupor-office-of-personnel-management': [
+    positionRecord(
+      'Early tech-operations leadership',
+      'Before venture capital: Held senior leadership roles at a web-hosting company later acquired by Hewlett Packard, including responsibility for a large global support organization.',
+    ),
+    positionRecord(
+      'Andreessen Horowitz',
+      '2009-2025: Joined the firm at its founding and eventually became managing partner as it grew into one of the country’s largest venture-capital firms.',
+    ),
+    positionRecord(
+      'Industry and teaching roles',
+      '2010s-2020s: Also served as chairman of the National Venture Capital Association and taught entrepreneurship at Stanford Graduate School of Business.',
+    ),
+    positionRecord(
+      'Office of Personnel Management',
+      '2025-present: Sworn in as OPM director in July 2025.',
+    ),
+  ],
+  'executive-jamieson-greer-united-states-office-of-special-counsel': [
+    positionRecord(
+      'Air Force JAG',
+      'Early career: Served in the U.S. Air Force Judge Advocate General’s Corps, including a deployment to Iraq.',
+    ),
+    positionRecord(
+      'First Trump trade term and private practice',
+      '2017-2024: Served as chief of staff to Ambassador Robert Lighthizer at USTR during the first Trump administration and later became a partner in private practice focused on trade and national-security matters.',
+    ),
+    positionRecord(
+      'United States Trade Representative',
+      '2025-present: Confirmed as U.S. trade representative in February 2025.',
+    ),
+    positionRecord(
+      'Office of Special Counsel',
+      '2025-present: Appointed acting special counsel on March 21, 2025.',
+    ),
+  ],
+  'executive-jared-isaacman-national-aeronautics-and-space-administration': [
+    positionRecord(
+      'Shift4 founder',
+      '1999-2025: Left high school at 16 to start United Bank Card, the company that became Shift4, and led it through its 2020 public listing before stepping down as chief executive in 2025.',
+    ),
+    positionRecord(
+      'Draken International',
+      '2011-2019: Co-founded Draken International and built a private adversary-air fleet used to train U.S. military pilots.',
+    ),
+    positionRecord(
+      'Commercial spaceflight',
+      '2021-2024: Commanded Inspiration4, the first all-civilian orbital spaceflight, and later led Polaris Dawn, which included the first commercial spacewalk.',
+    ),
+    positionRecord(
+      'National Aeronautics and Space Administration',
+      '2025-present: Confirmed and sworn in as NASA’s 15th administrator in December 2025.',
+    ),
+  ],
+  'executive-brian-stone-national-science-foundation': [
+    positionRecord(
+      'Polar-program operations',
+      '2000s-2010s: Held infrastructure, logistics, and research-support roles inside NSF’s Office of Polar Programs.',
+    ),
+    positionRecord(
+      'NSF central leadership staff',
+      'Later career: Moved into the Foundation’s central leadership team as chief of staff in the Office of the Director.',
+    ),
+    positionRecord(
+      'Acting agency leadership',
+      '2025-present: Became chief of staff performing the duties of the NSF director.',
+    ),
+    positionRecord(
+      'Policy and funding rollout',
+      '2025-present: Has served as the public face on major NSF priorities including AI, quantum, EPSCoR, and advanced-manufacturing announcements.',
+    ),
+  ],
+  'executive-peter-feldman-consumer-product-safety-commission': [
+    positionRecord(
+      'Senate Commerce Committee',
+      'Before CPSC: Served as senior counsel to the Senate Commerce, Science, and Transportation Committee and worked on bipartisan legislation and oversight touching CPSC and FTC issues.',
+    ),
+    positionRecord(
+      'Consumer Product Safety Commission commissioner',
+      '2018-present: Nominated by President Trump and confirmed in 2018, then later reconfirmed to a full seven-year term.',
+    ),
+    positionRecord(
+      'Vice chairman',
+      'Before 2025: Chosen by fellow commissioners to serve as vice chairman.',
+    ),
+    positionRecord(
+      'Consumer Product Safety Commission acting chairman',
+      '2025-present: Became acting chairman in January 2025.',
+    ),
+  ],
+  'executive-jennifer-tahmasebi-corporation-for-national-and-community-service': [
+    positionRecord(
+      'National-service and youth-service work',
+      '1990s: Worked in service and youth-engagement roles including AmeriCorps program work and service positions tied to Youth Service America and COOL.',
+    ),
+    positionRecord(
+      'YouthBuild USA',
+      'Late 1990s-2010: Spent about 11 years at YouthBuild USA, rising through multiple roles and overseeing AmeriCorps programming.',
+    ),
+    positionRecord(
+      'AmeriCorps senior leadership',
+      '2010s-2020s: Returned to federal service in senior AmeriCorps program-leadership roles.',
+    ),
+    positionRecord(
+      'Corporation for National and Community Service',
+      '2025-present: Serves as interim agency head of AmeriCorps.',
+    ),
+  ],
+  'executive-paul-shea-peace-corps': [
+    positionRecord(
+      'Peace Corps finance leadership',
+      '2010s: Served in senior financial-management roles at the Peace Corps, including as deputy chief financial officer.',
+    ),
+    positionRecord(
+      'Acting CFO period',
+      '2017-2018: Helped lead agency financial management during the period covered in Peace Corps financial-reporting releases.',
+    ),
+    positionRecord(
+      'Peace Corps chief executive role',
+      'August 2025-January 2026: Elevated from acting chief financial officer to chief executive officer during the 2025 leadership reshuffle.',
+    ),
+    positionRecord(
+      'Peace Corps senior advisor',
+      'January 2026-present: Continued with the agency as a senior advisor after Richard Swartz was named acting director.',
+    ),
+  ],
+  'executive-janet-dhillon-pension-benefit-guaranty-corporation': [
+    positionRecord(
+      'Skadden Arps',
+      '1990s-2000s: Began her legal career at Skadden, Arps, Slate, Meagher & Flom and practiced there for 13 years.',
+    ),
+    positionRecord(
+      'Fortune 500 general counsel roles',
+      '2000s-2010s: Served as general counsel at major companies including US Airways, JCPenney, Burlington Stores, and Dollar Tree.',
+    ),
+    positionRecord(
+      'Equal Employment Opportunity Commission',
+      '2019-2022: Served as an EEOC commissioner, including as chair from 2019 to 2021.',
+    ),
+    positionRecord(
+      'Labor Department and PBGC',
+      '2020s-present: Held senior roles in Labor Department benefits and solicitor offices and later became director of the PBGC in 2025.',
+    ),
+  ],
+  'executive-frank-bisignano-social-security-administration': [
+    positionRecord(
+      'Citigroup',
+      '2002-2005: Led Citigroup’s Global Transactions Services business and sat on the management committee.',
+    ),
+    positionRecord(
+      'JPMorgan Chase',
+      '2005-2013: Held senior executive roles including co-chief operating officer, head of mortgage banking, and chief administrative officer.',
+    ),
+    positionRecord(
+      'First Data and Fiserv',
+      '2013-2025: Ran First Data as chief executive and then led Fiserv after the merger, eventually serving as chairman and chief executive.',
+    ),
+    positionRecord(
+      'Social Security Administration',
+      '2025-present: Sworn in as the 18th commissioner of Social Security in May 2025.',
+    ),
+  ],
+  'executive-benjamin-black-overseas-private-investment-corporation': [
+    positionRecord(
+      'Corporate law',
+      'Early career: Worked as a corporate mergers-and-acquisitions attorney at Sullivan & Cromwell.',
+    ),
+    positionRecord(
+      'Private equity and credit investing',
+      '2000s-2010s: Worked in private equity at Apollo Global Management and later as a senior portfolio manager at Knowledge Universe Holdings.',
+    ),
+    positionRecord(
+      'Fortinbras Enterprises',
+      'Before returning to government: Founded Fortinbras Enterprises and led investment work across credit, restructuring, and strategic opportunities.',
+    ),
+    positionRecord(
+      'Development Finance Corporation / OPIC successor role',
+      '2025-present: Became chief executive of the U.S. International Development Finance Corporation after Senate confirmation in October 2025.',
+    ),
+  ],
+  'executive-pete-marocco-united-states-african-development-foundation': [
+    positionRecord(
+      'Marine Corps',
+      '1990s: Enlisted in the Marine Corps at 17 and later became a platoon sergeant.',
+    ),
+    positionRecord(
+      'State and Commerce national-security roles',
+      '2010s: Served as a State Department official for conflict and stabilization work and later as a senior advisor for intelligence and security at the Commerce Department.',
+    ),
+    positionRecord(
+      'Pentagon Africa policy',
+      '2019-2020: Served as deputy assistant secretary of defense for African affairs.',
+    ),
+    positionRecord(
+      'Trump foreign-assistance roles',
+      '2025-present: Returned in senior Trump-era foreign-assistance roles including work tied to State, USAID, and the USADF-linked profile in this dataset.',
+    ),
+  ],
+  'executive-michael-rigas-united-states-agency-for-global-media': [
+    positionRecord(
+      'Private-sector finance',
+      'Before federal service: Worked at Mellon Financial and Brown Brothers Harriman.',
+    ),
+    positionRecord(
+      'First Trump administration management posts',
+      '2018-2021: Served in senior federal management roles including OPM deputy director, acting OPM director, acting OMB deputy director for management, and acting federal CIO.',
+    ),
+    positionRecord(
+      'Transition and policy work',
+      '2022-2024: Directed the America First Policy Institute transition project and advised the Trump-Vance transition.',
+    ),
+    positionRecord(
+      'State, GSA, and USAGM-linked leadership',
+      '2025-present: Became deputy secretary of state for management and resources, served as acting GSA administrator in 2025, and is associated with the current USAGM profile in this dataset.',
+    ),
+  ],
+  'executive-bill-pulte-federal-housing-finance-agency': [
+    positionRecord(
+      'Housing and investment career',
+      '2010s: Built a career in homebuilding, housing products, and community-development investing.',
+    ),
+    positionRecord(
+      'Pulte Capital Partners and Pulte Homes',
+      '2011-2025: Founded Pulte Capital Partners and also served on the board of Pulte Homes.',
+    ),
+    positionRecord(
+      'Philanthropy and civic work',
+      '2010s-2020s: Built a public profile through anti-blight work and direct-giving philanthropy.',
+    ),
+    positionRecord(
+      'Federal Housing Finance Agency',
+      '2025-present: Sworn in as FHFA director in March 2025.',
+    ),
+  ],
+  'executive-kelly-loeffler-small-business-administration': [
+    positionRecord(
+      'Financial-services executive',
+      '1990s-2018: Built a long career in finance and technology, including senior executive roles at Intercontinental Exchange.',
+    ),
+    positionRecord(
+      'Bakkt',
+      '2018-2019: Became founding chief executive and first employee of Bakkt.',
+    ),
+    positionRecord(
+      'U.S. Senate',
+      '2020-2021: Served as U.S. senator from Georgia.',
+    ),
+    positionRecord(
+      'Post-Senate political and business work and SBA',
+      '2021-present: Founded Greater Georgia Action and RallyRight and later became administrator of the Small Business Administration in 2025.',
+    ),
   ],
 }

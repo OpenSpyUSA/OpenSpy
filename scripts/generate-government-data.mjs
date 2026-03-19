@@ -282,8 +282,7 @@ const CONGRESSIONAL_WEALTH_NOTE =
   'Personal wealth varies widely. Congressional filings are public, but they disclose assets and liabilities mostly in ranges rather than as one exact net-worth number.'
 const EXECUTIVE_SALARY_NOTE =
   'Senior executive branch pay is set by federal law and executive schedule rules; cabinet secretaries file annual financial disclosures.'
-const EXECUTIVE_WEALTH_NOTE =
-  'Public financial disclosures are required for senior executive officials, and those forms usually report assets and liabilities in ranges rather than as one exact net-worth figure.'
+const EXECUTIVE_WEALTH_NOTE = ''
 const JUSTICE_SALARY_NOTE =
   'Supreme Court compensation is set by law for the chief justice and associate justices, alongside annual financial disclosure requirements.'
 const JUSTICE_WEALTH_NOTE =
@@ -4581,9 +4580,6 @@ function annotateFinancialDisclosure(person) {
     return {
       ...person,
       financialDisclosureLabel: 'OGE disclosure portal',
-      financialDisclosureNote: searchHint
-        ? `Search ${searchHint} in the Office of Government Ethics collection. Executive disclosures usually list assets, liabilities, income, gifts, reimbursements, agreements, positions, and many securities transactions in value ranges rather than exact net worth.`
-        : 'Use the Office of Government Ethics collection for this official. Executive disclosures usually list assets, liabilities, income, gifts, reimbursements, agreements, positions, and many securities transactions in value ranges rather than exact net worth.',
       financialDisclosureSearchHint: searchHint,
       financialDisclosureUrl:
         'https://www.oge.gov/Web/OGE.nsf/Officials%20Individual%20Disclosures%20Search%20Collection?OpenForm=',
