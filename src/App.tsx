@@ -124,12 +124,12 @@ function formatRollCallOutcome(outcome?: LegislativeTrumpRollCall['trumpOutcome'
 
 function formatRollCallSignalTier(rollCall: LegislativeTrumpRollCall) {
   return rollCall.signalTier === 'broad_admin_related'
-    ? 'Broad administration-related'
-    : 'High-signal scored'
+    ? 'Broader Trump-related'
+    : 'Direct Trump-related'
 }
 
 function formatRollCallScoringStatus(rollCall: LegislativeTrumpRollCall) {
-  return rollCall.scoreIncluded ? 'Counts in Trump score' : 'Browser only'
+  return rollCall.scoreIncluded ? 'Used in Trump score' : 'Shown for context only'
 }
 
 function formatRollCallVoteTotals(event: LegislativeTrumpRollCall) {

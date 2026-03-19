@@ -74,8 +74,8 @@ function formatRollCallVoteTotals(event: LegislativeTrumpRollCall) {
 
 function formatRollCallSignalTier(event: LegislativeTrumpRollCall) {
   return event.signalTier === 'broad_admin_related'
-    ? 'Broad administration-related'
-    : 'High-signal scored'
+    ? 'Broader Trump-related'
+    : 'Direct Trump-related'
 }
 
 function formatCompactTrumpScore(score: number) {
@@ -163,16 +163,16 @@ export function LegislativeVoteMatrix({
           <p className="eyebrow">Vote matrix</p>
           <h3>{chamberLabel} Trump-linked roll calls</h3>
           <p className="vote-matrix__axes">
-            Rows sorted by age. Newest votes on the left. <strong>Scored</strong> votes move the
-            Trump score. <strong>Broad</strong> votes stay in the browser only.
+            Rows sorted by age. Newest votes on the left. <strong>Direct</strong> votes affect the
+            Trump score. <strong>Broader</strong> votes are shown for context only.
           </p>
           <div className="vote-matrix__scope-summary" aria-label="Roll-call scope summary">
             <span className="vote-matrix__scope-pill vote-matrix__scope-pill--scored">
-              High-signal scored {scoredCount}
+              Direct Trump-related {scoredCount}
             </span>
             {broadCount > 0 ? (
               <span className="vote-matrix__scope-pill vote-matrix__scope-pill--broad">
-                Broad administration-related {broadCount}
+                Broader Trump-related {broadCount}
               </span>
             ) : null}
           </div>
@@ -227,7 +227,7 @@ export function LegislativeVoteMatrix({
                         onClick={() => onOpenRollCall(event.id)}
                         title={`${event.label} • ${formatRollCallMatrixDateLabel(event)} • ${scopeLabel} • ${getRollCallOutcomeLabel(event.trumpOutcome)}${
                           countsLabel ? ` • ${countsLabel}` : ''
-                        }${event.scoreIncluded ? ' • Counts in Trump score' : ' • Browser only'}`}
+                        }${event.scoreIncluded ? ' • Used in Trump score' : ' • Shown for context only'}`}
                         type="button"
                       >
                         <span className="vote-matrix__event-date">
@@ -241,7 +241,7 @@ export function LegislativeVoteMatrix({
                             event.scoreIncluded ? 'scored' : 'broad'
                           }`}
                         >
-                          {event.scoreIncluded ? 'Scored' : 'Broad'}
+                          {event.scoreIncluded ? 'Direct' : 'Broader'}
                         </span>
                         {countsLabel ? (
                           <span className="vote-matrix__event-counts">{countsLabel}</span>
