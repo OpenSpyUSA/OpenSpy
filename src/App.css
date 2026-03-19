@@ -435,10 +435,6 @@
   backdrop-filter: blur(18px) saturate(1.06);
 }
 
-.branch-banner__copy--legislative .eyebrow {
-  margin-bottom: 0;
-}
-
 .branch-banner__copy p {
   margin: 0;
   font-size: clamp(1rem, 1.7vw, 1.14rem);
@@ -456,15 +452,6 @@
 .branch-summary {
   max-width: 52ch;
   opacity: 1;
-}
-
-.branch-banner__pills {
-  margin-top: 2px;
-}
-
-.hero-pill--focus {
-  border-color: rgba(29, 29, 31, 0.1);
-  background: color-mix(in srgb, rgba(255, 90, 82, 0.1) 56%, white);
 }
 
 .branch-state-heading {

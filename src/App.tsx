@@ -897,23 +897,6 @@ function buildLegislativeChamberStats(people: GovernmentPerson[]) {
   ] as const
 }
 
-function getLegislativeStatGroupTotal(
-  group:
-    | {
-        counts: Record<Alignment, number>
-        id: string
-        label: string
-      }
-    | null
-    | undefined,
-) {
-  if (!group) {
-    return 0
-  }
-
-  return Object.values(group.counts).reduce((total, count) => total + count, 0)
-}
-
 function HouseVacancySection({
   selectedStateCode,
 }: {
@@ -1992,16 +1975,6 @@ function App() {
   const stats = selectedBranch ? buildBranchStats(selectedBranch, statsPeople) : []
   const legislativeStats =
     selectedBranch?.id === 'legislative' ? buildLegislativeChamberStats(statsPeople) : []
-  const legislativeSenateGroup =
-    selectedBranch?.id === 'legislative'
-      ? legislativeStats.find((group) => group.id === 'senate') ?? null
-      : null
-  const legislativeHouseGroup =
-    selectedBranch?.id === 'legislative'
-      ? legislativeStats.find((group) => group.id === 'house') ?? null
-      : null
-  const legislativeSenateCount = getLegislativeStatGroupTotal(legislativeSenateGroup)
-  const legislativeHouseCount = getLegislativeStatGroupTotal(legislativeHouseGroup)
   const judicialJustices =
     selectedBranch?.id === 'judicial'
       ? visiblePeople
@@ -2267,21 +2240,11 @@ function App() {
         </div>
         {selectedBranch.id === 'legislative' ? (
           <div className="branch-banner__copy branch-banner__copy--legislative">
-            <p className="eyebrow">Congress overview</p>
             <p className="branch-banner__lede">
               Congress translates elections, party coalitions, committees, and state
               delegations into lawmaking, appropriations, confirmations, and oversight.
             </p>
             <p className="branch-summary">{legislativeOverviewSummary}</p>
-            <div className="hero-pills branch-banner__pills">
-              <span className="hero-pill">50 states</span>
-              <span className="hero-pill">{legislativeSenateCount} Senate profiles</span>
-              <span className="hero-pill">{legislativeHouseCount} House profiles</span>
-              <span className="hero-pill">{visibleRollCallEvents.length} roll calls in view</span>
-              {selectedStateSummary ? (
-                <span className="hero-pill hero-pill--focus">{selectedStateSummary.stateName} focus</span>
-              ) : null}
-            </div>
           </div>
         ) : (
           <div className="branch-banner__copy">
