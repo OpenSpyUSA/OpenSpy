@@ -2069,28 +2069,6 @@ const supremeCourtTrumpPowerCases = [
     sourceUrl: 'https://www.supremecourt.gov/opinions/23pdf/23-939_e2pg.pdf',
   },
   {
-    caseName: 'Trump v. Thompson',
-    date: '2022-01-19',
-    id: 'trump-v-thompson',
-    type: 'order',
-    issue:
-      'January 6 records and executive privilege. The case asked whether Trump could block release of White House records to the House January 6 committee.',
-    justiceStances: {
-      'judicial-john-g-roberts-jr': 'anti',
-      'judicial-clarence-thomas': 'pro',
-      'judicial-samuel-a-alito-jr': 'anti',
-      'judicial-sonia-sotomayor': 'anti',
-      'judicial-elena-kagan': 'anti',
-      'judicial-neil-m-gorsuch': 'anti',
-      'judicial-brett-m-kavanaugh': 'anti',
-      'judicial-amy-coney-barrett': 'anti',
-      'judicial-ketanji-brown-jackson': 'not_on_court',
-    },
-    powerTag: 'Records',
-    result: "The Court denied Trump's stay application and left the D.C. Circuit ruling in place.",
-    sourceUrl: 'https://www.supremecourt.gov/opinions/21pdf/21a272_9p6b.pdf',
-  },
-  {
     caseName: 'Trump v. New York',
     date: '2020-12-18',
     id: 'trump-v-new-york',
@@ -2135,51 +2113,6 @@ const supremeCourtTrumpPowerCases = [
     result:
       'The Court denied a motion to lift its stay, leaving the administration free to keep using the funds while the case proceeded.',
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19a60.html',
-  },
-  {
-    caseName: 'Trump v. Vance',
-    date: '2020-07-09',
-    id: 'trump-v-vance',
-    type: 'merits',
-    issue:
-      "State grand-jury subpoena. The case asked whether a sitting President had absolute immunity from a state prosecutor's subpoena for private records.",
-    justiceStances: {
-      'judicial-john-g-roberts-jr': 'anti',
-      'judicial-clarence-thomas': 'pro',
-      'judicial-samuel-a-alito-jr': 'pro',
-      'judicial-sonia-sotomayor': 'anti',
-      'judicial-elena-kagan': 'anti',
-      'judicial-neil-m-gorsuch': 'anti',
-      'judicial-brett-m-kavanaugh': 'anti',
-      'judicial-amy-coney-barrett': 'not_on_court',
-      'judicial-ketanji-brown-jackson': 'not_on_court',
-    },
-    powerTag: 'Records',
-    result: 'The Court rejected absolute immunity and allowed the subpoena fight to continue.',
-    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-635.html',
-  },
-  {
-    caseName: 'Trump v. Mazars USA, LLP',
-    date: '2020-07-09',
-    id: 'trump-v-mazars',
-    type: 'merits',
-    issue:
-      "Congressional subpoenas for Trump's financial records. The case asked whether House committees could demand those records from third parties.",
-    justiceStances: {
-      'judicial-john-g-roberts-jr': 'anti',
-      'judicial-clarence-thomas': 'pro',
-      'judicial-samuel-a-alito-jr': 'pro',
-      'judicial-sonia-sotomayor': 'anti',
-      'judicial-elena-kagan': 'anti',
-      'judicial-neil-m-gorsuch': 'anti',
-      'judicial-brett-m-kavanaugh': 'anti',
-      'judicial-amy-coney-barrett': 'not_on_court',
-      'judicial-ketanji-brown-jackson': 'not_on_court',
-    },
-    powerTag: 'Records',
-    result:
-      "The Court rejected Trump's categorical position and sent the dispute back under a new separation-of-powers test.",
-    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-715.html',
   },
   {
     caseName: 'Department of Homeland Security v. Regents of the University of California',
@@ -2294,6 +2227,99 @@ const supremeCourtTrumpPowerCases = [
     result:
       'The Court granted the Government applications in part, let the entry-suspension rules take effect against people without a qualifying U.S. connection, and set the case for argument.',
     sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/16-1436.html',
+  },
+]
+
+const supremeCourtTrumpPersonalCases = [
+  {
+    caseName: 'Trump v. Anderson',
+    date: '2024-03-04',
+    id: 'trump-v-anderson',
+    type: 'merits',
+    issue:
+      'Ballot eligibility under Section 3. The case asked whether Colorado could keep Trump off the presidential ballot under the Fourteenth Amendment disqualification clause.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'pro',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'pro',
+      'judicial-elena-kagan': 'pro',
+      'judicial-neil-m-gorsuch': 'pro',
+      'judicial-brett-m-kavanaugh': 'pro',
+      'judicial-amy-coney-barrett': 'pro',
+      'judicial-ketanji-brown-jackson': 'pro',
+    },
+    powerTag: 'Ballot',
+    result:
+      'The Court unanimously held that states cannot enforce Section 3 against presidential candidates for federal office on their own.',
+    sourceUrl: 'https://www.supremecourt.gov/opinions/23pdf/23-719_19m2.pdf',
+  },
+  {
+    caseName: 'Trump v. Thompson',
+    date: '2022-01-19',
+    id: 'trump-v-thompson',
+    type: 'order',
+    issue:
+      'January 6 records and executive privilege. The case asked whether Trump could block release of White House records to the House January 6 committee.',
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'anti',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'anti',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Records',
+    result: "The Court denied Trump's stay application and left the D.C. Circuit ruling in place.",
+    sourceUrl: 'https://www.supremecourt.gov/opinions/21pdf/21a272_9p6b.pdf',
+  },
+  {
+    caseName: 'Trump v. Vance',
+    date: '2020-07-09',
+    id: 'trump-v-vance',
+    type: 'merits',
+    issue:
+      "State grand-jury subpoena. The case asked whether a sitting President had absolute immunity from a state prosecutor's subpoena for private records.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Records',
+    result: 'The Court rejected absolute immunity and allowed the subpoena fight to continue.',
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-635.html',
+  },
+  {
+    caseName: 'Trump v. Mazars USA, LLP',
+    date: '2020-07-09',
+    id: 'trump-v-mazars',
+    type: 'merits',
+    issue:
+      "Congressional subpoenas for Trump's financial records. The case asked whether House committees could demand those records from third parties.",
+    justiceStances: {
+      'judicial-john-g-roberts-jr': 'anti',
+      'judicial-clarence-thomas': 'pro',
+      'judicial-samuel-a-alito-jr': 'pro',
+      'judicial-sonia-sotomayor': 'anti',
+      'judicial-elena-kagan': 'anti',
+      'judicial-neil-m-gorsuch': 'anti',
+      'judicial-brett-m-kavanaugh': 'anti',
+      'judicial-amy-coney-barrett': 'not_on_court',
+      'judicial-ketanji-brown-jackson': 'not_on_court',
+    },
+    powerTag: 'Records',
+    result:
+      "The Court rejected Trump's categorical position and sent the dispute back under a new separation-of-powers test.",
+    sourceUrl: 'https://www.supremecourt.gov/docket/docketfiles/html/public/19-715.html',
   },
 ]
 
@@ -3306,6 +3332,7 @@ function annotateJudicialTrumpRelationship(person) {
   let proVotes = 0
   let antiVotes = 0
   let notOnCourt = 0
+  const caseCount = supremeCourtTrumpPowerCases.length
 
   for (const caseItem of supremeCourtTrumpPowerCases) {
     const stance = caseItem.justiceStances[person.id]
@@ -3322,12 +3349,12 @@ function annotateJudicialTrumpRelationship(person) {
   const countedVotes = proVotes + antiVotes
   const derivedScore = countedVotes === 0 ? 0 : clampTrumpScoreToSingleDecimal((proVotes / countedVotes) * 10)
   const evidence = [
-    `${proVotes} Pro Trump votes and ${antiVotes} Not pro Trump votes across the 19 selected Trump-related Supreme Court cases on this site.`,
+    `${proVotes} Pro Trump votes and ${antiVotes} Not pro Trump votes across the ${caseCount} selected Trump Power Cases on this site.`,
   ]
   const trumpAppointment = supremeCourtTrumpFacts.get(person.name)
 
   if (notOnCourt > 0) {
-    evidence.push(`Not on Court for ${notOnCourt} of the 19 selected cases.`)
+    evidence.push(`Not on Court for ${notOnCourt} of the ${caseCount} selected power cases.`)
   }
 
   if (trumpAppointment) {
@@ -3338,7 +3365,7 @@ function annotateJudicialTrumpRelationship(person) {
     ...person,
     trumpEvidence: uniqueStrings(evidence),
     trumpLabel: judicialTrumpLabelFromScore(derivedScore),
-    trumpNote: `Score is derived from the 19 selected Trump-related Supreme Court cases on this site: ${proVotes}/${countedVotes} counted votes on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
+    trumpNote: `Score is derived from the ${caseCount} selected Trump Power Cases on this site: ${proVotes}/${countedVotes} counted votes on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
     trumpScore: derivedScore,
   }
 }
@@ -4724,6 +4751,7 @@ async function main() {
     legislativeTrumpRollCalls: trumpRelationshipContext.legislativeRollCallSummary,
     people,
     supremeCourtCases: supremeCourtTrumpPowerCases,
+    supremeCourtPersonalCases: supremeCourtTrumpPersonalCases,
     sources: SOURCES,
   }
 

@@ -8,6 +8,22 @@ function getInitials(name: string) {
     .join('')
 }
 
+function resolveImageUrl(imageUrl?: string) {
+  if (!imageUrl) {
+    return imageUrl
+  }
+
+  if (/^(?:https?:)?\/\//i.test(imageUrl) || imageUrl.startsWith('data:')) {
+    return imageUrl
+  }
+
+  if (imageUrl.startsWith('/')) {
+    return `${import.meta.env.BASE_URL}${imageUrl.slice(1)}`
+  }
+
+  return imageUrl
+}
+
 export function Avatar({
   className,
   imageUrl,
@@ -17,8 +33,9 @@ export function Avatar({
   imageUrl?: string
   name: string
 }) {
+  const resolvedImageUrl = resolveImageUrl(imageUrl)
   const [failedSrc, setFailedSrc] = useState<string | null>(null)
-  const showImage = Boolean(imageUrl) && failedSrc !== imageUrl
+  const showImage = Boolean(resolvedImageUrl) && failedSrc !== resolvedImageUrl
 
   return (
     <span className={className} aria-hidden="true">
@@ -27,8 +44,8 @@ export function Avatar({
           alt=""
           className="avatar-image"
           loading="lazy"
-          onError={() => setFailedSrc(imageUrl ?? null)}
-          src={imageUrl}
+          onError={() => setFailedSrc(resolvedImageUrl ?? null)}
+          src={resolvedImageUrl}
         />
       ) : (
         <span className="avatar-fallback">{getInitials(name)}</span>

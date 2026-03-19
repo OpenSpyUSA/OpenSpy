@@ -191,6 +191,7 @@ export interface GovernmentDataset {
   legislativeTrumpRollCalls?: LegislativeTrumpRollCallSummary
   people: GovernmentPerson[]
   supremeCourtCases?: SupremeCourtCase[]
+  supremeCourtPersonalCases?: SupremeCourtCase[]
   sources: SourceLink[]
 }
 

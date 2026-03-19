@@ -732,14 +732,20 @@ function buildDetailFacts(
 
 function SupremeCourtCaseMatrix({
   cases,
+  eyebrow,
+  title,
   justices,
   onOpenPerson,
   selectedPersonId,
+  showScore = true,
 }: {
   cases: SupremeCourtCase[]
+  eyebrow: string
+  title: string
   justices: GovernmentPerson[]
   onOpenPerson: (personId: string) => void
   selectedPersonId: string | null
+  showScore?: boolean
 }) {
   if (!cases.length || !justices.length) {
     return null
@@ -753,8 +759,8 @@ function SupremeCourtCaseMatrix({
     <section className="section-card case-section">
       <div className="section-card__header case-section__header">
         <div>
-          <p className="eyebrow">Trump Power Cases</p>
-          <h2>How The Nine Justices Lined Up</h2>
+          <p className="eyebrow">{eyebrow}</p>
+          <h2>{title}</h2>
         </div>
         <p>{cases.length} Supreme Court cases. Click any justice row for the profile or any case header for the official source.</p>
       </div>
@@ -836,10 +842,12 @@ function SupremeCourtCaseMatrix({
                                 {getCompactLastName(justice.name)}
                               </span>
                             </strong>
-                            <span className="vote-matrix__score">
-                              <span className="vote-matrix__desktop-copy">{scoreLabel}</span>
-                              <span className="vote-matrix__mobile-copy">{compactScoreLabel}</span>
-                            </span>
+                            {showScore ? (
+                              <span className="vote-matrix__score">
+                                <span className="vote-matrix__desktop-copy">{scoreLabel}</span>
+                                <span className="vote-matrix__mobile-copy">{compactScoreLabel}</span>
+                              </span>
+                            ) : null}
                           </span>
                           <span className="vote-matrix__person-detail">
                             <span className="vote-matrix__desktop-copy">{detailLabel}</span>
@@ -981,6 +989,7 @@ function DetailPanel({
   person,
   rollCall,
   section,
+  supremeCourtPersonalCases,
   supremeCourtCases,
 }: {
   branch: GovernmentBranch
@@ -988,6 +997,7 @@ function DetailPanel({
   person: GovernmentPerson | null
   rollCall: LegislativeTrumpRollCall | null
   section: BranchSection | null
+  supremeCourtPersonalCases: SupremeCourtCase[]
   supremeCourtCases: SupremeCourtCase[]
 }) {
   if (rollCall) {
@@ -1097,6 +1107,10 @@ function DetailPanel({
     person.branchId === 'judicial'
       ? supremeCourtCases.filter((caseItem) => caseItem.justiceStances[person.id])
       : []
+  const judicialPersonalCases =
+    person.branchId === 'judicial'
+      ? supremeCourtPersonalCases.filter((caseItem) => caseItem.justiceStances[person.id])
+      : []
 
   return (
     <aside className="detail-panel detail-panel--filled">
@@ -1195,6 +1209,40 @@ function DetailPanel({
           <h3>Trump Power Cases</h3>
           <div className="justice-case-list">
             {judicialCases.map((caseItem) => {
+              const stance = caseItem.justiceStances[person.id]
+
+              return (
+                <article className="justice-case-item" key={`${person.id}-${caseItem.id}`}>
+                  <div className="justice-case-item__header">
+                    <div>
+                      <h4>{caseItem.caseName}</h4>
+                      <p>
+                        {formatCaseDate(caseItem.date)} • {getTrumpCaseTypeLabel(caseItem.type)}
+                      </p>
+                    </div>
+                    <span className={`case-stance-chip case-stance-chip--${stance}`}>
+                      {getTrumpCaseStanceLabel(stance)}
+                    </span>
+                  </div>
+                  <p>{caseItem.issue}</p>
+                  <p>
+                    <strong>Result:</strong> {caseItem.result}
+                  </p>
+                  <a href={caseItem.sourceUrl} rel="noreferrer" target="_blank">
+                    Official source
+                  </a>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {judicialPersonalCases.length > 0 ? (
+        <section className="detail-block">
+          <h3>Trump Personal Cases</h3>
+          <div className="justice-case-list">
+            {judicialPersonalCases.map((caseItem) => {
               const stance = caseItem.justiceStances[person.id]
 
               return (
@@ -1455,6 +1503,7 @@ function App() {
   const branches = dataset?.branches ?? []
   const people = dataset?.people ?? []
   const supremeCourtCases = dataset?.supremeCourtCases ?? []
+  const supremeCourtPersonalCases = dataset?.supremeCourtPersonalCases ?? []
   const legislativeRollCallEvents = dataset?.legislativeTrumpRollCalls?.selectedEvents ?? []
   const peopleById = new Map(people.map((person) => [person.id, person]))
   const branchesById = new Map(branches.map((branch) => [branch.id, branch]))
@@ -1925,9 +1974,22 @@ function App() {
                 {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
                   <SupremeCourtCaseMatrix
                     cases={supremeCourtCases}
+                    eyebrow="Trump Power Cases"
+                    title="How The Nine Justices Lined Up"
                     justices={judicialJustices}
                     onOpenPerson={openPerson}
                     selectedPersonId={selectedPerson?.id ?? null}
+                  />
+                ) : null}
+                {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
+                  <SupremeCourtCaseMatrix
+                    cases={supremeCourtPersonalCases}
+                    eyebrow="Trump Personal Cases"
+                    title="How The Nine Justices Lined Up"
+                    justices={judicialJustices}
+                    onOpenPerson={openPerson}
+                    selectedPersonId={selectedPerson?.id ?? null}
+                    showScore={false}
                   />
                 ) : null}
               </Fragment>
@@ -1941,6 +2003,7 @@ function App() {
           person={selectedPerson}
           rollCall={selectedRollCall}
           section={selectedSection}
+          supremeCourtPersonalCases={supremeCourtPersonalCases}
           supremeCourtCases={supremeCourtCases}
         />
       </section>
