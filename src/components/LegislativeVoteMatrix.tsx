@@ -31,6 +31,7 @@ const CATEGORY_SHORT_LABELS: Record<string, string> = {
   tariffs: 'Tariff',
   taxes: 'Tax',
   trade: 'Trade',
+  trump: 'Trump',
   'veto-override': 'Veto',
   'war-powers': 'War',
 }

@@ -489,6 +489,69 @@ const houseCandidateExtras = [
 ]
 
 const broadHouseRollCalls = [
+  selectedBroadHouse('house-2023-secure-border-rule-pq', 2023, 205, 'immigration', {
+    label: 'Secure the Border Act rule previous question',
+  }),
+  selectedBroadHouse('house-2023-secure-border-rule', 2023, 207, 'immigration', {
+    label: 'Secure the Border Act rule adoption',
+  }),
+  selectedBroadHouse('house-2023-secure-border-recommit', 2023, 208, 'immigration', {
+    label: 'Secure the Border Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2023-secure-border-passage', 2023, 209, 'immigration', {
+    label: 'Secure the Border Act passage',
+  }),
+  selectedBroadHouse('house-2023-border-spending-rule-pq', 2023, 508, 'appropriations', {
+    label: 'Spending Reduction and Border Security Act rule previous question',
+  }),
+  selectedBroadHouse('house-2023-border-spending-rule', 2023, 509, 'appropriations', {
+    label: 'Spending Reduction and Border Security Act rule adoption',
+  }),
+  selectedBroadHouse('house-2023-border-spending-recommit', 2023, 510, 'appropriations', {
+    label: 'Spending Reduction and Border Security Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2023-border-spending-passage', 2023, 511, 'appropriations', {
+    label: 'Spending Reduction and Border Security Act passage',
+  }),
+  selectedBroadHouse('house-2023-communities-border-rule-pq', 2023, 678, 'immigration', {
+    label: 'Protecting Our Communities from Failure to Secure the Border Act rule previous question',
+  }),
+  selectedBroadHouse('house-2023-communities-border-rule', 2023, 679, 'immigration', {
+    label: 'Protecting Our Communities from Failure to Secure the Border Act rule adoption',
+  }),
+  selectedBroadHouse('house-2023-communities-border-passage', 2023, 689, 'immigration', {
+    label: 'Protecting Our Communities from Failure to Secure the Border Act passage',
+  }),
+  selectedBroadHouse('house-2024-hamas-immigration-rule-pq', 2024, 22, 'immigration', {
+    label: 'No Immigration Benefits for Hamas Terrorists Act rule previous question',
+  }),
+  selectedBroadHouse('house-2024-hamas-immigration-rule', 2024, 23, 'immigration', {
+    label: 'No Immigration Benefits for Hamas Terrorists Act rule adoption',
+  }),
+  selectedBroadHouse('house-2024-hamas-immigration-passage', 2024, 28, 'immigration', {
+    label: 'No Immigration Benefits for Hamas Terrorists Act passage',
+  }),
+  selectedBroadHouse('house-2024-trump-assassination-task-force', 2024, 393, 'trump', {
+    label: 'Trump assassination task force resolution',
+  }),
+  selectedBroadHouse('house-2024-detain-deport-assault-cops', 2024, 204, 'immigration', {
+    label: 'Detain and Deport Illegal Aliens Who Assault Cops Act passage',
+  }),
+  selectedBroadHouse('house-2024-police-our-border-passage', 2024, 215, 'immigration', {
+    label: 'Police Our Border Act passage',
+  }),
+  selectedBroadHouse('house-2024-sanctuary-cities-recommit', 2024, 436, 'immigration', {
+    label: 'No Bailout for Sanctuary Cities Act recommit motion',
+    proTrumpCast: 'Nay',
+  }),
+  selectedBroadHouse('house-2024-sanctuary-cities-passage', 2024, 437, 'immigration', {
+    label: 'No Bailout for Sanctuary Cities Act passage',
+  }),
+  selectedBroadHouse('house-2025-workforce-rule-discharge', 2025, 321, 'labor', {
+    label: "Protect America's Workforce Act rule discharge motion",
+  }),
   selectedBroadHouse('house-2025-state-planning-power', 2025, 323, 'energy', {
     label: 'State Planning for Reliability and Affordability Act passage',
   }),

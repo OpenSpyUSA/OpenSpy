@@ -53,6 +53,10 @@ function describeTopic(event: LegislativeTrumpRollCall) {
     return 'This bill would nullify an executive-order framework on federal labor-management relations, making it a direct test of support for stronger White House control over the federal workforce.'
   }
 
+  if (text.includes('attempted assassination of donald j. trump')) {
+    return 'This resolution created a House task force to investigate the attempted assassination of Donald Trump, making it a direct institutional response to a Trump-specific event.'
+  }
+
   if (text.includes("protect children's innocence act")) {
     return 'This vote concerned restrictions on gender-transition medical interventions for minors, a major social-policy issue strongly aligned with Trump-era messaging and executive action.'
   }
@@ -70,6 +74,10 @@ function describeTopic(event: LegislativeTrumpRollCall) {
 
   if (text.includes('rescissions act')) {
     return 'The Rescissions Act would cancel previously appropriated federal funds, with the 2025 package focusing on foreign-aid accounts, related agencies, and the Corporation for Public Broadcasting.'
+  }
+
+  if (text.includes('spending reduction and border security act')) {
+    return 'This was a House funding and border-security package that tied government-spending negotiations to tougher immigration enforcement, a central Trump-aligned bargaining strategy ahead of the 2024 election.'
   }
 
   if (text.includes('laken riley act')) {
@@ -192,6 +200,8 @@ function describeTopic(event: LegislativeTrumpRollCall) {
       return "This vote was part of Trump's tax agenda."
     case 'trade':
       return "This vote was tied to Trump's trade policy or to personnel needed to carry it out."
+    case 'trump':
+      return 'This was a direct House vote about Trump himself rather than a broader policy dispute.'
     case 'veto-override':
       return "This vote asked whether Congress would override Trump's veto."
     case 'war-powers':
