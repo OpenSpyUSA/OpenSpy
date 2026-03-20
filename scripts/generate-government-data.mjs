@@ -4746,8 +4746,8 @@ function annotateFinancialDisclosure(person) {
       ...person,
       financialDisclosureLabel: 'Senate eFD search',
       financialDisclosureNote: searchHint
-        ? `Search ${searchHint} in the Senate eFD system for annual filings and periodic transaction reports. Senate disclosures typically cover assets, liabilities, income, positions, agreements, gifts, travel, and many stock trades, with many values shown as ranges.`
-        : 'Use the Senate eFD system for annual filings and periodic transaction reports. Senate disclosures typically cover assets, liabilities, income, positions, agreements, gifts, travel, and many stock trades, with many values shown as ranges.',
+        ? `Search ${searchHint} in the Senate eFD system for annual filings and periodic transaction reports.`
+        : 'Use the Senate eFD system for annual filings and periodic transaction reports.',
       financialDisclosureSearchHint: searchHint,
       financialDisclosureUrl: 'https://efdsearch.senate.gov/search/home/',
     }
@@ -4758,8 +4758,8 @@ function annotateFinancialDisclosure(person) {
       ...person,
       financialDisclosureLabel: 'House disclosure search',
       financialDisclosureNote: searchHint
-        ? `Search ${searchHint} in the House Clerk database and choose the filing year. House disclosures typically list assets, liabilities, income, gifts or travel where applicable, and periodic transaction reports, often using value ranges.`
-        : 'Use the House Clerk database and choose the filing year. House disclosures typically list assets, liabilities, income, gifts or travel where applicable, and periodic transaction reports, often using value ranges.',
+        ? `Search ${searchHint} in the House Clerk database and choose the filing year.`
+        : 'Use the House Clerk database and choose the filing year.',
       financialDisclosureSearchHint: searchHint,
       financialDisclosureUrl: 'https://disclosures-clerk.house.gov/FinancialDisclosure/ViewSearch',
     }
