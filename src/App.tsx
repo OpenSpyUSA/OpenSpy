@@ -2236,11 +2236,6 @@ function DetailPanel({
               {person.trumpAvailableEvents ? ` of ${person.trumpAvailableEvents}` : ''} selected votes
             </p>
           ) : null}
-          {person.trumpConfidence ? (
-            <p>
-              <strong>Confidence:</strong> {person.trumpConfidence}
-            </p>
-          ) : null}
           <p>{getDisplayedTrumpNote(person)}</p>
           {person.branchId !== 'legislative' && person.trumpEvidence && person.trumpEvidence.length > 0 ? (
             <>
