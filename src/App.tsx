@@ -2428,7 +2428,7 @@ function DetailPanel({
 }
 
 function App() {
-  const datasetUrl = `${import.meta.env.BASE_URL}data/governmentData.json`
+  const datasetUrl = `${import.meta.env.BASE_URL}data/governmentData.json?v=${encodeURIComponent(__BUILD_ID__)}`
   const [dataset, setDataset] = useState<GovernmentDataset | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [audienceMode, setAudienceMode] = useState<AudienceMode | null>(() => readStoredAudienceMode())
@@ -2586,7 +2586,9 @@ function App() {
   useEffect(() => {
     let active = true
 
-    fetch(datasetUrl)
+    fetch(datasetUrl, {
+      cache: 'no-store',
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Unable to load data snapshot (${response.status})`)
