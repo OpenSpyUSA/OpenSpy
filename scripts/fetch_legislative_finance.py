@@ -45,6 +45,7 @@ HOUSE_OWNER_CODE_LABELS = {
     "SP": "Spouse",
 }
 HOUSE_FULL_DISCLOSURE_INDEX_FILING_TYPES = {"O", "H"}
+HOUSE_CANDIDATE_DISCLOSURE_INDEX_FILING_TYPES = {"C"}
 HOUSE_OWNER_CODE_PATTERN = "|".join(sorted(HOUSE_OWNER_CODE_LABELS))
 MANUAL_SENATE_ANNUAL_OVERRIDES: Dict[str, Dict[str, str]] = {
     "senate-shelley-moore-capito": {
@@ -61,6 +62,7 @@ HOUSE_HOLDING_CONTEXT_PATTERN = re.compile(
     r"\b(?:IRA|ACCOUNT|PENSION|401\(K\)|ANNUITY|BROKERAGE|PORTFOLIO|CASH)\b",
     re.IGNORECASE,
 )
+HOUSE_PTR_NOTE_DATE_PATTERN = re.compile(r"^[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}\.?$")
 
 
 def normalize_space(value: str) -> str:
@@ -97,6 +99,24 @@ def date_to_sort_key(value: Optional[str]) -> tuple:
             continue
 
     return (0, value)
+
+
+def normalize_date_string(value: Optional[str]) -> Optional[str]:
+    sort_key = date_to_sort_key(value)
+    return sort_key[1] if sort_key[0] else None
+
+
+def is_date_on_or_after(value: Optional[str], threshold: Optional[str]) -> bool:
+    if not value or not threshold:
+        return False
+
+    normalized_value = normalize_date_string(value)
+    normalized_threshold = normalize_date_string(threshold)
+
+    if not normalized_value or not normalized_threshold:
+        return False
+
+    return normalized_value >= normalized_threshold
 
 
 def parse_value_upper_bound(value: Optional[str]) -> int:
@@ -287,6 +307,26 @@ def is_house_full_disclosure_search_row(row: Dict[str, str]) -> bool:
     return filing_type.startswith("FD") or filing_type == "New Filer"
 
 
+def parse_house_pdf_filing_type(text: str) -> Optional[str]:
+    matched = re.search(r"Filing Type:\s*(.+)", text)
+    return normalize_space(matched.group(1)) if matched else None
+
+
+def build_disclosure_report_label(filing_type: Optional[str]) -> str:
+    normalized = normalize_space(filing_type or "").lower()
+
+    if "candidate" in normalized:
+        return "Candidate disclosure report"
+    if "new filer" in normalized:
+        return "New filer disclosure report"
+    if "annual" in normalized:
+        return "Annual disclosure report"
+    if "amendment" in normalized:
+        return "Amendment disclosure report"
+
+    return "Financial disclosure report"
+
+
 def parse_house_holdings(text: str) -> List[Dict[str, str]]:
     lines = [normalize_space(line) for line in text.splitlines() if normalize_space(line)]
     start_index = None
@@ -442,14 +482,27 @@ def parse_house_filing_date(text: str) -> Optional[str]:
     return matched.group(1) if matched else None
 
 
+def parse_house_ptr_filing_date(text: str) -> Optional[str]:
+    matched = re.search(r"Digitally Signed:.*?([0-9]{2}/[0-9]{2}/[0-9]{4})", text)
+    return matched.group(1) if matched else None
+
+
 def parse_house_ptr_trades(text: str, source_url: str) -> List[Dict[str, str]]:
-    lines = [normalize_space(line) for line in text.splitlines() if normalize_space(line)]
+    raw_lines = [normalize_space(line) for line in text.splitlines() if normalize_space(line)]
     trades: List[Dict[str, str]] = []
+    filing_date = parse_house_ptr_filing_date(text)
+    amount_pattern = (
+        r"(?:"
+        r"\$[0-9,]+(?:\.[0-9]{2})?\s*-\s*(?:\$[0-9,]+(?:\.[0-9]{2})?|Over \$[0-9,]+)"
+        r"|"
+        r"\$[0-9,]+(?:\.[0-9]{2})?"
+        r")"
+    )
     meta_pattern = re.compile(
         r"^(?P<type>.+?)\s+"
         r"(?P<transactionDate>[0-9]{2}/[0-9]{2}/[0-9]{4})"
         r"(?P<notificationDate>[0-9]{2}/[0-9]{2}/[0-9]{4})"
-        r"(?P<amount>None|\$[0-9,]+(?:\s*-\s*|\s+)(?:\$[0-9,]+|Over \$[0-9,]+))"
+        rf"(?P<amount>None|{amount_pattern})"
     )
     skipped_prefixes = (
         "ID Owner Asset Transaction",
@@ -471,12 +524,37 @@ def parse_house_ptr_trades(text: str, source_url: str) -> List[Dict[str, str]]:
         "Yes",
         "No",
     )
+    asset_start_pattern = re.compile(
+        rf"^(?:{HOUSE_OWNER_CODE_PATTERN}\s+)?[A-Za-z0-9].*(?:\[{HOUSE_ASSET_CODE_PATTERN}\]|[([][A-Z0-9]{{1,6}}[)\]])"
+    )
+    lines: List[str] = []
+    skipping_detail = False
+
+    for line in raw_lines:
+        if line.startswith("D :"):
+            skipping_detail = True
+            continue
+
+        if skipping_detail:
+            if (
+                line.startswith(skipped_prefixes)
+                or HOUSE_PTR_NOTE_DATE_PATTERN.match(line)
+                or asset_start_pattern.match(line)
+            ):
+                skipping_detail = False
+            else:
+                continue
+
+        if line.startswith(skipped_prefixes) or HOUSE_PTR_NOTE_DATE_PATTERN.match(line):
+            continue
+
+        lines.append(line)
 
     index = 0
     while index < len(lines):
         line = lines[index]
 
-        if line.startswith(skipped_prefixes):
+        if line.startswith("$"):
             index += 1
             continue
 
@@ -500,6 +578,11 @@ def parse_house_ptr_trades(text: str, source_url: str) -> List[Dict[str, str]]:
             if split_match:
                 meta_candidate = split_match.group("meta")
                 matched = meta_pattern.match(meta_candidate)
+                next_line = lines[index + consumed] if index + consumed < len(lines) else None
+                if matched and next_line and next_line.startswith("$"):
+                    candidate_lines.append(next_line)
+                    consumed += 1
+                    continue
                 if matched:
                     asset_line = normalize_space(split_match.group("asset"))
                     break
@@ -507,11 +590,7 @@ def parse_house_ptr_trades(text: str, source_url: str) -> List[Dict[str, str]]:
             if index + consumed >= len(lines):
                 break
 
-            next_line = lines[index + consumed]
-            if next_line.startswith(skipped_prefixes):
-                break
-
-            candidate_lines.append(next_line)
+            candidate_lines.append(lines[index + consumed])
             consumed += 1
 
         if matched:
@@ -520,11 +599,21 @@ def parse_house_ptr_trades(text: str, source_url: str) -> List[Dict[str, str]]:
                 trade_type = "Purchase"
             elif trade_type.startswith("S"):
                 trade_type = trade_type.replace("S", "Sale", 1)
+            if "[" in trade_type or "$" in trade_type:
+                index += max(consumed, 1)
+                continue
+            if asset_line.startswith("$") or re.match(
+                r"^(?:Common Stock|Stock|Shares|Units)\s+\(",
+                asset_line,
+            ):
+                index += max(consumed, 1)
+                continue
             trades.append(
                 {
                     "assetName": asset_line,
                     "amount": normalize_space(matched.group("amount")),
                     "date": matched.group("transactionDate"),
+                    "filingDate": filing_date,
                     "owner": owner,
                     "type": trade_type,
                     "sourceUrl": source_url,
@@ -544,7 +633,7 @@ def build_house_state_district_code(person: Dict[str, Any]) -> Optional[str]:
         return None
 
     district_lower = district.lower()
-    if district_lower in {"at-large", "at large"}:
+    if district_lower in {"at-large", "at large", "delegate", "resident commissioner"}:
         district_number = 0
     else:
         matched = re.search(r"(\d+)", district_lower)
@@ -592,7 +681,9 @@ def fetch_house_fd_index_rows(year: int) -> List[Dict[str, str]]:
     return list(csv.DictReader(StringIO(text), delimiter="\t"))
 
 
-def find_house_annual_row_from_index(person: Dict[str, Any], year: int) -> Optional[Dict[str, str]]:
+def find_house_disclosure_row_from_index(
+    person: Dict[str, Any], year: int, allowed_filing_types: set[str]
+) -> Optional[Dict[str, str]]:
     target_state_district = build_house_state_district_code(person)
     if not target_state_district:
         return None
@@ -609,7 +700,7 @@ def find_house_annual_row_from_index(person: Dict[str, Any], year: int) -> Optio
         return None
 
     for row in index_rows:
-        if row.get("FilingType") not in HOUSE_FULL_DISCLOSURE_INDEX_FILING_TYPES:
+        if row.get("FilingType") not in allowed_filing_types:
             continue
         if row.get("StateDst") != target_state_district:
             continue
@@ -664,9 +755,23 @@ def enrich_house_member(person: Dict[str, Any]) -> Dict[str, Any]:
     ptr_rows = [row for row in all_rows if row["filingType"].startswith("PTR")]
     if not annual_rows:
         for year in build_house_search_years():
-            fallback_annual_row = find_house_annual_row_from_index(person, year)
+            fallback_annual_row = find_house_disclosure_row_from_index(
+                person, year, HOUSE_FULL_DISCLOSURE_INDEX_FILING_TYPES
+            )
             if fallback_annual_row:
                 annual_rows.append(fallback_annual_row)
+
+    report_label = "Annual disclosure report"
+
+    if not annual_rows:
+        for year in build_house_search_years():
+            fallback_candidate_row = find_house_disclosure_row_from_index(
+                person, year, HOUSE_CANDIDATE_DISCLOSURE_INDEX_FILING_TYPES
+            )
+            if fallback_candidate_row:
+                annual_rows.append(fallback_candidate_row)
+                report_label = "Candidate disclosure report"
+                break
 
     annual_rows.sort(
         key=lambda row: (
@@ -682,10 +787,14 @@ def enrich_house_member(person: Dict[str, Any]) -> Dict[str, Any]:
 
     if annual_rows:
         result["financialAnnualReportUrl"] = annual_rows[0]["url"]
+        result["financialAnnualReportLabel"] = report_label
         if annual_rows[0].get("filedAt"):
             result["financialFilingDate"] = annual_rows[0]["filedAt"]
         try:
             annual_text = fetch_pdf_text(annual_rows[0]["url"])
+            parsed_filing_type = parse_house_pdf_filing_type(annual_text)
+            if parsed_filing_type:
+                result["financialAnnualReportLabel"] = build_disclosure_report_label(parsed_filing_type)
             parsed_filing_date = parse_house_filing_date(annual_text)
             if parsed_filing_date:
                 result["financialFilingDate"] = parsed_filing_date
@@ -694,8 +803,9 @@ def enrich_house_member(person: Dict[str, Any]) -> Dict[str, Any]:
         except Exception:
             pass
 
+    annual_filing_date = result.get("financialFilingDate")
     trades: List[Dict[str, str]] = []
-    for row in ptr_rows[:3]:
+    for row in ptr_rows:
         try:
             ptr_text = fetch_pdf_text(row["url"])
             trades.extend(parse_house_ptr_trades(ptr_text, row["url"]))
@@ -703,8 +813,15 @@ def enrich_house_member(person: Dict[str, Any]) -> Dict[str, Any]:
             continue
 
     if trades:
+        if annual_filing_date:
+            filtered_trades = [
+                trade
+                for trade in trades
+                if is_date_on_or_after(trade.get("filingDate"), annual_filing_date)
+            ]
+            trades = filtered_trades
         trades.sort(key=lambda trade: date_to_sort_key(trade.get("date")), reverse=True)
-        result["recentTrades"] = trades[:5]
+        result["recentTrades"] = trades
 
     return result
 
@@ -1039,7 +1156,7 @@ def parse_senate_annual(url: str) -> Dict[str, Any]:
     }
 
 
-def parse_senate_ptr(url: str) -> List[Dict[str, str]]:
+def parse_senate_ptr(url: str, filed_at: Optional[str] = None) -> List[Dict[str, str]]:
     session = get_senate_session()
     html = fetch_text(url, session=session, headers={"Referer": SENATE_SEARCH_URL})
     soup = BeautifulSoup(html, "html.parser")
@@ -1059,6 +1176,7 @@ def parse_senate_ptr(url: str) -> List[Dict[str, str]]:
         rows.append(
             {
                 "date": cells[1],
+                "filingDate": filed_at,
                 "owner": normalize_owner_label(cells[2], default="Self"),
                 "ticker": cells[3],
                 "assetName": cells[4],
@@ -1084,6 +1202,7 @@ def enrich_senator(person: Dict[str, Any]) -> Dict[str, Any]:
 
     if annual_rows:
         result["financialAnnualReportUrl"] = annual_rows[0]["url"]
+        result["financialAnnualReportLabel"] = "Annual disclosure report"
         result["financialFilingDate"] = annual_rows[0]["filedAt"]
         try:
             annual_details = parse_senate_annual(annual_rows[0]["url"])
@@ -1091,16 +1210,19 @@ def enrich_senator(person: Dict[str, Any]) -> Dict[str, Any]:
         except Exception:
             pass
 
+    annual_filing_date = result.get("financialFilingDate")
     trades: List[Dict[str, str]] = []
-    for row in ptr_rows[:3]:
+    for row in ptr_rows:
         try:
-            trades.extend(parse_senate_ptr(row["url"]))
+            if annual_filing_date and not is_date_on_or_after(row.get("filedAt"), annual_filing_date):
+                continue
+            trades.extend(parse_senate_ptr(row["url"], filed_at=row.get("filedAt")))
         except Exception:
             continue
 
     if trades:
         trades.sort(key=lambda trade: date_to_sort_key(trade.get("date")), reverse=True)
-        result["recentTrades"] = trades[:5]
+        result["recentTrades"] = trades
 
     return result
 

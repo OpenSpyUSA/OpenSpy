@@ -4792,9 +4792,8 @@ function annotateFinancialDisclosure(person) {
     return {
       ...personWithNaming,
       financialDisclosureLabel: 'Judicial disclosure database',
-      financialDisclosureNote: searchHint
-        ? `Search ${person.name} in the federal judiciary disclosure database. Judicial reports generally cover assets, liabilities, reimbursements, gifts, spouse or dependent interests, and many transactions, again with ranges instead of a single exact net-worth figure.`
-        : 'Use the federal judiciary disclosure database for this justice. Judicial reports generally cover assets, liabilities, reimbursements, gifts, spouse or dependent interests, and many transactions, again with ranges instead of a single exact net-worth figure.',
+      financialDisclosureNote:
+        'Annual disclosure report links here are local mirrors of the official judiciary PDFs, because the federal judiciary portal requires an entry form before opening reports.',
       financialDisclosureSearchHint: searchHint,
       financialDisclosureUrl: 'https://pub.jefs.uscourts.gov/',
     }
@@ -5214,6 +5213,26 @@ function getCachedLegislativeFinancials(person) {
 
   return {
     financialAnnualReportUrl: cachedPerson.financialAnnualReportUrl,
+    financialAnnualReportLabel: cachedPerson.financialAnnualReportLabel,
+    financialFilingDate: cachedPerson.financialFilingDate,
+    liabilities: cachedPerson.liabilities,
+    recentTrades: cachedPerson.recentTrades,
+    topHoldings: cachedPerson.topHoldings,
+  }
+}
+
+function getCachedExecutiveFinancials(person) {
+  const cachedPerson =
+    previousPeopleById.get(person.id) ??
+    (person.website ? previousPeopleByWebsite.get(person.website) : undefined)
+
+  if (!cachedPerson) {
+    return {}
+  }
+
+  return {
+    financialAnnualReportUrl: cachedPerson.financialAnnualReportUrl,
+    financialAnnualReportLabel: cachedPerson.financialAnnualReportLabel,
     financialFilingDate: cachedPerson.financialFilingDate,
     liabilities: cachedPerson.liabilities,
     recentTrades: cachedPerson.recentTrades,
@@ -5240,6 +5259,49 @@ function getCachedBackground(person) {
     highestEducationSchool: cachedPerson.highestEducationSchool,
     imageUrl: cachedPerson.imageUrl,
   }
+}
+
+async function enrichPeopleWithExecutiveFinancials(people) {
+  const executivePeople = people.filter((person) => person.branchId === 'executive')
+
+  if (executivePeople.length === 0) {
+    return people
+  }
+
+  let financialDetailsById = {}
+
+  try {
+    const rawOutput = execFileSync(
+      'python3',
+      [resolve(__dirname, './fetch_executive_finance.py')],
+      {
+        cwd: resolve(__dirname, '..'),
+        encoding: 'utf8',
+        input: JSON.stringify({ people: executivePeople }),
+        maxBuffer: 32 * 1024 * 1024,
+      },
+    )
+
+    financialDetailsById = JSON.parse(rawOutput)
+  } catch (error) {
+    console.warn('Executive finance enrichment failed, using cached values when available.')
+    console.warn(error instanceof Error ? error.message : error)
+  }
+
+  return people.map((person) => {
+    if (person.branchId !== 'executive') {
+      return person
+    }
+
+    const fetchedDetails = financialDetailsById[person.id] ?? {}
+    const cachedDetails = getCachedExecutiveFinancials(person)
+
+    return {
+      ...person,
+      ...cachedDetails,
+      ...fetchedDetails,
+    }
+  })
 }
 
 async function enrichPeopleWithLegislativeFinancials(people) {
@@ -5757,7 +5819,8 @@ async function main() {
       .map(annotateDepartmentBudget)
       .map(annotateIndependentAgencyBudget)
       .map(annotateFinancialDisclosure)
-    const executiveWithBackground = await enrichPeopleWithBackground(executiveBasePeople)
+    const executiveWithFinancials = await enrichPeopleWithExecutiveFinancials(executiveBasePeople)
+    const executiveWithBackground = await enrichPeopleWithBackground(executiveWithFinancials)
     const executiveWithManualCareerHistory =
       applyManualCareerHistoryOverrides(executiveWithBackground)
     const executiveWithCongressHistory = executiveWithManualCareerHistory.map((person) =>
@@ -5799,7 +5862,10 @@ async function main() {
     .map(annotateDepartmentBudget)
     .map(annotateIndependentAgencyBudget)
     .map(annotateFinancialDisclosure)
-  const legislativelyEnrichedPeople = await enrichPeopleWithLegislativeFinancials(basePeople)
+  const executiveEnrichedPeople = await enrichPeopleWithExecutiveFinancials(basePeople)
+  const legislativelyEnrichedPeople = await enrichPeopleWithLegislativeFinancials(
+    executiveEnrichedPeople,
+  )
   const peopleWithBackground = await enrichPeopleWithBackground(legislativelyEnrichedPeople)
   const peopleWithManualCareerHistory = applyManualCareerHistoryOverrides(peopleWithBackground)
   const peopleWithExecutiveCongressHistory = peopleWithManualCareerHistory.map((person) =>

@@ -74,6 +74,7 @@ dataset.people = dataset.people.map((person) => {
   return {
     ...person,
     financialAnnualReportUrl: undefined,
+    financialAnnualReportLabel: undefined,
     financialFilingDate: undefined,
     liabilities: undefined,
     recentTrades: undefined,

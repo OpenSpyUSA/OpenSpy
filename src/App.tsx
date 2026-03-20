@@ -34,12 +34,12 @@ import type {
   Alignment,
   BranchId,
   BranchSection,
-  DisclosureTrade,
   ExecutiveCongressRollCallVote,
   ExecutiveCongressServiceRecord,
   GovernmentBranch,
   GovernmentDataset,
   GovernmentPerson,
+  DisclosureTrade,
   LegislativeTrumpRollCall,
   StateDelegationSummary,
   SupremeCourtCase,
@@ -657,18 +657,33 @@ function getSupremeCourtOfficialWording(caseItem: SupremeCourtCase) {
 }
 
 function shouldShowAnnualDisclosureReportLink(person: GovernmentPerson) {
-  return Boolean(person.financialAnnualReportUrl)
+  return Boolean(person.financialAnnualReportUrl) && person.sectionId !== 'senate'
 }
 
-function isTradeOnOrAfter2026(trade: DisclosureTrade) {
-  const matched = trade.date.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+function parseDisclosureDateToTimestamp(value?: string) {
+  if (!value) {
+    return null
+  }
+
+  const matched = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
 
   if (!matched) {
-    return false
+    return null
   }
 
   const [, month, day, year] = matched
-  return `${year}-${month}-${day}` >= '2026-01-01'
+  return Date.parse(`${year}-${month}-${day}T00:00:00Z`)
+}
+
+function shouldDisplayTradeAfterLatestAnnualReport(person: GovernmentPerson, trade: DisclosureTrade) {
+  const filingTimestamp = parseDisclosureDateToTimestamp(person.financialFilingDate)
+  const tradeTimestamp = parseDisclosureDateToTimestamp(trade.date)
+
+  if (filingTimestamp === null || tradeTimestamp === null) {
+    return false
+  }
+
+  return tradeTimestamp > filingTimestamp
 }
 
 function formatDisclosureOwner(owner?: string) {
@@ -707,6 +722,22 @@ function DisclosureOwnerBadge({ owner }: { owner?: string }) {
   }
 
   return <span className="disclosure-owner-badge">{label}</span>
+}
+
+function shouldShowTradeSourceLink(person: GovernmentPerson, trade: DisclosureTrade) {
+  if (!trade.sourceUrl) {
+    return false
+  }
+
+  return person.sectionId !== 'senate'
+}
+
+function resolvePersonLink(url: string) {
+  if (/^(https?:)?\/\//i.test(url)) {
+    return url
+  }
+
+  return `${import.meta.env.BASE_URL}${url.replace(/^\//, '')}`
 }
 
 function isInferredSupremeCourtJusticeStance(caseItem: SupremeCourtCase, justiceId: string) {
@@ -1770,8 +1801,6 @@ function DetailPanel({
   rollCall,
   section,
   supremeCourtCaseSelection,
-  supremeCourtPersonalCases,
-  supremeCourtCases,
 }: {
   branch: GovernmentBranch
   onClose: () => void
@@ -1779,8 +1808,6 @@ function DetailPanel({
   rollCall: LegislativeTrumpRollCall | null
   section: BranchSection | null
   supremeCourtCaseSelection: SupremeCourtCaseSelection | null
-  supremeCourtPersonalCases: SupremeCourtCase[]
-  supremeCourtCases: SupremeCourtCase[]
 }) {
   if (rollCall) {
     const voteTotals = formatRollCallVoteTotals(rollCall)
@@ -1958,14 +1985,6 @@ function DetailPanel({
   const showTrumpRelationship = shouldShowTrumpRelationship(person)
   const executiveCongressHistory =
     person.branchId === 'executive' ? person.executiveCongressServiceHistory ?? [] : []
-  const judicialCases =
-    person.branchId === 'judicial'
-      ? supremeCourtCases.filter((caseItem) => caseItem.justiceStances[person.id])
-      : []
-  const judicialPersonalCases =
-    person.branchId === 'judicial'
-      ? supremeCourtPersonalCases.filter((caseItem) => caseItem.justiceStances[person.id])
-      : []
 
   return (
     <aside className="detail-panel detail-panel--filled">
@@ -2135,74 +2154,6 @@ function DetailPanel({
         </section>
       ) : null}
 
-      {judicialCases.length > 0 ? (
-        <section className="detail-block">
-          <h3>Trump Administration Cases</h3>
-          <p className="detail-note">{JUDICIAL_INFERENCE_NOTE}</p>
-          <div className="justice-case-list">
-            {judicialCases.map((caseItem) => {
-              const stance = caseItem.justiceStances[person.id]
-              const inferred = isInferredSupremeCourtJusticeStance(caseItem, person.id)
-
-              return (
-                <article className="justice-case-item" key={`${person.id}-${caseItem.id}`}>
-                  <div className="justice-case-item__header">
-                    <div>
-                      <h4>{caseItem.caseName}</h4>
-                      <p>
-                        {formatCaseDate(caseItem.date)} • {getTrumpCaseTypeLabel(caseItem.type)}
-                      </p>
-                    </div>
-                    <span className={`case-stance-chip case-stance-chip--${stance}`}>
-                      {getTrumpCaseStanceLabel(stance, inferred)}
-                    </span>
-                  </div>
-                  <p>{caseItem.issue}</p>
-                  <p>
-                    <strong>Result:</strong> {caseItem.result}
-                  </p>
-                  <SupremeCourtCaseLinks caseItem={caseItem} />
-                </article>
-              )
-            })}
-          </div>
-        </section>
-      ) : null}
-
-      {judicialPersonalCases.length > 0 ? (
-        <section className="detail-block">
-          <h3>Trump Personal Cases</h3>
-          <p className="detail-note">{JUDICIAL_INFERENCE_NOTE}</p>
-          <div className="justice-case-list">
-            {judicialPersonalCases.map((caseItem) => {
-              const stance = caseItem.justiceStances[person.id]
-              const inferred = isInferredSupremeCourtJusticeStance(caseItem, person.id)
-
-              return (
-                <article className="justice-case-item" key={`${person.id}-${caseItem.id}`}>
-                  <div className="justice-case-item__header">
-                    <div>
-                      <h4>{caseItem.caseName}</h4>
-                      <p>
-                        {formatCaseDate(caseItem.date)} • {getTrumpCaseTypeLabel(caseItem.type)}
-                      </p>
-                    </div>
-                    <span className={`case-stance-chip case-stance-chip--${stance}`}>
-                      {getTrumpCaseStanceLabel(stance, inferred)}
-                    </span>
-                  </div>
-                  <p>{caseItem.issue}</p>
-                  <p>
-                    <strong>Result:</strong> {caseItem.result}
-                  </p>
-                  <SupremeCourtCaseLinks caseItem={caseItem} />
-                </article>
-              )
-            })}
-          </div>
-        </section>
-      ) : null}
-
       {person.highestEducationSchool || person.highestDegree || person.highestEducationField ? (
         <section className="detail-block">
           <h3>Education</h3>
@@ -2309,6 +2260,11 @@ function DetailPanel({
             <strong>Current annual salary:</strong> {person.salaryAmount}
           </p>
         ) : null}
+        {person.financialFilingDate ? (
+          <p>
+            <strong>Disclosure filing date:</strong> {person.financialFilingDate}
+          </p>
+        ) : null}
         <p>{person.salaryNote}</p>
         {person.salarySourceUrl && person.salarySourceLabel ? (
           <p>
@@ -2372,17 +2328,25 @@ function DetailPanel({
       ) : null}
 
       {(() => {
-        const recent2026Trades = person.recentTrades?.filter(isTradeOnOrAfter2026) ?? []
+        const displayedTrades =
+          person.recentTrades?.filter((trade) =>
+            shouldDisplayTradeAfterLatestAnnualReport(person, trade),
+          ) ?? []
 
-        if (recent2026Trades.length === 0) {
+        if (displayedTrades.length === 0) {
           return null
         }
 
+        const tradesHeading =
+          person.branchId === 'legislative'
+            ? `PTR Trades Since ${person.financialFilingDate}`
+            : `Recent Trades Since ${person.financialFilingDate}`
+
         return (
           <section className="detail-block">
-            <h3>2026 PTR Trades</h3>
+            <h3>{tradesHeading}</h3>
             <ul className="detail-list">
-              {recent2026Trades.map((trade) => (
+              {displayedTrades.map((trade) => (
                 <li
                   className="disclosure-line-item"
                   key={`${person.id}-${trade.assetName}-${trade.date}-${trade.amount}`}
@@ -2391,6 +2355,16 @@ function DetailPanel({
                   <span>
                     {trade.date}: {trade.type} {trade.assetName} ({trade.amount})
                   </span>
+                  {shouldShowTradeSourceLink(person, trade) ? (
+                    <a
+                      className="holding-source"
+                      href={resolvePersonLink(trade.sourceUrl ?? '')}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      source
+                    </a>
+                  ) : null}
                 </li>
               ))}
             </ul>
@@ -2399,30 +2373,33 @@ function DetailPanel({
       })()}
 
       <section className="detail-links">
-        <a href={person.sourceUrl} rel="noreferrer" target="_blank">
+        <a href={resolvePersonLink(person.sourceUrl)} rel="noreferrer" target="_blank">
           Official source
         </a>
         {person.financialDisclosureUrl && person.financialDisclosureLabel ? (
-          <a href={person.financialDisclosureUrl} rel="noreferrer" target="_blank">
+          <a href={resolvePersonLink(person.financialDisclosureUrl)} rel="noreferrer" target="_blank">
             {person.financialDisclosureLabel}
           </a>
         ) : null}
         {person.financialAnnualReportUrl && shouldShowAnnualDisclosureReportLink(person) ? (
-          <a href={person.financialAnnualReportUrl} rel="noreferrer" target="_blank">
-            Annual disclosure report
+          <a href={resolvePersonLink(person.financialAnnualReportUrl)} rel="noreferrer" target="_blank">
+            {person.financialAnnualReportLabel ?? 'Annual disclosure report'}
           </a>
         ) : null}
         {person.website && person.website !== person.sourceUrl ? (
-          <a href={person.website} rel="noreferrer" target="_blank">
+          <a href={resolvePersonLink(person.website)} rel="noreferrer" target="_blank">
             Personal office site
           </a>
         ) : null}
         {person.xUrl && xHandle ? (
-          <a href={person.xUrl} rel="noreferrer" target="_blank">
+          <a href={resolvePersonLink(person.xUrl)} rel="noreferrer" target="_blank">
             X {xHandle}
           </a>
         ) : null}
       </section>
+      {person.branchId === 'judicial' && person.financialDisclosureNote ? (
+        <p className="detail-note">{person.financialDisclosureNote}</p>
+      ) : null}
     </aside>
   )
 }
@@ -3008,8 +2985,6 @@ function App() {
           rollCall={selectedRollCall}
           section={selectedSection}
           supremeCourtCaseSelection={selectedSupremeCourtCase}
-          supremeCourtPersonalCases={supremeCourtPersonalCases}
-          supremeCourtCases={supremeCourtCases}
         />
       </section>
 

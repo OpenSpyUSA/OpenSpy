@@ -43,6 +43,7 @@ export interface DisclosureTrade {
   amount: string
   assetName: string
   date: string
+  filingDate?: string
   owner?: string
   sourceUrl?: string
   ticker?: string
@@ -179,6 +180,7 @@ export interface GovernmentPerson {
   financialDisclosureSearchName?: string
   financialDisclosureUrl?: string
   financialAnnualReportUrl?: string
+  financialAnnualReportLabel?: string
   financialFilingDate?: string
   liabilities?: DisclosureLiability[]
   recentTrades?: DisclosureTrade[]

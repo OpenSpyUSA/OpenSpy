@@ -41,6 +41,7 @@ function clearSenateFinancialSnapshot(person) {
   return {
     ...person,
     financialAnnualReportUrl: undefined,
+    financialAnnualReportLabel: undefined,
     financialFilingDate: undefined,
     liabilities: undefined,
     recentTrades: undefined,

@@ -62,6 +62,12 @@ const personNamingOverrides = {
     financialDisclosureSearchLastName: 'Amata',
     financialDisclosureSearchName: 'Aumua Amata',
   },
+  'house-matt-van-epps-tennessee-7th': {
+    officialName: 'Matthew Robert Van Epps',
+    aliases: ['Matthew Van Epps', 'Matthew Robert Van Epps'],
+    financialDisclosureSearchLastName: 'Van Epps',
+    financialDisclosureSearchName: 'Matthew Robert Van Epps',
+  },
   'senate-jack-reed': {
     officialName: 'John F. Reed',
     aliases: ['John Reed'],
