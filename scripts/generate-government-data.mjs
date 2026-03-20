@@ -3291,30 +3291,58 @@ const executiveCongressServiceOverrides = new Map([
     [
       {
         chamber: 'senate',
+        endDate: '2025-01-10',
         label: 'U.S. senator from Ohio (2023-2025)',
         matchName: 'JD Vance',
+        startDate: '2023-01-03',
         stateCode: 'OH',
       },
     ],
   ],
   [
     'executive-marco-rubio',
-    [{ chamber: 'senate', label: 'U.S. senator from Florida (2011-2025)', stateCode: 'FL' }],
+    [
+      {
+        chamber: 'senate',
+        endDate: '2025-01-20',
+        label: 'U.S. senator from Florida (2011-2025)',
+        startDate: '2011-01-03',
+        stateCode: 'FL',
+      },
+    ],
   ],
   [
     'executive-marco-rubio-national-archives-and-records-administration',
-    [{ chamber: 'senate', label: 'U.S. senator from Florida (2011-2025)', stateCode: 'FL' }],
+    [
+      {
+        chamber: 'senate',
+        endDate: '2025-01-20',
+        label: 'U.S. senator from Florida (2011-2025)',
+        startDate: '2011-01-03',
+        stateCode: 'FL',
+      },
+    ],
   ],
   [
     'executive-kelly-loeffler-small-business-administration',
-    [{ chamber: 'senate', label: 'U.S. senator from Georgia (2020-2021)', stateCode: 'GA' }],
+    [
+      {
+        chamber: 'senate',
+        endDate: '2021-01-20',
+        label: 'U.S. senator from Georgia (2020-2021)',
+        startDate: '2020-01-06',
+        stateCode: 'GA',
+      },
+    ],
   ],
   [
     'executive-lori-chavez-deremer',
     [
       {
         chamber: 'house',
+        endDate: '2025-01-03',
         label: "U.S. representative for Oregon's 5th congressional district (2023-2025)",
+        startDate: '2023-01-03',
         stateCode: 'OR',
       },
     ],
@@ -3324,7 +3352,9 @@ const executiveCongressServiceOverrides = new Map([
     [
       {
         chamber: 'house',
+        endDate: '2021-01-03',
         label: "U.S. representative for Georgia's 9th congressional district (2013-2021)",
+        startDate: '2013-01-03',
         stateCode: 'GA',
       },
     ],
@@ -3334,7 +3364,9 @@ const executiveCongressServiceOverrides = new Map([
     [
       {
         chamber: 'house',
+        endDate: '2019-09-23',
         label: "U.S. representative for Wisconsin's 7th congressional district (2011-2019)",
+        startDate: '2011-01-03',
         stateCode: 'WI',
       },
     ],
@@ -3344,7 +3376,9 @@ const executiveCongressServiceOverrides = new Map([
     [
       {
         chamber: 'house',
+        endDate: '2019-01-03',
         label: "U.S. representative for South Dakota's at-large district (2011-2019)",
+        startDate: '2011-01-03',
         stateCode: 'SD',
       },
     ],
@@ -3354,7 +3388,9 @@ const executiveCongressServiceOverrides = new Map([
     [
       {
         chamber: 'house',
+        endDate: '2023-01-03',
         label: 'U.S. representative for New York (2015-2023)',
+        startDate: '2015-01-03',
         stateCode: 'NY',
       },
     ],
@@ -3364,7 +3400,9 @@ const executiveCongressServiceOverrides = new Map([
     [
       {
         chamber: 'house',
+        endDate: '2020-05-22',
         label: 'U.S. representative for Texas (2015-2021)',
+        startDate: '2015-01-06',
         stateCode: 'TX',
       },
     ],
@@ -3374,7 +3412,9 @@ const executiveCongressServiceOverrides = new Map([
     [
       {
         chamber: 'house',
+        endDate: '2021-01-03',
         label: 'U.S. representative for Hawaii (2013-2021)',
+        startDate: '2013-01-03',
         stateCode: 'HI',
       },
     ],
@@ -3408,6 +3448,97 @@ function firstNamesLikelyMatch(left, right) {
   const rightEquivalents = getEquivalentFirstNames(right)
 
   return leftEquivalents.some((candidate) => rightEquivalents.includes(candidate))
+}
+
+function parseIsoDateToTimestamp(value) {
+  const match = value?.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+
+  if (!match) {
+    return null
+  }
+
+  const [, year, month, day] = match
+  return Date.UTC(Number(year), Number(month) - 1, Number(day))
+}
+
+function parseRollCallDateToTimestamp(value) {
+  const trimmed = value?.replace(/\s+/g, ' ').trim()
+
+  if (!trimmed) {
+    return null
+  }
+
+  const shortMonthMatch = trimmed.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/)
+
+  if (shortMonthMatch) {
+    const [, day, monthText, year] = shortMonthMatch
+    const month = [
+      'jan',
+      'feb',
+      'mar',
+      'apr',
+      'may',
+      'jun',
+      'jul',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+    ].indexOf(monthText.toLowerCase())
+
+    if (month >= 0) {
+      return Date.UTC(Number(year), month, Number(day))
+    }
+  }
+
+  const longMonthMatch = trimmed.match(/^([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})/)
+
+  if (longMonthMatch) {
+    const [, monthText, day, year] = longMonthMatch
+    const month = new Date(`${monthText} 1, 2000 UTC`).getUTCMonth()
+
+    if (Number.isFinite(month)) {
+      return Date.UTC(Number(year), month, Number(day))
+    }
+  }
+
+  const timestamp = Date.parse(trimmed)
+  return Number.isNaN(timestamp) ? null : timestamp
+}
+
+function isExecutiveServiceActiveOnSnapshot(service, snapshot) {
+  const snapshotTimestamp = parseRollCallDateToTimestamp(snapshot.date)
+
+  if (snapshotTimestamp === null) {
+    return true
+  }
+
+  const startTimestamp = parseIsoDateToTimestamp(service.startDate)
+
+  if (startTimestamp !== null && snapshotTimestamp < startTimestamp) {
+    return false
+  }
+
+  const endTimestamp = parseIsoDateToTimestamp(service.endDate)
+
+  if (endTimestamp !== null && snapshotTimestamp > endTimestamp) {
+    return false
+  }
+
+  return true
+}
+
+function parseHouseVoteEntryName(entryName) {
+  const raw = entryName ?? ''
+  const [lastPart, firstPart = ''] = raw.includes(',') ? raw.split(',', 2) : ['', raw]
+  const fallbackTokens = buildNormalizedNameTokens(raw)
+  const firstTokens = buildNormalizedNameTokens(firstPart)
+  const lastTokens = buildNormalizedNameTokens(lastPart)
+  const firstName = firstTokens[0] ?? fallbackTokens[0] ?? ''
+  const lastName = lastTokens.join(' ') || fallbackTokens.slice(1).join(' ') || fallbackTokens.slice(-1).join(' ')
+
+  return { firstName, lastName }
 }
 
 function parseHouseVoteEntries(html) {
@@ -3526,16 +3657,22 @@ function findMatchingExecutiveCongressVoteEntry(voteEntries, service, fallbackNa
         return firstNamesLikelyMatch(referenceFirstName, voteFirstName)
       }
 
-      const normalizedVoteName = removeSingleLetterNameTokens(normalizeNameMatch(entry.name))
+      const { firstName: voteFirstName, lastName: voteLastName } = parseHouseVoteEntryName(entry.name)
+      const surnameMatches =
+        referenceLastOne === voteLastName ||
+        referenceLastTwo === voteLastName ||
+        voteLastName.endsWith(` ${referenceLastOne}`) ||
+        referenceLastTwo.endsWith(` ${voteLastName}`)
 
-      return (
-        normalizedVoteName === referenceLastOne ||
-        normalizedVoteName === referenceLastTwo ||
-        normalizedVoteName.startsWith(`${referenceLastOne} `) ||
-        normalizedVoteName.startsWith(`${referenceLastTwo} `) ||
-        normalizedVoteName.endsWith(` ${referenceLastOne}`) ||
-        normalizedVoteName.endsWith(` ${referenceLastTwo}`)
-      )
+      if (!surnameMatches) {
+        return false
+      }
+
+      if (!voteFirstName || !referenceFirstName) {
+        return true
+      }
+
+      return firstNamesLikelyMatch(referenceFirstName, voteFirstName)
     }) ?? null
   )
 }
@@ -3913,6 +4050,10 @@ function buildExecutiveCongressServiceHistoryMap(executivePeople, snapshots) {
 
       for (const snapshot of snapshots) {
         if (snapshot.chamber !== service.chamber) {
+          continue
+        }
+
+        if (!isExecutiveServiceActiveOnSnapshot(service, snapshot)) {
           continue
         }
 
