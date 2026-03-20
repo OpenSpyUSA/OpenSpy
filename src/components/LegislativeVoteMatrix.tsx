@@ -229,7 +229,7 @@ export function LegislativeVoteMatrix({
                         onClick={() => onOpenRollCall(event.id)}
                         title={`${event.label} • ${formatRollCallMatrixDateLabel(event)} • ${scopeLabel} • ${getRollCallOutcomeLabel(event.trumpOutcome)}${
                           countsLabel ? ` • ${countsLabel}` : ''
-                        }${event.scoreIncluded ? ' • Used in Trump score' : ' • Shown for context only'}`}
+                        }`}
                         type="button"
                       >
                         <span className="vote-matrix__event-date">

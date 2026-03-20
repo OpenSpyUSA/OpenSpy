@@ -693,10 +693,6 @@ function formatRollCallSignalTier(rollCall: LegislativeTrumpRollCall) {
     : 'Direct Trump-related'
 }
 
-function formatRollCallScoringStatus(rollCall: LegislativeTrumpRollCall) {
-  return rollCall.scoreIncluded ? 'Used in Trump score' : 'Shown for context only'
-}
-
 function formatRollCallVoteTotals(event: LegislativeTrumpRollCall) {
   if (!Number.isFinite(event.yeaTotal) || !Number.isFinite(event.nayTotal)) {
     return null
@@ -1766,14 +1762,6 @@ function DetailPanel({
           <div className="fact-row">
             <span>Tier</span>
             <strong>{signalTierLabel}</strong>
-          </div>
-          <div className="fact-row">
-            <span>Scoring</span>
-            <strong>{formatRollCallScoringStatus(rollCall)}</strong>
-          </div>
-          <div className="fact-row">
-            <span>Trump side cast</span>
-            <strong>{rollCall.proTrumpCast}</strong>
           </div>
           <div className="fact-row">
             <span>Final result</span>

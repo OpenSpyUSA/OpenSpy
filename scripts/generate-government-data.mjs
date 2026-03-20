@@ -291,6 +291,7 @@ const PRESIDENT_SALARY_SOURCE_URL =
   'https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title3-section102&num=0&edition=prelim'
 const SENIOR_POLITICAL_PAY_FREEZE_SOURCE_URL =
   'https://www.opm.gov/chcoc/latest-memos/updated-guidance-pay-freeze-for-certain-senior-political-officials-1.pdf'
+const SENIOR_POLITICAL_PAY_FREEZE_SOURCE_LABEL = 'OPM 2026 senior political pay guidance'
 const HOUSE_SALARY_SOURCE_URL = 'https://www.house.gov/doing-business-with-the-house/current-house-salaries'
 const SENATE_SALARY_SOURCE_URL = 'https://www.senate.gov/legislative/common/generic/Salaries.htm'
 const JUDICIAL_SALARY_SOURCE_URL =
@@ -4410,7 +4411,7 @@ function annotateSalary(person) {
         person,
         '$235,100',
         'The payable 2026 vice presidential salary is frozen at $235,100 under current OPM guidance for covered senior political officials.',
-        'OPM 2026 senior political pay guidance',
+        SENIOR_POLITICAL_PAY_FREEZE_SOURCE_LABEL,
         SENIOR_POLITICAL_PAY_FREEZE_SOURCE_URL,
       )
     }
@@ -4431,7 +4432,7 @@ function annotateSalary(person) {
       person,
       '$203,500',
       'The payable 2026 rate for Executive Schedule Level I positions held by covered senior political appointees is frozen at $203,500.',
-      'OPM 2026 senior political pay guidance',
+      SENIOR_POLITICAL_PAY_FREEZE_SOURCE_LABEL,
       SENIOR_POLITICAL_PAY_FREEZE_SOURCE_URL,
     )
   }
