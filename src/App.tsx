@@ -655,6 +655,10 @@ function getSupremeCourtOfficialWording(caseItem: SupremeCourtCase) {
   return supremeCourtCaseOfficialWording[caseItem.id] ?? []
 }
 
+function shouldShowAnnualDisclosureReportLink(person: GovernmentPerson) {
+  return person.sectionId !== 'senate'
+}
+
 function isInferredSupremeCourtJusticeStance(caseItem: SupremeCourtCase, justiceId: string) {
   const stance = caseItem.justiceStances[justiceId] ?? 'not_on_court'
 
@@ -931,6 +935,16 @@ function getIndependentAgencyAppointerLabel(person: GovernmentPerson) {
   }
 
   return `Appointed by ${getJusticeShortName(displayedAppointer)}`
+}
+
+function getDisplayedTrumpNote(person: GovernmentPerson) {
+  if (person.branchId !== 'legislative') {
+    return person.trumpNote
+  }
+
+  return person.trumpNote
+    .replace(/\s+Not in office for \d+ high-signal scored votes\./g, '')
+    .replace(/\s+Missed or abstained on \d+ high-signal scored votes\./g, '')
 }
 
 function isNonVotingHouseMember(person: GovernmentPerson) {
@@ -2230,7 +2244,7 @@ function DetailPanel({
               <strong>Confidence:</strong> {person.trumpConfidence}
             </p>
           ) : null}
-          <p>{person.trumpNote}</p>
+          <p>{getDisplayedTrumpNote(person)}</p>
           {person.branchId !== 'legislative' && person.trumpEvidence && person.trumpEvidence.length > 0 ? (
             <>
               <p>
@@ -2334,7 +2348,7 @@ function DetailPanel({
             {person.financialDisclosureLabel}
           </a>
         ) : null}
-        {person.financialAnnualReportUrl ? (
+        {person.financialAnnualReportUrl && shouldShowAnnualDisclosureReportLink(person) ? (
           <a href={person.financialAnnualReportUrl} rel="noreferrer" target="_blank">
             Annual disclosure report
           </a>

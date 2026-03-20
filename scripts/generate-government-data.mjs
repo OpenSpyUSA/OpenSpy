@@ -4465,26 +4465,10 @@ function annotateLegislativeTrumpRelationship(person, context) {
     `Score is derived from high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls on this site: ${metrics.proVotes}/${metrics.sampleSize} counted votes on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
   ]
 
-  if (metrics.notInOfficeCount > 0) {
-    noteParts.push(`Not in office for ${metrics.notInOfficeCount} high-signal scored votes.`)
-  }
-
-  if (metrics.missedCount > 0) {
-    noteParts.push(`Missed or abstained on ${metrics.missedCount} high-signal scored votes.`)
-  }
-
   const evidence = [
     `${metrics.proVotes} Pro Trump votes and ${metrics.antiVotes} Not pro Trump votes across ${metrics.sampleSize} counted high-signal scored ${person.sectionId === 'senate' ? 'Senate' : 'House'} roll calls.`,
     `Sample size: ${metrics.sampleSize} of ${metrics.availableEvents} high-signal scored votes. Confidence: ${confidence}.`,
   ]
-
-  if (metrics.notInOfficeCount > 0) {
-    evidence.push(`Not in office for ${metrics.notInOfficeCount} high-signal scored votes.`)
-  }
-
-  if (metrics.missedCount > 0) {
-    evidence.push(`Missed or abstained on ${metrics.missedCount} high-signal scored votes.`)
-  }
 
   evidence.push(...metrics.evidence)
 
