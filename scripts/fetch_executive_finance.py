@@ -8,9 +8,7 @@ from datetime import datetime
 from functools import lru_cache
 from html import unescape
 from io import BytesIO
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import unquote, urlparse
 
 import requests
 from pypdf import PdfReader
@@ -25,9 +23,6 @@ REQUEST_HEADERS = {
 }
 
 OGE_API_URL = "https://extapps2.oge.gov/201/Presiden.nsf/API.xsp/v2/rest"
-REPO_ROOT = Path(__file__).resolve().parent.parent
-PUBLIC_EXECUTIVE_DISCLOSURES_DIR = REPO_ROOT / "public" / "executive-disclosures"
-EXECUTIVE_DISCLOSURE_MIRROR_PREFIX = "executive-disclosures"
 TOP_HOLDINGS_DEFAULT_COUNT = 5
 TOP_HOLDINGS_EXTENSION_THRESHOLD = 1_000_000
 TOP_HOLDINGS_MIN_DISPLAY_UPPER_BOUND = 15_001
@@ -83,31 +78,6 @@ def normalize_space(value: str) -> str:
 
 def strip_diacritics(value: str) -> str:
     return unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-
-
-def sanitize_filename_fragment(value: str) -> str:
-    cleaned = strip_diacritics(unquote(value))
-    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "-", cleaned)
-    cleaned = cleaned.strip("-")
-    return cleaned or "document"
-
-
-def build_executive_mirror_filename(person_id: str, source_url: str) -> str:
-    parsed = urlparse(source_url)
-    path_segments = [segment for segment in parsed.path.split("/") if segment]
-
-    doc_id = "document"
-    for index, segment in enumerate(path_segments):
-        if segment == "$FILE" and index > 0:
-            doc_id = path_segments[index - 1]
-            break
-
-    basename = sanitize_filename_fragment(Path(unquote(parsed.path)).name)
-    return (
-        f"{sanitize_filename_fragment(person_id)}--"
-        f"{sanitize_filename_fragment(doc_id)}--"
-        f"{basename}"
-    )
 
 
 def normalize_name_tokens(value: Optional[str]) -> List[str]:
@@ -372,27 +342,11 @@ def fetch_oge_rows() -> Tuple[Dict[str, Any], ...]:
     return tuple(rows)
 
 
-@lru_cache(maxsize=128)
-def fetch_pdf_bytes(url: str) -> bytes:
-    response = requests.get(url, headers=REQUEST_HEADERS, timeout=120)
-    response.raise_for_status()
-    return response.content
-
-
-def mirror_executive_pdf(url: str, person_id: str) -> str:
-    PUBLIC_EXECUTIVE_DISCLOSURES_DIR.mkdir(parents=True, exist_ok=True)
-    filename = build_executive_mirror_filename(person_id, url)
-    destination = PUBLIC_EXECUTIVE_DISCLOSURES_DIR / filename
-
-    if not destination.exists():
-        destination.write_bytes(fetch_pdf_bytes(url))
-
-    return f"{EXECUTIVE_DISCLOSURE_MIRROR_PREFIX}/{filename}"
-
-
 @lru_cache(maxsize=256)
 def fetch_pdf_pages(url: str) -> Tuple[str, ...]:
-    reader = PdfReader(BytesIO(fetch_pdf_bytes(url)))
+    response = requests.get(url, headers=REQUEST_HEADERS, timeout=120)
+    response.raise_for_status()
+    reader = PdfReader(BytesIO(response.content))
     return tuple(page.extract_text() or "" for page in reader.pages)
 
 
@@ -853,9 +807,7 @@ def enrich_executive_person(person: Dict[str, Any]) -> Dict[str, Any]:
         liabilities = parse_278e_liabilities(pages, person.get("name", ""))
 
         result["financialAnnualReportLabel"] = annual_report_label(primary_278_document["kind"])
-        result["financialAnnualReportUrl"] = mirror_executive_pdf(
-            primary_278_document["url"], person["id"]
-        )
+        result["financialAnnualReportUrl"] = primary_278_document["url"]
 
         if filing_date:
             result["financialFilingDate"] = filing_date
