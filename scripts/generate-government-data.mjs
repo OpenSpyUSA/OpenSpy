@@ -742,7 +742,7 @@ const INDEPENDENT_AGENCY_PROFILE_OVERRIDES = new Map([
         'Patricia L. Lee is profiled here as the current sitting board member of the Defense Nuclear Facilities Safety Board, which has been operating without its full complement of members.',
       id: 'executive-patricia-l-lee-defense-nuclear-facilities-safety-board',
       name: 'Patricia L. Lee',
-      sourceUrl: 'https://www.dnfsb.gov/about/who-we-are/our-board-members',
+      sourceUrl: 'https://www.dnfsb.gov/about/board-members',
       title: 'Board Member of the Defense Nuclear Facilities Safety Board',
       website: 'https://www.dnfsb.gov/',
     },
