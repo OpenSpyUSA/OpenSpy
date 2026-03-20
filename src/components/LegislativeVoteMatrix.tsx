@@ -2,6 +2,7 @@ import { Avatar } from './Avatar'
 import {
   compareLegislativeRollCallsByRecency,
   formatRollCallMatrixDateLabel,
+  getRollCallThresholdLabel,
 } from '../legislativeRollCallFormat'
 import {
   formatAgeLabel,
@@ -212,6 +213,7 @@ export function LegislativeVoteMatrix({
                   const countsLabel = formatRollCallVoteTotals(event)
                   const isSelected = selectedRollCallId === event.id
                   const scopeLabel = formatRollCallSignalTier(event)
+                  const thresholdLabel = getRollCallThresholdLabel(event)
 
                   return (
                     <th
@@ -229,7 +231,7 @@ export function LegislativeVoteMatrix({
                         onClick={() => onOpenRollCall(event.id)}
                         title={`${event.label} • ${formatRollCallMatrixDateLabel(event)} • ${scopeLabel} • ${getRollCallOutcomeLabel(event.trumpOutcome)}${
                           countsLabel ? ` • ${countsLabel}` : ''
-                        }`}
+                        }${thresholdLabel ? ` • ${thresholdLabel}` : ''}`}
                         type="button"
                       >
                         <span className="vote-matrix__event-date">
@@ -245,6 +247,9 @@ export function LegislativeVoteMatrix({
                         >
                           {event.scoreIncluded ? 'Direct' : 'Broader'}
                         </span>
+                        {thresholdLabel ? (
+                          <span className="vote-matrix__event-threshold">2/3</span>
+                        ) : null}
                         {countsLabel ? (
                           <span className="vote-matrix__event-counts">{countsLabel}</span>
                         ) : null}

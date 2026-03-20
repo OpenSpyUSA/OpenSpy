@@ -1071,6 +1071,7 @@
 .vote-matrix__event-date,
 .vote-matrix__event-category,
 .vote-matrix__event-scope,
+.vote-matrix__event-threshold,
 .vote-matrix__event-counts {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
@@ -1105,6 +1106,13 @@
 
 .vote-matrix__event-scope--broad {
   color: rgba(29, 29, 31, 0.56);
+}
+
+.vote-matrix__event-threshold {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #8f5f00;
 }
 
 .vote-matrix__event-counts {
@@ -2418,6 +2426,11 @@
   color: #1379a5;
 }
 
+.detail-tag--threshold {
+  background: rgba(242, 162, 0, 0.14);
+  color: #8f5f00;
+}
+
 .detail-description {
   margin: 0;
   font-size: 1rem;
@@ -3008,6 +3021,7 @@
   }
 
   .vote-matrix__event-scope,
+  .vote-matrix__event-threshold,
   .vote-matrix__event-counts {
     font-size: 0.62rem;
   }

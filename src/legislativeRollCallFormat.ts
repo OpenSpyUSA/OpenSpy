@@ -64,6 +64,21 @@ function normalizeText(value: string) {
   return value.replace(/\s+/g, ' ').trim()
 }
 
+export function isTwoThirdsRollCall(event: LegislativeTrumpRollCall) {
+  const question = normalizeText(event.question).toLowerCase()
+
+  return (
+    question.includes('suspend the rules') ||
+    question.includes('on overriding the veto') ||
+    question.includes('objections of the president to the contrary notwithstanding') ||
+    (event.category === 'impeachment' && question.includes('guilty or not guilty'))
+  )
+}
+
+export function getRollCallThresholdLabel(event: LegislativeTrumpRollCall) {
+  return isTwoThirdsRollCall(event) ? '2/3 required' : null
+}
+
 function padNumber(value: number) {
   return String(value).padStart(2, '0')
 }

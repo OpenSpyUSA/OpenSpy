@@ -15,6 +15,7 @@ import {
   compareLegislativeRollCallsByRecency,
   formatRollCallRecordedLine,
   formatRollCallReferenceLine,
+  getRollCallThresholdLabel,
 } from './legislativeRollCallFormat'
 import { LegislativeMap } from './components/LegislativeMap'
 import './App.css'
@@ -68,7 +69,7 @@ type PresidentPartyTone = 'democratic' | 'republican'
 type AudienceMode = 'citizen' | 'observer'
 
 const JUDICIAL_INFERENCE_NOTE =
-  "A ? means this justice's stance is inferred from the Court's result or a partial public statement, rather than fully listed justice-by-justice in the official text."
+  "A \"?\" means this justice's stance is inferred from the Court's result or a partial public statement, rather than fully listed justice-by-justice in the official text."
 const AUDIENCE_MODE_STORAGE_KEY = 'open-spy-audience-mode'
 
 const HOME_AUDIENCE_COPY: Record<
@@ -1429,7 +1430,7 @@ function SupremeCourtCaseMatrix({
       <div className="vote-matrix">
         <div className="vote-matrix__header">
           <p className="vote-matrix__axes">
-            A &quot;?&quot; means this justice&apos;s stance is inferred from the Court&apos;s result or a partial public statement.
+            {JUDICIAL_INFERENCE_NOTE}
           </p>
           <div className="vote-matrix__legend" aria-label="Case matrix legend">
             <span className="vote-matrix__legend-item">
@@ -1721,6 +1722,7 @@ function DetailPanel({
     const voteTotals = formatRollCallVoteTotals(rollCall)
     const outcomeLabel = formatRollCallOutcome(rollCall.trumpOutcome)
     const signalTierLabel = formatRollCallSignalTier(rollCall)
+    const thresholdLabel = getRollCallThresholdLabel(rollCall)
     const narrative = describeLegislativeRollCall(rollCall)
     const referenceLine = formatRollCallReferenceLine(rollCall)
     const recordedLine = formatRollCallRecordedLine(rollCall)
@@ -1747,6 +1749,7 @@ function DetailPanel({
           <span className="detail-tag">{formatRollCallChamber(rollCall.chamber)}</span>
           <span className="detail-tag">{formatRollCallCategory(rollCall.category)}</span>
           <span className="detail-tag">{signalTierLabel}</span>
+          {thresholdLabel ? <span className="detail-tag detail-tag--threshold">{thresholdLabel}</span> : null}
           <span
             className={`detail-tag${
               rollCall.trumpOutcome ? ` detail-tag--${rollCall.trumpOutcome}` : ''
@@ -1767,6 +1770,12 @@ function DetailPanel({
             <span>Tier</span>
             <strong>{signalTierLabel}</strong>
           </div>
+          {thresholdLabel ? (
+            <div className="fact-row">
+              <span>Passage threshold</span>
+              <strong>{thresholdLabel}</strong>
+            </div>
+          ) : null}
           <div className="fact-row">
             <span>Final result</span>
             <strong>{outcomeLabel}</strong>
