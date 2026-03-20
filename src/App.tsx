@@ -2231,7 +2231,7 @@ function DetailPanel({
             </p>
           ) : null}
           <p>{person.trumpNote}</p>
-          {person.trumpEvidence && person.trumpEvidence.length > 0 ? (
+          {person.branchId !== 'legislative' && person.trumpEvidence && person.trumpEvidence.length > 0 ? (
             <>
               <p>
                 <strong>Evidence used:</strong>
