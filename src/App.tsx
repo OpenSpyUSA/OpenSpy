@@ -2230,9 +2230,6 @@ function DetailPanel({
       {showTrumpRelationship ? (
         <section className="detail-block">
           <h3>Trump Relationship Estimate</h3>
-          <p>
-            <strong>{person.trumpLabel}.</strong>
-          </p>
           {person.trumpSampleSize != null ? (
             <p>
               <strong>Sample size:</strong> {person.trumpSampleSize}
