@@ -121,7 +121,7 @@ const SOURCES = [
   },
   {
     label: 'House Financial Disclosure Search',
-    url: 'https://disclosures-clerk.house.gov/FinancialDisclosure/ViewSearch',
+    url: 'https://disclosures-clerk.house.gov/FinancialDisclosure',
   },
   {
     label: 'President Compensation Statute',
@@ -4784,7 +4784,7 @@ function annotateFinancialDisclosure(person) {
         ? `Search ${searchHint} in the House Clerk database and choose the filing year.`
         : 'Use the House Clerk database and choose the filing year.',
       financialDisclosureSearchHint: searchHint,
-      financialDisclosureUrl: 'https://disclosures-clerk.house.gov/FinancialDisclosure/ViewSearch',
+      financialDisclosureUrl: 'https://disclosures-clerk.house.gov/FinancialDisclosure',
     }
   }
 

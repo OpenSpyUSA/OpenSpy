@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 
+import csv
 import json
 import re
 import sys
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime
-from io import BytesIO
+from functools import lru_cache
+from io import BytesIO, StringIO
 from typing import Any, Dict, List, Optional
+from zipfile import ZipFile
 
 import requests
 from bs4 import BeautifulSoup
@@ -24,6 +27,9 @@ REQUEST_HEADERS = {
 
 HOUSE_SEARCH_URL = "https://disclosures-clerk.house.gov/FinancialDisclosure/ViewMemberSearchResult"
 HOUSE_BASE_URL = "https://disclosures-clerk.house.gov/"
+HOUSE_FINANCIAL_DISCLOSURE_INDEX_URL_TEMPLATE = (
+    "https://disclosures-clerk.house.gov/public_disc/financial-pdfs/{year}FD.zip"
+)
 SENATE_HOME_URL = "https://efdsearch.senate.gov/search/home/"
 SENATE_SEARCH_URL = "https://efdsearch.senate.gov/search/"
 SENATE_DATA_URL = "https://efdsearch.senate.gov/search/report/data/"
@@ -32,11 +38,13 @@ MONTH_PATTERN = (
 )
 TOP_HOLDINGS_DEFAULT_COUNT = 5
 TOP_HOLDINGS_EXTENSION_THRESHOLD = 1_000_000
+TOP_HOLDINGS_MIN_DISPLAY_UPPER_BOUND = 15_001
 HOUSE_OWNER_CODE_LABELS = {
     "DC": "Child",
     "JT": "Joint",
     "SP": "Spouse",
 }
+HOUSE_FULL_DISCLOSURE_INDEX_FILING_TYPES = {"O", "H"}
 HOUSE_OWNER_CODE_PATTERN = "|".join(sorted(HOUSE_OWNER_CODE_LABELS))
 MANUAL_SENATE_ANNUAL_OVERRIDES: Dict[str, Dict[str, str]] = {
     "senate-shelley-moore-capito": {
@@ -124,8 +132,13 @@ def parse_value_lower_bound(value: Optional[str]) -> int:
 
 
 def select_top_holdings(entries: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    filtered_entries = [
+        entry
+        for entry in entries
+        if parse_value_upper_bound(entry.get("value")) >= TOP_HOLDINGS_MIN_DISPLAY_UPPER_BOUND
+    ]
     sorted_entries = sorted(
-        entries,
+        filtered_entries,
         key=lambda entry: (-parse_value_upper_bound(entry["value"]), entry["label"]),
     )
 
@@ -267,6 +280,11 @@ def parse_house_search_rows(html: str) -> List[Dict[str, str]]:
         )
 
     return rows
+
+
+def is_house_full_disclosure_search_row(row: Dict[str, str]) -> bool:
+    filing_type = normalize_space(row.get("filingType", ""))
+    return filing_type.startswith("FD") or filing_type == "New Filer"
 
 
 def parse_house_holdings(text: str) -> List[Dict[str, str]]:
@@ -518,6 +536,120 @@ def parse_house_ptr_trades(text: str, source_url: str) -> List[Dict[str, str]]:
     return trades
 
 
+def build_house_state_district_code(person: Dict[str, Any]) -> Optional[str]:
+    state_code = person.get("stateCode")
+    district = normalize_space(str(person.get("district") or ""))
+
+    if not state_code or not district:
+        return None
+
+    district_lower = district.lower()
+    if district_lower in {"at-large", "at large"}:
+        district_number = 0
+    else:
+        matched = re.search(r"(\d+)", district_lower)
+        if not matched:
+            return None
+        district_number = int(matched.group(1))
+
+    return f"{state_code}{district_number:02d}"
+
+
+def build_house_name_variants(person: Dict[str, Any]) -> List[str]:
+    variants: List[str] = []
+
+    for value in [
+        person.get("financialDisclosureSearchName"),
+        person.get("officialName"),
+        person.get("displayName"),
+        person.get("name"),
+        *(person.get("aliases") or []),
+    ]:
+        normalized_value = normalize_search_name(value)
+        if normalized_value and normalized_value not in variants:
+            variants.append(normalized_value)
+
+    return variants
+
+
+def tokenize_house_name(value: str) -> List[str]:
+    return [token for token in normalize_search_name(value).lower().split() if token]
+
+
+@lru_cache(maxsize=4)
+def fetch_house_fd_index_rows(year: int) -> List[Dict[str, str]]:
+    response = requests.get(
+        HOUSE_FINANCIAL_DISCLOSURE_INDEX_URL_TEMPLATE.format(year=year),
+        headers=REQUEST_HEADERS,
+        timeout=30,
+    )
+    response.raise_for_status()
+
+    with ZipFile(BytesIO(response.content)) as archive:
+        with archive.open(f"{year}FD.txt") as handle:
+            text = handle.read().decode("utf-8-sig")
+
+    return list(csv.DictReader(StringIO(text), delimiter="\t"))
+
+
+def find_house_annual_row_from_index(person: Dict[str, Any], year: int) -> Optional[Dict[str, str]]:
+    target_state_district = build_house_state_district_code(person)
+    if not target_state_district:
+        return None
+
+    name_variants = build_house_name_variants(person)
+    if not name_variants:
+        return None
+
+    matches: List[Dict[str, str]] = []
+
+    try:
+        index_rows = fetch_house_fd_index_rows(year)
+    except Exception:
+        return None
+
+    for row in index_rows:
+        if row.get("FilingType") not in HOUSE_FULL_DISCLOSURE_INDEX_FILING_TYPES:
+            continue
+        if row.get("StateDst") != target_state_district:
+            continue
+
+        row_tokens = set(tokenize_house_name(f"{row.get('First', '')} {row.get('Last', '')}"))
+        if not row_tokens:
+            continue
+
+        for variant in name_variants:
+            variant_tokens = tokenize_house_name(variant)
+            if len(variant_tokens) < 2:
+                continue
+            if all(token in row_tokens for token in variant_tokens):
+                matches.append(
+                    {
+                        "filedAt": row.get("FilingDate", ""),
+                        "filingType": row.get("FilingType", ""),
+                        "filingYear": row.get("Year", str(year)),
+                        "url": (
+                            f"{HOUSE_BASE_URL}public_disc/financial-pdfs/"
+                            f"{row.get('Year', year)}/{row.get('DocID')}.pdf"
+                        ),
+                    }
+                )
+                break
+
+    if not matches:
+        return None
+
+    matches.sort(
+        key=lambda row: (
+            int(row.get("filingYear") or 0),
+            date_to_sort_key(row.get("filedAt")),
+            row.get("url", ""),
+        ),
+        reverse=True,
+    )
+    return matches[0]
+
+
 def enrich_house_member(person: Dict[str, Any]) -> Dict[str, Any]:
     all_rows: List[Dict[str, str]] = []
 
@@ -528,21 +660,35 @@ def enrich_house_member(person: Dict[str, Any]) -> Dict[str, Any]:
             continue
         all_rows.extend(parse_house_search_rows(html))
 
-    if not all_rows:
-        return {}
-
-    annual_rows = [row for row in all_rows if row["filingType"].startswith("FD")]
+    annual_rows = [row for row in all_rows if is_house_full_disclosure_search_row(row)]
     ptr_rows = [row for row in all_rows if row["filingType"].startswith("PTR")]
-    annual_rows.sort(key=lambda row: (int(row["filingYear"]), row["url"]), reverse=True)
+    if not annual_rows:
+        for year in build_house_search_years():
+            fallback_annual_row = find_house_annual_row_from_index(person, year)
+            if fallback_annual_row:
+                annual_rows.append(fallback_annual_row)
+
+    annual_rows.sort(
+        key=lambda row: (
+            int(row.get("filingYear") or 0),
+            date_to_sort_key(row.get("filedAt")),
+            row["url"],
+        ),
+        reverse=True,
+    )
     ptr_rows.sort(key=lambda row: row["url"], reverse=True)
 
     result: Dict[str, Any] = {}
 
     if annual_rows:
+        result["financialAnnualReportUrl"] = annual_rows[0]["url"]
+        if annual_rows[0].get("filedAt"):
+            result["financialFilingDate"] = annual_rows[0]["filedAt"]
         try:
             annual_text = fetch_pdf_text(annual_rows[0]["url"])
-            result["financialAnnualReportUrl"] = annual_rows[0]["url"]
-            result["financialFilingDate"] = parse_house_filing_date(annual_text)
+            parsed_filing_date = parse_house_filing_date(annual_text)
+            if parsed_filing_date:
+                result["financialFilingDate"] = parsed_filing_date
             result["topHoldings"] = select_top_holdings(parse_house_holdings(annual_text))
             result["liabilities"] = parse_house_liabilities(annual_text)[:5]
         except Exception:

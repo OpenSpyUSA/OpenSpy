@@ -19,6 +19,49 @@ export function stripDiacritics(value = '') {
 }
 
 const personNamingOverrides = {
+  'house-marie-perez-washington-3rd': {
+    officialName: 'Marie Gluesenkamp Perez',
+    aliases: ['Marie Gluesenkamp Perez'],
+    financialDisclosureSearchLastName: 'Gluesenkamp Perez',
+    financialDisclosureSearchName: 'Marie Gluesenkamp Perez',
+  },
+  'house-monica-de-la-cruz-texas-15th': {
+    financialDisclosureSearchLastName: 'De La Cruz',
+  },
+  'house-teresa-leger-fernandez-new-mexico-3rd': {
+    financialDisclosureSearchLastName: 'Leger Fernandez',
+  },
+  'house-jefferson-van-drew-new-jersey-2nd': {
+    financialDisclosureSearchLastName: 'Van Drew',
+  },
+  'house-beth-van-duyne-texas-24th': {
+    financialDisclosureSearchLastName: 'Van Duyne',
+  },
+  'house-derrick-van-orden-wisconsin-3rd': {
+    financialDisclosureSearchLastName: 'Van Orden',
+  },
+  'house-debbie-wasserman-schultz-florida-25th': {
+    financialDisclosureSearchLastName: 'Wasserman Schultz',
+  },
+  'house-ashley-hinson-iowa-2nd': {
+    officialName: 'Ashley Hinson Arenholz',
+    aliases: ['Ashley Hinson Arenholz'],
+    financialDisclosureSearchLastName: 'Arenholz',
+    financialDisclosureSearchName: 'Ashley Hinson Arenholz',
+  },
+  'house-anna-paulina-luna-florida-13th': {
+    aliases: ['Anna Luna'],
+    financialDisclosureSearchLastName: 'Paulina Luna',
+  },
+  'house-nydia-velazquez-new-york-7th': {
+    aliases: ['Nydia M. Velazquez'],
+    financialDisclosureSearchName: 'Nydia M. Velazquez',
+  },
+  'house-aumua-amata-radewagen-american-samoa-delegate': {
+    aliases: ['Aumua Amata'],
+    financialDisclosureSearchLastName: 'Amata',
+    financialDisclosureSearchName: 'Aumua Amata',
+  },
   'senate-jack-reed': {
     officialName: 'John F. Reed',
     aliases: ['John Reed'],

@@ -657,7 +657,7 @@ function getSupremeCourtOfficialWording(caseItem: SupremeCourtCase) {
 }
 
 function shouldShowAnnualDisclosureReportLink(person: GovernmentPerson) {
-  return person.sectionId !== 'senate'
+  return Boolean(person.financialAnnualReportUrl)
 }
 
 function isTradeOnOrAfter2026(trade: DisclosureTrade) {
