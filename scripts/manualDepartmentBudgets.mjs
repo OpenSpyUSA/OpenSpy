@@ -99,7 +99,7 @@ export const manualDepartmentBudgetsByDepartment = {
     note:
       "HUD's FY 2026 congressional justification describes $77.1 billion in gross spending and $42.8 billion in net budget authority.",
     sourceLabel: 'HUD FY 2026 Congressional Justification',
-    sourceUrl: 'https://www.hud.gov/sites/dfiles/CFO/documents/FY26CJ.pdf',
+    sourceUrl: 'https://www.hud.gov/sites/dfiles/CFO/documents/FY_2026_Congressional_Justification_E-File.pdf',
   },
   'Department of Transportation': {
     totalAmount: '$147.1B',
@@ -109,7 +109,7 @@ export const manualDepartmentBudgetsByDepartment = {
     note:
       "DOT's FY 2026 budget estimates describe $147.1 billion in total budgetary resources and $62.9 billion in discretionary budget authority.",
     sourceLabel: 'DOT FY 2026 Budget Estimates',
-    sourceUrl: 'https://www.transportation.gov/budget/fiscal-year-2026-budget-estimates',
+    sourceUrl: 'https://www.transportation.gov/mission/budget/fiscal-year-2026-budget-estimates',
   },
   'Department of Energy': {
     totalAmount: '$51.6B',
@@ -128,8 +128,8 @@ export const manualDepartmentBudgetsByDepartment = {
     discretionaryLabel: 'FY 2026 discretionary funding',
     note:
       "Education's FY 2026 budget summary describes about $77.2 billion in total budget appropriation and $66.7 billion in discretionary funding. This is the department's budget appropriation, not the full outstanding federal student-loan portfolio or every dollar of annual loan volume.",
-    sourceLabel: 'Education FY 2026 Budget Summary',
-    sourceUrl: 'https://www.ed.gov/about/ed-overview/federal-budget/fy-2026-budget-summary',
+    sourceLabel: 'Education FY 2026 Budget Request Summary',
+    sourceUrl: 'https://www.ed.gov/media/document/fiscal-year-2026-budget-summary-110043.pdf',
   },
   'Department of Veterans Affairs': {
     totalAmount: '$441.3B',
@@ -149,6 +149,6 @@ export const manualDepartmentBudgetsByDepartment = {
     note:
       "DHS's FY 2026 congressional justification describes $115.6 billion in total budget authority and $63.6 billion in adjusted net discretionary funding.",
     sourceLabel: 'DHS FY 2026 Congressional Budget Justification',
-    sourceUrl: 'https://www.dhs.gov/publication/congressional-budget-justification-fiscal-year-2026',
+    sourceUrl: 'https://www.dhs.gov/publication/congressional-budget-justification-fiscal-year-fy-2026',
   },
 }

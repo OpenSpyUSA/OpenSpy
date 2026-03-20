@@ -118,19 +118,19 @@ const SOURCES = [
   },
   {
     label: 'President Compensation Statute',
-    url: 'https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title3-section102&num=0&edition=prelim',
+    url: 'https://uscode.house.gov/view.xhtml?req=%28title%3A3+section%3A102+edition%3Aprelim%29',
   },
   {
     label: 'OPM 2026 Senior Political Pay Freeze Guidance',
     url: 'https://www.opm.gov/chcoc/latest-memos/updated-guidance-pay-freeze-for-certain-senior-political-officials-1.pdf',
   },
   {
-    label: 'Current House Salaries',
-    url: 'https://www.house.gov/doing-business-with-the-house/current-house-salaries',
+    label: 'CRS Report on Salaries of Members of Congress',
+    url: 'https://clerk.house.gov/reference-files/congressional_research_service_report.pdf',
   },
   {
     label: '2026 Executive Schedule rates',
-    url: 'https://www.whitehouse.gov/briefing-room/presidential-actions/2025/12/23/adjustments-of-certain-rates-of-pay/',
+    url: 'https://www.whitehouse.gov/presidential-actions/2025/12/adjustments-of-certain-rates-of-pay/',
   },
   {
     label: 'Senate Salaries Since 1789',
@@ -290,16 +290,17 @@ const JUSTICE_SALARY_NOTE =
 const JUSTICE_WEALTH_NOTE =
   'Justices file public annual financial disclosures. These reports are more reliable than outside net-worth estimates, and ideological color-coding on this site is descriptive only.'
 const PRESIDENT_SALARY_SOURCE_URL =
-  'https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title3-section102&num=0&edition=prelim'
+  'https://uscode.house.gov/view.xhtml?req=%28title%3A3+section%3A102+edition%3Aprelim%29'
 const SENIOR_POLITICAL_PAY_FREEZE_SOURCE_URL =
   'https://www.opm.gov/chcoc/latest-memos/updated-guidance-pay-freeze-for-certain-senior-political-officials-1.pdf'
 const SENIOR_POLITICAL_PAY_FREEZE_SOURCE_LABEL = 'OPM 2026 senior political pay guidance'
-const HOUSE_SALARY_SOURCE_URL = 'https://www.house.gov/doing-business-with-the-house/current-house-salaries'
+const HOUSE_SALARY_SOURCE_URL =
+  'https://clerk.house.gov/reference-files/congressional_research_service_report.pdf'
 const SENATE_SALARY_SOURCE_URL = 'https://www.senate.gov/legislative/common/generic/Salaries.htm'
 const JUDICIAL_SALARY_SOURCE_URL =
   'https://www.uscourts.gov/judges-judgeships/judicial-compensation'
 const EXECUTIVE_SCHEDULE_2026_SOURCE_URL =
-  'https://www.whitehouse.gov/briefing-room/presidential-actions/2025/12/23/adjustments-of-certain-rates-of-pay/'
+  'https://www.whitehouse.gov/presidential-actions/2025/12/adjustments-of-certain-rates-of-pay/'
 
 const houseSalaryOverrides = new Map([
   [
@@ -585,10 +586,9 @@ const INDEPENDENT_AGENCY_PROFILE_OVERRIDES = new Map([
         'Marvin E. Kaplan is chairman of the National Labor Relations Board, the independent labor-law board that handles union representation disputes and unfair-labor-practice cases.',
       id: 'executive-marvin-e-kaplan-national-labor-relations-board',
       name: 'Marvin E. Kaplan',
-      sourceUrl:
-        'https://www.nlrb.gov/about-nlrb/who-we-are/board/marvin-e-kaplan-chairman',
+      sourceUrl: 'https://www.nlrb.gov/bio/marvin-e-kaplan',
       title: 'Chairman of the National Labor Relations Board',
-      website: 'https://www.nlrb.gov/',
+      website: 'https://www.nlrb.gov/about-nlrb/who-we-are',
     },
   ],
   [
@@ -628,9 +628,9 @@ const INDEPENDENT_AGENCY_PROFILE_OVERRIDES = new Map([
         'Brian Stone is performing the duties of the NSF director, helping lead the federal science-funding agency while the director position remains unfilled.',
       id: 'executive-brian-stone-national-science-foundation',
       name: 'Brian Stone',
-      sourceUrl: 'https://new.nsf.gov/about/leadership/brian-stone',
+      sourceUrl: 'https://www.nsf.gov/about/leadership',
       title: 'Performing the duties of Director of the National Science Foundation',
-      website: 'https://new.nsf.gov/',
+      website: 'https://www.nsf.gov/',
     },
   ],
   [
@@ -659,7 +659,7 @@ const INDEPENDENT_AGENCY_PROFILE_OVERRIDES = new Map([
       id: 'executive-tulsi-gabbard-office-of-the-director-of-national-intelligence',
       name: 'Tulsi Gabbard',
       sourceUrl:
-        'https://www.dni.gov/index.php/who-we-are/leadership/director-national-intelligence',
+        'https://www.dni.gov/index.php/who-we-are/leadership/director-of-national-intelligence',
       title: 'Director of National Intelligence',
       website: 'https://www.dni.gov/',
     },
@@ -683,7 +683,8 @@ const INDEPENDENT_AGENCY_PROFILE_OVERRIDES = new Map([
         'Michael M. Kubayanda is chairman of the Postal Regulatory Commission, the independent regulator that reviews U.S. Postal Service rates, service standards, and related compliance matters.',
       id: 'executive-michael-m-kubayanda-postal-regulatory-commission',
       name: 'Michael M. Kubayanda',
-      sourceUrl: 'https://www.prc.gov/commissioner/michael-kubayanda',
+      sourceUrl:
+        'https://www.prc.gov/press-releases/michael-m-kubayanda-designated-chairman-postal-regulatory-commission/5044',
       title: 'Chairman of the Postal Regulatory Commission',
       website: 'https://www.prc.gov/',
     },
@@ -710,7 +711,9 @@ const INDEPENDENT_AGENCY_PROFILE_OVERRIDES = new Map([
   [
     'Small Business Administration',
     {
+      sourceUrl: 'https://www.sba.gov/person/kelly-loeffler',
       title: 'Administrator of the Small Business Administration',
+      website: 'https://www.sba.gov/person/kelly-loeffler',
     },
   ],
   [
@@ -4183,11 +4186,97 @@ function buildExecutiveTrumpNote(person, evidence) {
   return 'Current service in Trump’s administration is the clearest factual tie in this dataset, so the score stays high without claiming personal friendship.'
 }
 
-function annotateExecutiveTrumpRelationship(person) {
+function buildExecutiveCongressTrumpRelationship(person, context) {
+  const services = context.executiveCongressHistoryByPersonId?.get(person.id) ?? []
+
+  if (!services.length) {
+    return null
+  }
+
+  let proVotes = 0
+  let antiVotes = 0
+  let missedCount = 0
+  let directVoteCount = 0
+  let broadVoteCount = 0
+  const chambers = new Set()
+
+  for (const service of services) {
+    proVotes += service.proCount
+    antiVotes += service.antiCount
+    missedCount += service.missedCount
+    directVoteCount += service.directVoteCount
+    broadVoteCount += service.broadVoteCount
+    chambers.add(service.chamber)
+  }
+
+  const sampleSize = proVotes + antiVotes
+
+  if (sampleSize === 0) {
+    return null
+  }
+
+  const availableEvents = [...chambers].reduce((total, chamber) => {
+    if (chamber === 'senate') {
+      return total + (context.legislativeRollCallSummary?.senateScoredCount ?? 0)
+    }
+
+    return total + (context.legislativeRollCallSummary?.houseScoredCount ?? 0)
+  }, 0)
+  const confidence = getLegislativeTrumpConfidence(sampleSize, availableEvents || sampleSize)
+  const derivedScore = clampTrumpScoreToSingleDecimal((proVotes / sampleSize) * 10)
+  const chamberLabel =
+    chambers.size > 1 ? 'House and Senate' : chambers.has('senate') ? 'Senate' : 'House'
+  const noteParts = [
+    `Score is derived from selected Trump-linked ${chamberLabel} roll calls on this site during this official's time in Congress: ${proVotes}/${sampleSize} counted votes on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
+  ]
+
+  if (missedCount > 0) {
+    noteParts.push(`Missed ${missedCount} direct votes.`)
+  }
+
+  if (broadVoteCount > 0) {
+    noteParts.push(`${broadVoteCount} broader unscored votes are listed separately below.`)
+  }
+
+  const evidence = [
+    `${proVotes} Pro Trump votes and ${antiVotes} Not pro Trump votes across ${sampleSize} counted ${chamberLabel} votes during this official's past service in Congress.`,
+    `Sample size: ${sampleSize}${availableEvents ? ` of ${availableEvents}` : ''} selected scored votes. Confidence: ${confidence}.`,
+  ]
+
+  if (missedCount > 0) {
+    evidence.push(`Missed or abstained on ${missedCount} direct votes in the listed record.`)
+  }
+
+  if (broadVoteCount > 0) {
+    evidence.push(`${broadVoteCount} broader, unscored Trump-linked votes are also listed in the congressional history section.`)
+  }
+
+  return {
+    ...person,
+    trumpAntiCount: antiVotes,
+    trumpAvailableEvents: availableEvents || undefined,
+    trumpConfidence: confidence,
+    trumpEvidence: uniqueStrings(evidence),
+    trumpLabel: buildLegislativeTrumpLabel(derivedScore),
+    trumpMissedCount: missedCount,
+    trumpProCount: proVotes,
+    trumpSampleSize: sampleSize,
+    trumpNote: noteParts.join(' '),
+    trumpScore: derivedScore,
+  }
+}
+
+function annotateExecutiveTrumpRelationship(person, context) {
   const override = trumpManualOverrides.get(person.name)
 
   if (override) {
     return finalizeTrumpAnnotation(person, override.score, override.note, override.evidence)
+  }
+
+  const congressVoteBasedAnnotation = buildExecutiveCongressTrumpRelationship(person, context)
+
+  if (congressVoteBasedAnnotation) {
+    return congressVoteBasedAnnotation
   }
 
   const evidence = extractExecutiveTrumpEvidence(person)
@@ -4393,7 +4482,7 @@ function annotateExecutiveCongressHistory(person, context) {
 
 function annotateTrumpProximity(person, context) {
   if (person.branchId === 'executive') {
-    return annotateExecutiveTrumpRelationship(person)
+    return annotateExecutiveTrumpRelationship(person, context)
   }
 
   if (person.branchId === 'judicial') {
@@ -4511,7 +4600,7 @@ function annotateSalary(person) {
           person,
           override.amount,
           override.note,
-          'Current House salaries',
+          'CRS report on congressional salaries',
           HOUSE_SALARY_SOURCE_URL,
         )
       }
@@ -4520,7 +4609,7 @@ function annotateSalary(person) {
         person,
         '$174,000',
         'The current annual salary for House members, delegates, and the resident commissioner is $174,000.',
-        'Current House salaries',
+        'CRS report on congressional salaries',
         HOUSE_SALARY_SOURCE_URL,
       )
     }

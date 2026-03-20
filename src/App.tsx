@@ -751,7 +751,11 @@ function formatDisplayedTrumpScore(person: GovernmentPerson) {
 }
 
 function shouldShowTrumpRelationship(person: GovernmentPerson) {
-  return person.branchId !== 'executive'
+  if (person.branchId !== 'executive') {
+    return true
+  }
+
+  return (person.executiveCongressServiceHistory?.length ?? 0) > 0
 }
 
 function parseHash(hash: string, peopleById?: Map<string, GovernmentPerson>): RouteState {
@@ -2206,13 +2210,13 @@ function DetailPanel({
           <p>
             <strong>{person.trumpLabel}.</strong>
           </p>
-          {person.branchId === 'legislative' && person.trumpSampleSize != null ? (
+          {person.trumpSampleSize != null ? (
             <p>
               <strong>Sample size:</strong> {person.trumpSampleSize}
               {person.trumpAvailableEvents ? ` of ${person.trumpAvailableEvents}` : ''} selected votes
             </p>
           ) : null}
-          {person.branchId === 'legislative' && person.trumpConfidence ? (
+          {person.trumpConfidence ? (
             <p>
               <strong>Confidence:</strong> {person.trumpConfidence}
             </p>

@@ -51,6 +51,6 @@ export const manualIndependentAgencyBudgetsByDepartment = {
     note:
       "The CFTC's FY 2026 President's Budget requests $410.0 million. The request also proposes offsetting collections from user fees, but the agency is not funded like the Federal Reserve or SEC under a standing self-funding model.",
     sourceLabel: 'CFTC FY 2026 President’s Budget',
-    sourceUrl: 'https://www.cftc.gov/sites/default/files/2025-05/CFTC_FY2026_Presidents_Budget.pdf',
+    sourceUrl: 'https://www.cftc.gov/sites/default/files/CFTC_FY2026_Presidents_Budget.pdf',
   },
 }
