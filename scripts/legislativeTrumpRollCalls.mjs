@@ -110,11 +110,11 @@ const selectedHouseRollCalls = [
   }),
   selectedHouse('house-border-emergency-rule-pq-1', 2019, 92, 'emergency-powers', {
     label: 'First border emergency disapproval rule previous question',
-    proTrumpCast: 'Yea',
+    proTrumpCast: 'Nay',
   }),
   selectedHouse('house-border-emergency-rule-1', 2019, 93, 'emergency-powers', {
     label: 'First border emergency disapproval rule adoption',
-    proTrumpCast: 'Yea',
+    proTrumpCast: 'Nay',
   }),
   selectedHouse('house-border-emergency-disapproval-1', 2019, 94, 'emergency-powers', {
     highlight: true,
@@ -128,11 +128,11 @@ const selectedHouseRollCalls = [
   }),
   selectedHouse('house-border-emergency-rule-pq-2', 2019, 549, 'emergency-powers', {
     label: 'Second border emergency disapproval rule previous question',
-    proTrumpCast: 'Yea',
+    proTrumpCast: 'Nay',
   }),
   selectedHouse('house-border-emergency-rule-2', 2019, 550, 'emergency-powers', {
     label: 'Second border emergency disapproval rule adoption',
-    proTrumpCast: 'Yea',
+    proTrumpCast: 'Nay',
   }),
   selectedHouse('house-border-emergency-disapproval-2', 2019, 553, 'emergency-powers', {
     highlight: true,
@@ -159,11 +159,11 @@ const selectedHouseRollCalls = [
   }),
   selectedHouse('house-iran-war-powers-rule-pq-1', 2020, 5, 'war-powers', {
     label: 'Iran war powers rule previous question',
-    proTrumpCast: 'Yea',
+    proTrumpCast: 'Nay',
   }),
   selectedHouse('house-iran-war-powers-rule-1', 2020, 6, 'war-powers', {
     label: 'Iran war powers rule adoption',
-    proTrumpCast: 'Yea',
+    proTrumpCast: 'Nay',
   }),
   selectedHouse('house-iran-war-powers-1', 2020, 7, 'war-powers', {
     highlight: true,
@@ -172,11 +172,11 @@ const selectedHouseRollCalls = [
   }),
   selectedHouse('house-iran-war-powers-rule-2', 2020, 95, 'war-powers', {
     label: 'Second Iran war powers rule previous question',
-    proTrumpCast: 'Yea',
+    proTrumpCast: 'Nay',
   }),
   selectedHouse('house-iran-war-powers-rule-2-adopt', 2020, 96, 'war-powers', {
     label: 'Second Iran war powers rule adoption',
-    proTrumpCast: 'Yea',
+    proTrumpCast: 'Nay',
   }),
   selectedHouse('house-iran-war-powers-2', 2020, 101, 'war-powers', {
     highlight: true,
@@ -684,9 +684,11 @@ const selectedSenateRollCalls = [
   }),
   selectedSenate('senate-obamacare-commit-schumer', 115, 1, 176, 'health-care', {
     label: 'Obamacare repeal Schumer commit motion',
+    proTrumpCast: 'Nay',
   }),
   selectedSenate('senate-obamacare-commit-murray', 115, 1, 178, 'health-care', {
     label: 'Obamacare repeal Murray commit motion',
+    proTrumpCast: 'Nay',
   }),
   selectedSenate('senate-tax-cuts-motion-to-proceed', 115, 1, 284, 'taxes', {
     label: 'Tax Cuts and Jobs Act motion to proceed',
@@ -973,6 +975,144 @@ const selectedSenateRollCalls = [
   selectedSenate('senate-atkins-confirm', 119, 1, 205, 'nominations', {
     highlight: true,
     label: 'Paul Atkins confirmation',
+  }),
+  selectedSenate('senate-s5-cloture-motion-to-proceed', 119, 1, 1, 'immigration', {
+    label: 'Laken Riley Act cloture on motion to proceed',
+  }),
+  selectedSenate('senate-s5-motion-to-proceed', 119, 1, 2, 'immigration', {
+    highlight: true,
+    label: 'Laken Riley Act motion to proceed',
+  }),
+  selectedSenate('senate-s5-cornyn-amendment', 119, 1, 3, 'immigration', {
+    label: 'Laken Riley Act Cornyn amendment',
+  }),
+  selectedSenate('senate-s5-coons-amendment', 119, 1, 4, 'immigration', {
+    label: 'Laken Riley Act Coons amendment',
+    proTrumpCast: 'Nay',
+  }),
+  selectedSenate('senate-s5-cloture', 119, 1, 5, 'immigration', {
+    label: 'Laken Riley Act cloture',
+  }),
+  selectedSenate('senate-s5-ernst-amendment', 119, 1, 6, 'immigration', {
+    label: 'Laken Riley Act Ernst amendment',
+  }),
+  selectedSenate('senate-s5-passage', 119, 1, 7, 'immigration', {
+    highlight: true,
+    label: 'Laken Riley Act passage',
+  }),
+  selectedSenate('senate-iran-hostilities-sjres59-discharge', 119, 1, 328, 'war-powers', {
+    highlight: true,
+    label: 'Iran hostilities discharge (S.J. Res. 59)',
+    proTrumpCast: 'Nay',
+  }),
+  selectedSenate('senate-hr4-discharge', 119, 1, 391, 'rescissions', {
+    label: 'H.R. 4 rescissions discharge motion',
+  }),
+  selectedSenate('senate-hr4-motion-to-proceed', 119, 1, 392, 'rescissions', {
+    highlight: true,
+    label: 'H.R. 4 rescissions motion to proceed',
+  }),
+  selectedSenate('senate-hr4-schmitt-substitute', 119, 1, 410, 'rescissions', {
+    label: 'H.R. 4 rescissions substitute amendment',
+  }),
+  selectedSenate('senate-hr4-passage', 119, 1, 411, 'rescissions', {
+    highlight: true,
+    label: 'H.R. 4 rescissions passage',
+  }),
+  selectedSenate('senate-s2882-initial-passage', 119, 1, 527, 'appropriations', {
+    highlight: true,
+    label: 'S. 2882 continuing appropriations initial passage',
+    proTrumpCast: 'Nay',
+  }),
+  selectedSenate('senate-hr5371-initial-passage', 119, 1, 528, 'appropriations', {
+    highlight: true,
+    label: 'H.R. 5371 continuing appropriations initial passage',
+  }),
+  selectedSenate('senate-s2882-reconsidered-passage', 119, 1, 534, 'appropriations', {
+    label: 'S. 2882 continuing appropriations reconsidered passage',
+    proTrumpCast: 'Nay',
+  }),
+  selectedSenate('senate-hr5371-reconsidered-passage', 119, 1, 535, 'appropriations', {
+    label: 'H.R. 5371 continuing appropriations reconsidered passage',
+  }),
+  selectedSenate('senate-s2882-oct1-cloture-motion-to-proceed', 119, 1, 536, 'appropriations', {
+    label: 'S. 2882 continuing appropriations cloture on motion to proceed',
+    proTrumpCast: 'Nay',
+  }),
+  selectedSenate('senate-hr5371-oct1-cloture-motion-to-proceed', 119, 1, 537, 'appropriations', {
+    label: 'H.R. 5371 continuing appropriations cloture on motion to proceed',
+  }),
+  selectedSenate('senate-hr5371-nov9-cloture-motion-to-proceed', 119, 1, 610, 'appropriations', {
+    label: 'H.R. 5371 continuing appropriations cloture on motion to proceed revisit',
+  }),
+  selectedSenate('senate-hr5371-motion-to-proceed', 119, 1, 611, 'appropriations', {
+    label: 'H.R. 5371 continuing appropriations motion to proceed',
+  }),
+  selectedSenate('senate-hr5371-cloture', 119, 1, 617, 'appropriations', {
+    label: 'H.R. 5371 continuing appropriations cloture',
+  }),
+  selectedSenate('senate-hr5371-final-passage', 119, 1, 618, 'appropriations', {
+    highlight: true,
+    label: 'H.R. 5371 continuing appropriations final passage',
+  }),
+  selectedSenate('senate-venezuela-hostilities-sjres98-discharge', 119, 2, 5, 'war-powers', {
+    highlight: true,
+    label: 'Venezuela hostilities discharge (S.J. Res. 98)',
+    proTrumpCast: 'Nay',
+  }),
+  selectedSenate('senate-hr6938-cloture-motion-to-proceed', 119, 2, 7, 'appropriations', {
+    label: 'H.R. 6938 consolidated appropriations cloture on motion to proceed',
+  }),
+  selectedSenate('senate-hr6938-cloture', 119, 2, 10, 'appropriations', {
+    label: 'H.R. 6938 consolidated appropriations cloture',
+  }),
+  selectedSenate('senate-hr6938-passage', 119, 2, 11, 'appropriations', {
+    highlight: true,
+    label: 'H.R. 6938 consolidated appropriations passage',
+  }),
+  selectedSenate('senate-hr7148-cloture-motion-to-proceed', 119, 2, 13, 'appropriations', {
+    label: 'H.R. 7148 further appropriations cloture on motion to proceed',
+  }),
+  selectedSenate('senate-hr7148-sanders-amendment', 119, 2, 18, 'rescissions', {
+    label: 'H.R. 7148 Sanders ICE and Medicaid amendment',
+    proTrumpCast: 'Nay',
+  }),
+  selectedSenate('senate-hr7148-merkley-waiver', 119, 2, 19, 'rescissions', {
+    label: 'H.R. 7148 Merkley anti-impoundment waiver',
+    proTrumpCast: 'Nay',
+  }),
+  selectedSenate('senate-hr7148-passage', 119, 2, 20, 'appropriations', {
+    highlight: true,
+    label: 'H.R. 7148 further appropriations passage',
+  }),
+  selectedSenate('senate-hr7147-feb12-cloture-motion-to-proceed', 119, 2, 38, 'appropriations', {
+    label: 'H.R. 7147 further appropriations cloture on motion to proceed',
+  }),
+  selectedSenate('senate-hr7147-feb24-cloture-motion-to-proceed', 119, 2, 39, 'appropriations', {
+    label: 'H.R. 7147 further appropriations cloture on motion to proceed revisit',
+  }),
+  selectedSenate('senate-iran-hostilities-sjres104-discharge', 119, 2, 46, 'war-powers', {
+    highlight: true,
+    label: 'Iran hostilities discharge (S.J. Res. 104)',
+    proTrumpCast: 'Nay',
+  }),
+  selectedSenate('senate-hr7147-mar5-cloture-motion-to-proceed', 119, 2, 47, 'appropriations', {
+    label: 'H.R. 7147 further appropriations cloture on motion to proceed reconsideration',
+  }),
+  selectedSenate('senate-hr7147-mar12-cloture-motion-to-proceed', 119, 2, 54, 'appropriations', {
+    label: 'H.R. 7147 further appropriations cloture on motion to proceed final attempt',
+  }),
+  selectedSenate('senate-st-john-cloture', 119, 2, 55, 'nominations', {
+    label: 'Anna St. John cloture',
+  }),
+  selectedSenate('senate-st-john-confirm', 119, 2, 56, 'nominations', {
+    highlight: true,
+    label: 'Anna St. John confirmation',
+  }),
+  selectedSenate('senate-iran-hostilities-sjres118-discharge', 119, 2, 58, 'war-powers', {
+    highlight: true,
+    label: 'Iran hostilities discharge (S.J. Res. 118)',
+    proTrumpCast: 'Nay',
   }),
 ]
 
@@ -1358,6 +1498,18 @@ const senateCandidateExtras = [
   senate('senate-simington-fcc-confirm', 116, 2, 257, 'nominations', {
     label: 'Nathan Simington confirmation',
   }),
+  senate('senate-joshua-simmons-cloture', 119, 1, 656, 'nominations', {
+    label: 'Joshua Simmons cloture',
+  }),
+  senate('senate-keith-bass-cloture', 119, 1, 657, 'nominations', {
+    label: 'Keith Bass cloture',
+  }),
+  senate('senate-van-hook-cloture', 119, 1, 658, 'nominations', {
+    label: 'Alexander C. Van Hook cloture',
+  }),
+  senate('senate-sara-bailey-cloture', 119, 1, 659, 'nominations', {
+    label: 'Sara Bailey cloture',
+  }),
   senate('senate-keith-bass-confirm', 119, 2, 1, 'nominations', {
     label: 'Keith Bass confirmation',
   }),
@@ -1366,6 +1518,45 @@ const senateCandidateExtras = [
   }),
   senate('senate-sara-bailey-confirm', 119, 2, 3, 'nominations', {
     label: 'Sara Bailey confirmation',
+  }),
+  senate('senate-van-hook-confirm', 119, 2, 6, 'nominations', {
+    label: 'Alexander C. Van Hook confirmation',
+  }),
+  senate('senate-fowlkes-cloture', 119, 2, 21, 'nominations', {
+    label: 'David Clay Fowlkes cloture',
+  }),
+  senate('senate-fowlkes-confirm', 119, 2, 22, 'nominations', {
+    label: 'David Clay Fowlkes confirmation',
+  }),
+  senate('senate-ganjei-cloture', 119, 2, 23, 'nominations', {
+    label: 'Nicholas Jon Ganjei cloture',
+  }),
+  senate('senate-ganjei-confirm', 119, 2, 24, 'nominations', {
+    label: 'Nicholas Jon Ganjei confirmation',
+  }),
+  senate('senate-peterson-cloture', 119, 2, 25, 'nominations', {
+    label: 'Aaron Christian Peterson cloture',
+  }),
+  senate('senate-peterson-confirm', 119, 2, 26, 'nominations', {
+    label: 'Aaron Christian Peterson confirmation',
+  }),
+  senate('senate-benton-cloture', 119, 2, 27, 'nominations', {
+    label: 'Megan Blair Benton cloture',
+  }),
+  senate('senate-benton-confirm', 119, 2, 28, 'nominations', {
+    label: 'Megan Blair Benton confirmation',
+  }),
+  senate('senate-lea-cloture', 119, 2, 29, 'nominations', {
+    label: 'Brian Charles Lea cloture',
+  }),
+  senate('senate-lea-confirm', 119, 2, 30, 'nominations', {
+    label: 'Brian Charles Lea confirmation',
+  }),
+  senate('senate-olson-cloture', 119, 2, 31, 'nominations', {
+    label: 'Justin R. Olson cloture',
+  }),
+  senate('senate-olson-confirm', 119, 2, 32, 'nominations', {
+    label: 'Justin R. Olson confirmation',
   }),
   senate('senate-daniel-burrows-cloture', 119, 2, 33, 'nominations', {
     label: 'Daniel Burrows cloture',
@@ -1385,6 +1576,12 @@ const senateCandidateExtras = [
   senate('senate-ryan-mccormack-confirm', 119, 2, 43, 'nominations', {
     label: 'Ryan McCormack confirmation',
   }),
+  senate('senate-rudd-cloture', 119, 2, 48, 'nominations', {
+    label: 'Lt. Gen. Joshua M. Rudd cloture',
+  }),
+  senate('senate-rudd-confirm', 119, 2, 49, 'nominations', {
+    label: 'Lt. Gen. Joshua M. Rudd confirmation',
+  }),
   senate('senate-obamacare-2017-4', 115, 1, 4, 'health-care', {
     label: 'Protect Medicare and Medicaid amendment',
     proTrumpCast: 'Nay',
@@ -1395,9 +1592,11 @@ const senateCandidateExtras = [
   }),
   senate('senate-obamacare-2017-170', 115, 1, 170, 'health-care', {
     label: 'Obamacare repeal Donnelly commit motion',
+    proTrumpCast: 'Nay',
   }),
   senate('senate-obamacare-2017-171', 115, 1, 171, 'health-care', {
     label: 'Obamacare repeal Casey commit motion',
+    proTrumpCast: 'Nay',
   }),
   senate('senate-tax-cuts-321', 115, 1, 321, 'taxes', {
     label: 'Tax Cuts and Jobs Act conference motion to proceed',
@@ -1419,9 +1618,11 @@ const senateCandidateExtras = [
   }),
   senate('senate-second-impeachment-procedure-1', 117, 1, 9, 'impeachment', {
     label: 'Second impeachment trial procedures 1',
+    proTrumpCast: 'Nay',
   }),
   senate('senate-second-impeachment-procedure-2', 117, 1, 56, 'impeachment', {
     label: 'Second impeachment trial procedures 2',
+    proTrumpCast: 'Nay',
   }),
   senate('senate-energy-emergency-termination', 119, 1, 95, 'emergency-powers', {
     label: 'Energy emergency termination',
@@ -1526,8 +1727,14 @@ const senateCandidateExtras = [
   senate('senate-edlow-confirm', 119, 1, 390, 'immigration', {
     label: 'Joseph Edlow confirmation',
   }),
+  senate('senate-emil-bove-cloture', 119, 1, 437, 'nominations', {
+    label: 'Emil Bove III cloture',
+  }),
   senate('senate-emil-bove-confirm', 119, 1, 448, 'nominations', {
     label: 'Emil Bove III confirmation',
+  }),
+  senate('senate-matthew-lohmeier-cloture', 119, 1, 433, 'nominations', {
+    label: 'Matthew Lohmeier cloture',
   }),
   senate('senate-matthew-lohmeier-confirm', 119, 1, 434, 'nominations', {
     label: 'Matthew Lohmeier confirmation',

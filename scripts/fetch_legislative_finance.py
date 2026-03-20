@@ -3,6 +3,7 @@
 import json
 import re
 import sys
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime
 from io import BytesIO
@@ -29,10 +30,48 @@ SENATE_DATA_URL = "https://efdsearch.senate.gov/search/report/data/"
 MONTH_PATTERN = (
     r"(?:January|February|March|April|May|June|July|August|September|October|November|December|Ongoing)"
 )
+TOP_HOLDINGS_DEFAULT_COUNT = 5
+TOP_HOLDINGS_EXTENSION_THRESHOLD = 1_000_000
+HOUSE_OWNER_CODE_LABELS = {
+    "DC": "Child",
+    "JT": "Joint",
+    "SP": "Spouse",
+}
+HOUSE_OWNER_CODE_PATTERN = "|".join(sorted(HOUSE_OWNER_CODE_LABELS))
+MANUAL_SENATE_ANNUAL_OVERRIDES: Dict[str, Dict[str, str]] = {
+    "senate-shelley-moore-capito": {
+        "filedAt": "05/12/2025",
+        "url": "https://efdsearch.senate.gov/search/view/annual/56ff880c-f3ce-468c-99cd-a65364d4a0ad/",
+    },
+    "senate-tammy-duckworth": {
+        "filedAt": "07/31/2025",
+        "url": "https://efdsearch.senate.gov/search/view/annual/04a80b6d-cfca-4892-8926-b6ef44fdcf29/",
+    }
+}
+HOUSE_ASSET_CODE_PATTERN = r"[A-Z0-9]{2}"
+HOUSE_HOLDING_CONTEXT_PATTERN = re.compile(
+    r"\b(?:IRA|ACCOUNT|PENSION|401\(K\)|ANNUITY|BROKERAGE|PORTFOLIO|CASH)\b",
+    re.IGNORECASE,
+)
 
 
 def normalize_space(value: str) -> str:
     return re.sub(r"\s+", " ", value).strip()
+
+
+def strip_diacritics(value: str) -> str:
+    return unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
+
+
+def normalize_search_name(value: Optional[str]) -> str:
+    if not value:
+        return ""
+
+    cleaned = strip_diacritics(value)
+    cleaned = re.sub(r"\b(Jr|Sr)\.?\b", " ", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\bII|III|IV|V\b", " ", cleaned)
+    cleaned = re.sub(r"[^A-Za-z\s.'-]", " ", cleaned)
+    return normalize_space(cleaned)
 
 
 def clean_pdf_text(value: str) -> str:
@@ -66,6 +105,94 @@ def parse_value_upper_bound(value: Optional[str]) -> int:
         return max(numbers)
 
     return 0
+
+
+def parse_value_lower_bound(value: Optional[str]) -> int:
+    if not value:
+        return 0
+
+    cleaned = value.replace(",", "")
+    numbers = [int(match) for match in re.findall(r"\$([0-9]+)", cleaned)]
+
+    if not numbers:
+        return 0
+
+    if "Over $" in value:
+        return numbers[0] + 1
+
+    return numbers[0]
+
+
+def select_top_holdings(entries: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    sorted_entries = sorted(
+        entries,
+        key=lambda entry: (-parse_value_upper_bound(entry["value"]), entry["label"]),
+    )
+
+    if len(sorted_entries) <= TOP_HOLDINGS_DEFAULT_COUNT:
+        return sorted_entries
+
+    selected = list(sorted_entries[:TOP_HOLDINGS_DEFAULT_COUNT])
+
+    for entry in sorted_entries[TOP_HOLDINGS_DEFAULT_COUNT:]:
+        if parse_value_lower_bound(entry["value"]) > TOP_HOLDINGS_EXTENSION_THRESHOLD:
+            selected.append(entry)
+            continue
+        break
+
+    return selected
+
+
+def normalize_owner_label(value: Optional[str], default: Optional[str] = None) -> Optional[str]:
+    normalized = normalize_space(value or "")
+    if not normalized:
+        return default
+
+    upper = normalized.upper()
+
+    if upper in HOUSE_OWNER_CODE_LABELS:
+        return HOUSE_OWNER_CODE_LABELS[upper]
+    if upper in {"SELF", "FILER"}:
+        return "Self"
+    if upper == "JOINT":
+        return "Joint"
+    if "SPOUSE" in upper:
+        return "Spouse"
+    if "CHILD" in upper or "DEPENDENT" in upper:
+        return "Child"
+    if "JOINT" in upper:
+        return "Joint"
+
+    return normalized
+
+
+def make_holding_dedupe_key(entry: Dict[str, str]) -> str:
+    owner = normalize_owner_label(entry.get("owner"), default="Self") or "Self"
+    return f"{owner}|{entry['label']}"
+
+
+def should_merge_house_holding_prefix(line: str, next_line: str) -> bool:
+    current = normalize_space(line)
+    following = normalize_space(next_line)
+
+    if not current or "[" in current or "]" in current:
+        return False
+
+    if "[" not in following or "]" not in following:
+        return False
+
+    if "$" in current or current.startswith(("L :", "D :", "Asset Owner", "Filing ID", "#", "* ")):
+        return False
+
+    word_count = len(current.split())
+
+    if following.startswith("["):
+        return True
+
+    if HOUSE_HOLDING_CONTEXT_PATTERN.search(current) and word_count <= 5:
+        return False
+
+    return word_count >= 4 or len(current) >= 24
 
 
 def load_json_stdin() -> Dict[str, Any]:
@@ -105,7 +232,11 @@ def build_house_search_years() -> List[int]:
 
 
 def build_house_query(person: Dict[str, Any], filing_year: int) -> Dict[str, str]:
-    last_name = person.get("financialDisclosureSearchHint") or person["name"].split()[-1]
+    last_name = (
+        person.get("financialDisclosureSearchLastName")
+        or person.get("financialDisclosureSearchHint")
+        or person["name"].split()[-1]
+    )
     return {
         "LastName": last_name,
         "FilingYear": str(filing_year),
@@ -159,8 +290,8 @@ def parse_house_holdings(text: str) -> List[Dict[str, str]]:
     content_lines = lines[start_index:end_index]
     entries: List[Dict[str, str]] = []
     pattern = re.compile(
-        r"^(?P<asset>.+?\[[A-Z]{2}\])(?:\s+(?P<owner>[A-Z]{2}))?\s+"
-        r"(?P<value>None|\$[0-9,]+(?:\s*-\s*|\s+)(?:\$[0-9,]+|Over \$[0-9,]+))"
+        rf"^(?P<asset>.+?\[{HOUSE_ASSET_CODE_PATTERN}\])(?:\s+(?P<owner>{HOUSE_OWNER_CODE_PATTERN}))?\s+"
+        r"(?P<value>None|Undetermined|\$[0-9,]+(?:\s*-\s*|\s+)(?:\$[0-9,]+|Over \$[0-9,]+))"
     )
 
     index = 0
@@ -176,7 +307,9 @@ def parse_house_holdings(text: str) -> List[Dict[str, str]]:
 
         if "[" in line and "]" in line:
             candidate = line
-        elif index + 1 < len(content_lines) and content_lines[index + 1].startswith("["):
+        elif index + 1 < len(content_lines) and should_merge_house_holding_prefix(
+            line, content_lines[index + 1]
+        ):
             candidate = f"{line} {content_lines[index + 1]}"
             consumed = 2
 
@@ -184,22 +317,21 @@ def parse_house_holdings(text: str) -> List[Dict[str, str]]:
             index += 1
             continue
 
-        matched = None
-
-        for extra in range(consumed, min(consumed + 3, len(content_lines) - index)):
-            candidate = f"{candidate} {content_lines[index + extra]}"
-            matched = pattern.match(candidate)
-            if matched:
-                consumed = extra + 1
-                break
+        matched = pattern.match(candidate)
 
         if matched is None:
-            matched = pattern.match(candidate)
+            for extra in range(consumed, min(consumed + 3, len(content_lines) - index)):
+                candidate = f"{candidate} {content_lines[index + extra]}"
+                matched = pattern.match(candidate)
+                if matched:
+                    consumed = extra + 1
+                    break
 
         if matched:
             entries.append(
                 {
                     "label": normalize_space(matched.group("asset")),
+                    "owner": normalize_owner_label(matched.group("owner"), default="Self"),
                     "value": normalize_space(matched.group("value")),
                 }
             )
@@ -208,9 +340,10 @@ def parse_house_holdings(text: str) -> List[Dict[str, str]]:
 
     deduped: Dict[str, Dict[str, str]] = {}
     for entry in entries:
-        existing = deduped.get(entry["label"])
+        dedupe_key = make_holding_dedupe_key(entry)
+        existing = deduped.get(dedupe_key)
         if existing is None or parse_value_upper_bound(entry["value"]) > parse_value_upper_bound(existing["value"]):
-            deduped[entry["label"]] = entry
+            deduped[dedupe_key] = entry
 
     return sorted(
         deduped.values(),
@@ -239,7 +372,7 @@ def parse_house_liabilities(text: str) -> List[Dict[str, str]]:
     content_lines = lines[start_index:end_index]
     rows: List[Dict[str, str]] = []
     line_pattern = re.compile(
-        rf"^(?P<owner>[A-Z]{{2}})\s+(?P<creditor>.+?)\s+"
+        rf"^(?:(?P<owner>{HOUSE_OWNER_CODE_PATTERN})\s+)?(?P<creditor>.+?)\s+"
         rf"(?P<incurred>(?:{MONTH_PATTERN}\s+\d{{4}}|Ongoing))\s*"
         r"(?P<type>.+)$"
     )
@@ -247,7 +380,7 @@ def parse_house_liabilities(text: str) -> List[Dict[str, str]]:
     index = 0
     while index < len(content_lines):
         line = content_lines[index]
-        if not re.match(r"^[A-Z]{2}\s+", line):
+        if line.startswith(("Position Name of Organization", "Owner Creditor Date Incurred Type Amount of")):
             index += 1
             continue
 
@@ -275,6 +408,7 @@ def parse_house_liabilities(text: str) -> List[Dict[str, str]]:
             rows.append(
                 {
                     "creditor": normalize_space(matched.group("creditor")),
+                    "owner": normalize_owner_label(matched.group("owner"), default="Self"),
                     "type": normalize_space(matched.group("type")),
                     "amount": amount,
                 }
@@ -299,29 +433,70 @@ def parse_house_ptr_trades(text: str, source_url: str) -> List[Dict[str, str]]:
         r"(?P<notificationDate>[0-9]{2}/[0-9]{2}/[0-9]{4})"
         r"(?P<amount>None|\$[0-9,]+(?:\s*-\s*|\s+)(?:\$[0-9,]+|Over \$[0-9,]+))"
     )
+    skipped_prefixes = (
+        "ID Owner Asset Transaction",
+        "Type",
+        "Date Notification",
+        "Date",
+        "Amount Cap.",
+        "Gains >",
+        "$200?",
+        "Filing ID #",
+        "F S :",
+        "S O :",
+        "D :",
+        "I V D",
+        "I P O",
+        "C S",
+        "* For the complete list",
+        "Digitally Signed:",
+        "Yes",
+        "No",
+    )
 
     index = 0
     while index < len(lines):
         line = lines[index]
 
-        if not re.match(r"^[A-Z]{2}\s+", line):
+        if line.startswith(skipped_prefixes):
             index += 1
             continue
 
-        owner = line[:2]
-        asset_line = line[3:]
-        consumed = 1
+        owner_match = re.match(rf"^(?:(?P<owner>{HOUSE_OWNER_CODE_PATTERN})\s+)?(?P<asset>.+)$", line)
+        if owner_match is None:
+            index += 1
+            continue
 
-        if index + consumed < len(lines) and lines[index + consumed].startswith("["):
-            asset_line = f"{asset_line} {lines[index + consumed]}"
+        owner = normalize_owner_label(owner_match.group("owner"), default="Self")
+        consumed = 1
+        candidate_lines = [normalize_space(owner_match.group("asset"))]
+        matched = None
+        asset_line = candidate_lines[0]
+
+        while index + consumed <= len(lines) and consumed <= 4:
+            combined = normalize_space(" ".join(candidate_lines))
+            split_match = re.match(
+                rf"^(?P<asset>.+?\[{HOUSE_ASSET_CODE_PATTERN}\])\s+(?P<meta>.+)$",
+                combined,
+            )
+            if split_match:
+                meta_candidate = split_match.group("meta")
+                matched = meta_pattern.match(meta_candidate)
+                if matched:
+                    asset_line = normalize_space(split_match.group("asset"))
+                    break
+
+            if index + consumed >= len(lines):
+                break
+
+            next_line = lines[index + consumed]
+            if next_line.startswith(skipped_prefixes):
+                break
+
+            candidate_lines.append(next_line)
             consumed += 1
 
-        meta_line = lines[index + consumed] if index + consumed < len(lines) else ""
-        amount_continuation = lines[index + consumed + 1] if index + consumed + 1 < len(lines) else ""
-        matched = meta_pattern.match(f"{meta_line} {amount_continuation}")
-
         if matched:
-            consumed += 2 if amount_continuation.startswith("$") else 1
             trade_type = normalize_space(matched.group("type"))
             if trade_type == "P":
                 trade_type = "Purchase"
@@ -329,7 +504,7 @@ def parse_house_ptr_trades(text: str, source_url: str) -> List[Dict[str, str]]:
                 trade_type = trade_type.replace("S", "Sale", 1)
             trades.append(
                 {
-                    "assetName": normalize_space(asset_line),
+                    "assetName": asset_line,
                     "amount": normalize_space(matched.group("amount")),
                     "date": matched.group("transactionDate"),
                     "owner": owner,
@@ -338,7 +513,7 @@ def parse_house_ptr_trades(text: str, source_url: str) -> List[Dict[str, str]]:
                 }
             )
 
-        index += consumed
+        index += max(consumed, 1)
 
     return trades
 
@@ -368,7 +543,7 @@ def enrich_house_member(person: Dict[str, Any]) -> Dict[str, Any]:
             annual_text = fetch_pdf_text(annual_rows[0]["url"])
             result["financialAnnualReportUrl"] = annual_rows[0]["url"]
             result["financialFilingDate"] = parse_house_filing_date(annual_text)
-            result["topHoldings"] = parse_house_holdings(annual_text)[:5]
+            result["topHoldings"] = select_top_holdings(parse_house_holdings(annual_text))
             result["liabilities"] = parse_house_liabilities(annual_text)[:5]
         except Exception:
             pass
@@ -408,14 +583,123 @@ def get_senate_session() -> requests.Session:
     return session
 
 
-def fetch_senate_rows(person: Dict[str, Any]) -> List[Dict[str, str]]:
-    session = get_senate_session()
-    warm_page = fetch_text(SENATE_SEARCH_URL, session=session)
-    csrf_match = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', warm_page)
-    if not csrf_match:
-        return []
+def build_senate_query_name(full_name: str, explicit_last_name: Optional[str] = None) -> Optional[Dict[str, str]]:
+    normalized_full_name = normalize_search_name(full_name)
+    if not normalized_full_name:
+        return None
 
-    csrf_token = csrf_match.group(1)
+    normalized_last_name = normalize_search_name(explicit_last_name)
+
+    if normalized_last_name:
+        if normalized_full_name.lower().endswith(normalized_last_name.lower()):
+            first_name = normalized_full_name[: -len(normalized_last_name)].strip(" ,")
+        else:
+            tokens = normalized_full_name.split()
+            last_name_token_count = len(normalized_last_name.split())
+            if len(tokens) <= last_name_token_count:
+                return None
+            first_name = " ".join(tokens[:-last_name_token_count])
+
+        if not first_name:
+            return None
+
+        return {"first_name": first_name, "last_name": normalized_last_name}
+
+    tokens = normalized_full_name.split()
+    if len(tokens) < 2:
+        return None
+
+    return {
+        "first_name": " ".join(tokens[:-1]),
+        "last_name": tokens[-1],
+    }
+
+
+def expand_senate_query_variants(query_name: Dict[str, str]) -> List[Dict[str, str]]:
+    variants = [query_name]
+    first_name_tokens = query_name["first_name"].replace(".", " ").split()
+
+    if not first_name_tokens:
+        return variants
+
+    without_initials = [token for token in first_name_tokens if len(token) > 1]
+    compact_first_names = []
+
+    if without_initials:
+        compact_first_names.append(" ".join(without_initials))
+        compact_first_names.append(without_initials[0])
+    else:
+        compact_first_names.append(first_name_tokens[0])
+
+    seen = {(query_name["first_name"].lower(), query_name["last_name"].lower())}
+
+    for first_name in compact_first_names:
+        normalized_first_name = normalize_space(first_name)
+        if not normalized_first_name:
+            continue
+
+        key = (normalized_first_name.lower(), query_name["last_name"].lower())
+        if key in seen:
+            continue
+
+        seen.add(key)
+        variants.append(
+            {
+                "first_name": normalized_first_name,
+                "last_name": query_name["last_name"],
+            }
+        )
+
+    return variants
+
+
+def build_senate_search_candidates(person: Dict[str, Any]) -> List[Dict[str, str]]:
+    primary_last_name = person.get("financialDisclosureSearchLastName") or person.get(
+        "financialDisclosureSearchHint"
+    )
+    candidate_names: List[str] = []
+
+    for value in [
+        person.get("financialDisclosureSearchName"),
+        person.get("officialName"),
+        person.get("displayName"),
+        person.get("name"),
+        *(person.get("aliases") or []),
+    ]:
+        if value and value not in candidate_names:
+            candidate_names.append(value)
+
+    candidates: List[Dict[str, str]] = []
+    seen = set()
+
+    for full_name in candidate_names:
+        query_name = build_senate_query_name(full_name, explicit_last_name=primary_last_name)
+        if not query_name:
+            continue
+
+        for variant in expand_senate_query_variants(query_name):
+            key = (variant["first_name"].lower(), variant["last_name"].lower())
+            if key in seen:
+                continue
+
+            seen.add(key)
+            candidates.append(variant)
+
+    if not candidates and person.get("name"):
+        fallback = build_senate_query_name(person["name"])
+        if fallback:
+            candidates.append(fallback)
+
+    return candidates
+
+
+def fetch_senate_rows_for_query(
+    session: requests.Session,
+    csrf_token: str,
+    state_code: str,
+    first_name: str,
+    last_name: str,
+) -> List[Dict[str, str]]:
     search_payload = {
         "draw": "1",
         "start": "0",
@@ -459,10 +743,10 @@ def fetch_senate_rows(person: Dict[str, Any]) -> List[Dict[str, str]]:
         "submitted_start_date": "01/01/2012 00:00:00",
         "submitted_end_date": "",
         "candidate_state": "",
-        "senator_state": person.get("stateCode", ""),
+        "senator_state": state_code,
         "office_id": "",
-        "first_name": person["name"].split()[0],
-        "last_name": person.get("financialDisclosureSearchHint") or person["name"].split()[-1],
+        "first_name": first_name,
+        "last_name": last_name,
         "csrfmiddlewaretoken": csrf_token,
     }
 
@@ -511,6 +795,52 @@ def fetch_senate_rows(person: Dict[str, Any]) -> List[Dict[str, str]]:
     return rows
 
 
+def fetch_senate_rows(person: Dict[str, Any]) -> List[Dict[str, str]]:
+    session = get_senate_session()
+    warm_page = fetch_text(SENATE_SEARCH_URL, session=session)
+    csrf_match = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', warm_page)
+    if not csrf_match:
+        return []
+
+    csrf_token = csrf_match.group(1)
+    candidates = build_senate_search_candidates(person)
+    best_rows: List[Dict[str, str]] = []
+    best_score = (-1, -1)
+
+    for candidate in candidates:
+        rows = fetch_senate_rows_for_query(
+            session,
+            csrf_token,
+            person.get("stateCode", ""),
+            candidate["first_name"],
+            candidate["last_name"],
+        )
+        annual_count = sum(1 for row in rows if is_senate_annual_row(row))
+        score = (annual_count, len(rows))
+
+        if score > best_score:
+            best_rows = rows
+            best_score = score
+
+        if annual_count > 0:
+            return rows
+
+    return best_rows
+
+
+def is_senate_annual_row(row: Dict[str, str]) -> bool:
+    url = row.get("url", "")
+    title = row.get("title", "")
+
+    if "/view/annual/" in url:
+        return True
+
+    if "/view/paper/" in url and title.startswith("Annual Report"):
+        return True
+
+    return False
+
+
 def parse_senate_annual(url: str) -> Dict[str, Any]:
     session = get_senate_session()
     html = fetch_text(url, session=session, headers={"Referer": SENATE_SEARCH_URL})
@@ -528,7 +858,13 @@ def parse_senate_annual(url: str) -> Dict[str, Any]:
                 cells = [normalize_space(td.get_text(" ", strip=True)) for td in tr.find_all("td")]
                 if len(cells) < 7:
                     continue
-                holdings.append({"label": cells[1], "value": cells[4]})
+                holdings.append(
+                    {
+                        "label": cells[1],
+                        "owner": normalize_owner_label(cells[3], default="Self"),
+                        "value": cells[4],
+                    }
+                )
 
         if "Creditor" in headers and "Amount" in headers:
             for tr in table.select("tbody tr"):
@@ -538,6 +874,7 @@ def parse_senate_annual(url: str) -> Dict[str, Any]:
                 liabilities.append(
                     {
                         "creditor": cells[8],
+                        "owner": normalize_owner_label(cells[3], default="Self"),
                         "type": cells[4],
                         "amount": cells[7],
                     }
@@ -545,15 +882,13 @@ def parse_senate_annual(url: str) -> Dict[str, Any]:
 
     deduped_holdings: Dict[str, Dict[str, str]] = {}
     for entry in holdings:
-        existing = deduped_holdings.get(entry["label"])
+        dedupe_key = make_holding_dedupe_key(entry)
+        existing = deduped_holdings.get(dedupe_key)
         if existing is None or parse_value_upper_bound(entry["value"]) > parse_value_upper_bound(existing["value"]):
-            deduped_holdings[entry["label"]] = entry
+            deduped_holdings[dedupe_key] = entry
 
     return {
-        "topHoldings": sorted(
-            deduped_holdings.values(),
-            key=lambda entry: (-parse_value_upper_bound(entry["value"]), entry["label"]),
-        )[:5],
+        "topHoldings": select_top_holdings(list(deduped_holdings.values())),
         "liabilities": liabilities[:5],
     }
 
@@ -578,7 +913,7 @@ def parse_senate_ptr(url: str) -> List[Dict[str, str]]:
         rows.append(
             {
                 "date": cells[1],
-                "owner": cells[2],
+                "owner": normalize_owner_label(cells[2], default="Self"),
                 "ticker": cells[3],
                 "assetName": cells[4],
                 "type": cells[6],
@@ -591,10 +926,10 @@ def parse_senate_ptr(url: str) -> List[Dict[str, str]]:
 
 def enrich_senator(person: Dict[str, Any]) -> Dict[str, Any]:
     rows = fetch_senate_rows(person)
-    if not rows:
-        return {}
-
-    annual_rows = [row for row in rows if "/view/annual/" in row["url"]]
+    annual_rows = [row for row in rows if is_senate_annual_row(row)]
+    manual_annual_override = MANUAL_SENATE_ANNUAL_OVERRIDES.get(person.get("id", ""))
+    if manual_annual_override and not any(row["url"] == manual_annual_override["url"] for row in annual_rows):
+        annual_rows.append(manual_annual_override)
     annual_rows.sort(key=lambda row: date_to_sort_key(row["filedAt"]), reverse=True)
     ptr_rows = [row for row in rows if "/view/ptr/" in row["url"]]
     ptr_rows.sort(key=lambda row: date_to_sort_key(row["filedAt"]), reverse=True)
@@ -602,11 +937,11 @@ def enrich_senator(person: Dict[str, Any]) -> Dict[str, Any]:
     result: Dict[str, Any] = {}
 
     if annual_rows:
+        result["financialAnnualReportUrl"] = annual_rows[0]["url"]
+        result["financialFilingDate"] = annual_rows[0]["filedAt"]
         try:
             annual_details = parse_senate_annual(annual_rows[0]["url"])
             result.update(annual_details)
-            result["financialAnnualReportUrl"] = annual_rows[0]["url"]
-            result["financialFilingDate"] = annual_rows[0]["filedAt"]
         except Exception:
             pass
 

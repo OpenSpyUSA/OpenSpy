@@ -9,6 +9,7 @@ import {
 import { manualCareerHistoryById } from './manualCareerHistory.mjs'
 import { manualDepartmentBudgetsByDepartment } from './manualDepartmentBudgets.mjs'
 import { manualIndependentAgencyBudgetsByDepartment } from './manualIndependentAgencyBudgets.mjs'
+import { resolvePersonNaming, stripDiacritics } from './personNaming.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outPath = resolve(__dirname, '../public/data/governmentData.json')
@@ -59,10 +60,12 @@ function clonePerson(person) {
     agencyBudgetSourceLabel: person.agencyBudgetSourceLabel,
     agencyBudgetSourceUrl: person.agencyBudgetSourceUrl,
     agencyFundingModel: person.agencyFundingModel,
+    aliases: person.aliases ? [...person.aliases] : undefined,
     birthDate: person.birthDate,
     birthYear: person.birthYear,
     careerHistory: person.careerHistory ? person.careerHistory.map((entry) => ({ ...entry })) : undefined,
     committees: person.committees ? [...person.committees] : undefined,
+    displayName: person.displayName,
     education: person.education ? person.education.map((entry) => ({ ...entry })) : undefined,
     departmentBudgetDiscretionaryAmount: person.departmentBudgetDiscretionaryAmount,
     departmentBudgetDiscretionaryLabel: person.departmentBudgetDiscretionaryLabel,
@@ -74,7 +77,10 @@ function clonePerson(person) {
     highestDegree: person.highestDegree,
     highestEducationField: person.highestEducationField,
     highestEducationSchool: person.highestEducationSchool,
+    financialDisclosureSearchLastName: person.financialDisclosureSearchLastName,
+    financialDisclosureSearchName: person.financialDisclosureSearchName,
     liabilities: person.liabilities ? person.liabilities.map((entry) => ({ ...entry })) : undefined,
+    officialName: person.officialName,
     recentTrades: person.recentTrades ? person.recentTrades.map((entry) => ({ ...entry })) : undefined,
     trumpEvidence: person.trumpEvidence ? [...person.trumpEvidence] : undefined,
     topHoldings: person.topHoldings ? person.topHoldings.map((entry) => ({ ...entry })) : undefined,
@@ -297,7 +303,7 @@ const SENIOR_POLITICAL_PAY_FREEZE_SOURCE_URL =
 const SENIOR_POLITICAL_PAY_FREEZE_SOURCE_LABEL = 'OPM 2026 senior political pay guidance'
 const HOUSE_SALARY_SOURCE_URL =
   'https://clerk.house.gov/reference-files/congressional_research_service_report.pdf'
-const SENATE_SALARY_SOURCE_URL = 'https://www.senate.gov/legislative/common/generic/Salaries.htm'
+const SENATE_SALARY_SOURCE_URL = 'https://www.senate.gov/senators/SenateSalariesSince1789.htm'
 const JUDICIAL_SALARY_SOURCE_URL =
   'https://www.uscourts.gov/judges-judgeships/judicial-compensation'
 const EXECUTIVE_SCHEDULE_2026_SOURCE_URL =
@@ -4532,6 +4538,26 @@ function finalizeSalary(person, amount, note, sourceLabel, sourceUrl) {
   }
 }
 
+function getCurrentSenateSeatCycleLabel(senateClass, referenceDate = new Date()) {
+  const termStartRemainders = {
+    'Class I': 3,
+    'Class II': 5,
+    'Class III': 1,
+  }
+  const remainder = termStartRemainders[senateClass]
+
+  if (remainder === undefined) {
+    return null
+  }
+
+  let year = referenceDate.getUTCFullYear()
+  while ((year % 6 + 6) % 6 !== remainder) {
+    year -= 1
+  }
+
+  return `${year}-${year + 6}`
+}
+
 function annotateSalary(person) {
   if (person.branchId === 'executive') {
     if (person.name === 'Donald J. Trump') {
@@ -4702,7 +4728,7 @@ function joinList(items) {
 }
 
 function getDisclosureSearchHint(name) {
-  return name
+  return stripDiacritics(name)
     .replace(/\b(Jr|Sr)\.?\b/gi, ' ')
     .replace(/\bII|III|IV|V\b/g, ' ')
     .replace(/[^A-Za-z\s-]/g, ' ')
@@ -4713,11 +4739,24 @@ function getDisclosureSearchHint(name) {
 }
 
 function annotateFinancialDisclosure(person) {
-  const searchHint = getDisclosureSearchHint(person.name)
+  const naming = resolvePersonNaming(person)
+  const searchHint = getDisclosureSearchHint(
+    naming.financialDisclosureSearchLastName ||
+      naming.financialDisclosureSearchName ||
+      naming.displayName,
+  )
+  const personWithNaming = {
+    ...person,
+    aliases: naming.aliases,
+    displayName: naming.displayName,
+    financialDisclosureSearchLastName: naming.financialDisclosureSearchLastName,
+    financialDisclosureSearchName: naming.financialDisclosureSearchName,
+    officialName: naming.officialName,
+  }
 
   if (person.branchId === 'executive') {
     return {
-      ...person,
+      ...personWithNaming,
       financialDisclosureLabel: 'OGE disclosure portal',
       financialDisclosureSearchHint: searchHint,
       financialDisclosureUrl:
@@ -4727,7 +4766,7 @@ function annotateFinancialDisclosure(person) {
 
   if (person.sectionId === 'senate') {
     return {
-      ...person,
+      ...personWithNaming,
       financialDisclosureLabel: 'Senate eFD search',
       financialDisclosureNote: searchHint
         ? `Search ${searchHint} in the Senate eFD system for annual filings and periodic transaction reports.`
@@ -4739,7 +4778,7 @@ function annotateFinancialDisclosure(person) {
 
   if (person.sectionId === 'house') {
     return {
-      ...person,
+      ...personWithNaming,
       financialDisclosureLabel: 'House disclosure search',
       financialDisclosureNote: searchHint
         ? `Search ${searchHint} in the House Clerk database and choose the filing year.`
@@ -4751,7 +4790,7 @@ function annotateFinancialDisclosure(person) {
 
   if (person.branchId === 'judicial') {
     return {
-      ...person,
+      ...personWithNaming,
       financialDisclosureLabel: 'Judicial disclosure database',
       financialDisclosureNote: searchHint
         ? `Search ${person.name} in the federal judiciary disclosure database. Judicial reports generally cover assets, liabilities, reimbursements, gifts, spouse or dependent interests, and many transactions, again with ranges instead of a single exact net-worth figure.`
@@ -4761,7 +4800,7 @@ function annotateFinancialDisclosure(person) {
     }
   }
 
-  return person
+  return personWithNaming
 }
 
 function annotateDerivedHoldingEstimates(person) {
@@ -5429,12 +5468,16 @@ async function buildSenators() {
     const leadershipSentence = leadership
       ? ` Currently serves as ${leadership.toLowerCase()} in the Senate.`
       : ''
+    const senateSeatCycle = getCurrentSenateSeatCycleLabel(senateClass)
+    const senateClassSentence = senateClass
+      ? ` ${senateClass} seat${senateSeatCycle ? ` (current seat cycle: ${senateSeatCycle}).` : '.'}`
+      : ''
 
     return {
       alignment: alignmentFromParty(partyCode),
       alignmentLabel: partyLabel,
       branchId: 'legislative',
-      description: `${name} is a ${partyLabel.toLowerCase()} U.S. senator from ${state}.${leadershipSentence} ${senateClass} seat.`.replace(
+      description: `${name} is a ${partyLabel.toLowerCase()} U.S. senator from ${state}.${leadershipSentence}${senateClassSentence}`.replace(
         /\s+/g,
         ' ',
       ),

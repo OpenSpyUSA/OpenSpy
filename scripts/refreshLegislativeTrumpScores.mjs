@@ -188,6 +188,163 @@ function getLegislativeCastSide(cast) {
   return null
 }
 
+function rebuildExecutiveCongressServiceHistory(services, snapshotById) {
+  return (services ?? []).map((service) => {
+    let proCount = 0
+    let antiCount = 0
+    let missedCount = 0
+    let directVoteCount = 0
+    let broadVoteCount = 0
+
+    const votes = (service.votes ?? []).map((vote) => {
+      const snapshot = snapshotById.get(vote.id)
+
+      if (!snapshot) {
+        return vote
+      }
+
+      const skipped = isSkippedLegislativeCast(vote.voteCast)
+      const position = skipped
+        ? 'missed'
+        : normalizeLegislativeCast(vote.voteCast) === normalizeLegislativeCast(snapshot.proTrumpCast)
+          ? 'pro'
+          : 'anti'
+
+      if (snapshot.scoreIncluded === false) {
+        broadVoteCount += 1
+      } else {
+        directVoteCount += 1
+      }
+
+      if (position === 'missed') {
+        missedCount += 1
+      } else if (snapshot.scoreIncluded !== false) {
+        if (position === 'pro') {
+          proCount += 1
+        } else {
+          antiCount += 1
+        }
+      }
+
+      return {
+        ...vote,
+        actionTime: snapshot.actionTime,
+        billNumber: snapshot.billNumber,
+        category: snapshot.category,
+        chamber: snapshot.chamber,
+        congress: snapshot.congress,
+        date: snapshot.date,
+        label: snapshot.label,
+        nayTotal: snapshot.nayTotal,
+        position,
+        proTrumpCast: snapshot.proTrumpCast,
+        question: snapshot.question,
+        rollCallNumber: snapshot.rollCallNumber,
+        scoreIncluded: snapshot.scoreIncluded !== false,
+        signalTier: snapshot.signalTier ?? 'high_signal_scored',
+        sourceUrl: snapshot.sourceUrl,
+        title: snapshot.title,
+        trumpOutcome: snapshot.trumpOutcome,
+        yeaTotal: snapshot.yeaTotal,
+      }
+    })
+
+    return {
+      ...service,
+      antiCount,
+      broadVoteCount,
+      countedVoteCount: proCount + antiCount,
+      directVoteCount,
+      missedCount,
+      proCount,
+      votes,
+    }
+  })
+}
+
+function rebuildExecutiveTrumpMetrics(person, services, scoredHouseCount, scoredSenateCount) {
+  let proVotes = 0
+  let antiVotes = 0
+  let missedCount = 0
+  let directVoteCount = 0
+  let broadVoteCount = 0
+  const chambers = new Set()
+
+  for (const service of services) {
+    proVotes += service.proCount ?? 0
+    antiVotes += service.antiCount ?? 0
+    missedCount += service.missedCount ?? 0
+    directVoteCount += service.directVoteCount ?? 0
+    broadVoteCount += service.broadVoteCount ?? 0
+
+    if (service.chamber) {
+      chambers.add(service.chamber)
+    }
+  }
+
+  const sampleSize = proVotes + antiVotes
+
+  if (sampleSize === 0) {
+    return {
+      ...person,
+      executiveCongressServiceHistory: services,
+    }
+  }
+
+  const availableEvents = [...chambers].reduce((total, chamber) => {
+    if (chamber === 'senate') {
+      return total + scoredSenateCount
+    }
+
+    return total + scoredHouseCount
+  }, 0)
+  const confidence = getLegislativeTrumpConfidence(sampleSize, availableEvents || sampleSize)
+  const derivedScore = clampTrumpScoreToSingleDecimal((proVotes / sampleSize) * 10)
+  const chamberLabel =
+    chambers.size > 1 ? 'House and Senate' : chambers.has('senate') ? 'Senate' : 'House'
+  const noteParts = [
+    `Score is derived from selected Trump-linked ${chamberLabel} roll calls on this site during this official's time in Congress: ${proVotes}/${sampleSize} counted votes on Trump's side, converted to ${derivedScore.toFixed(1)}/10.`,
+  ]
+
+  if (missedCount > 0) {
+    noteParts.push(`Missed ${missedCount} direct votes.`)
+  }
+
+  if (broadVoteCount > 0) {
+    noteParts.push(`${broadVoteCount} broader unscored votes are listed separately below.`)
+  }
+
+  const evidence = [
+    `${proVotes} Pro Trump votes and ${antiVotes} Not pro Trump votes across ${sampleSize} counted ${chamberLabel} votes during this official's past service in Congress.`,
+    `Sample size: ${sampleSize}${availableEvents ? ` of ${availableEvents}` : ''} selected scored votes. Confidence: ${confidence}.`,
+  ]
+
+  if (missedCount > 0) {
+    evidence.push(`Missed or abstained on ${missedCount} direct votes in the listed record.`)
+  }
+
+  if (broadVoteCount > 0) {
+    evidence.push(
+      `${broadVoteCount} broader, unscored Trump-linked votes are also listed in the congressional history section.`,
+    )
+  }
+
+  return {
+    ...person,
+    executiveCongressServiceHistory: services,
+    trumpAntiCount: antiVotes,
+    trumpAvailableEvents: availableEvents || undefined,
+    trumpConfidence: confidence,
+    trumpEvidence: uniqueStrings(evidence),
+    trumpLabel: buildLegislativeTrumpLabel(derivedScore),
+    trumpMissedCount: missedCount,
+    trumpNote: noteParts.join(' '),
+    trumpProCount: proVotes,
+    trumpSampleSize: sampleSize,
+    trumpScore: derivedScore,
+  }
+}
+
 function resolveWinningLegislativeSide(resultText, yeaTotal, nayTotal) {
   const normalized = (resultText ?? '').replace(/\s+/g, ' ').trim().toLowerCase()
   const negativePatterns = [
@@ -377,22 +534,31 @@ function parseSenateVoteXml(xml) {
 }
 
 async function fetchText(url) {
-  const response = await fetch(url, {
-    headers: {
-      accept: 'application/xml,text/xml,text/html;q=0.9,*/*;q=0.8',
-      'accept-language': 'en-US,en;q=0.9',
-      'cache-control': 'no-cache',
-      pragma: 'no-cache',
-      'user-agent':
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
-    },
-  })
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(url, {
+      headers: {
+        accept: 'application/xml,text/xml,text/html;q=0.9,*/*;q=0.8',
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'no-cache',
+        pragma: 'no-cache',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
+      },
+      signal: AbortSignal.timeout(15000),
+    }).catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: ${response.status}`)
+    if (response?.ok) {
+      return response.text()
+    }
+
+    if (response && ![403, 429].includes(response.status) && response.status < 500) {
+      throw new Error(`Failed to fetch ${url}: ${response.status}`)
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)))
   }
 
-  return await response.text()
+  throw new Error(`Failed to fetch ${url} after retries`)
 }
 
 async function mapWithConcurrency(items, concurrency, mapper) {
@@ -426,7 +592,7 @@ async function buildSelectedLegislativeRollCallSnapshots() {
   const scoredSenateRollCalls = selectedSenateRollCalls.filter((item) => item.scoreIncluded !== false)
   const selectedRollCalls = [...selectedHouseRollCalls, ...selectedSenateRollCalls]
 
-  const snapshots = await mapWithConcurrency(selectedRollCalls, 8, async (event) => {
+  const snapshots = await mapWithConcurrency(selectedRollCalls, 6, async (event) => {
     if (event.chamber === 'house') {
       const xmlUrl = buildHouseRollCallXmlUrl(event.year, event.rollNumber)
       const parsed = parseHouseVoteXml(await fetchText(xmlUrl))
@@ -499,6 +665,7 @@ async function main() {
   )
   const { scoredHouseCount, scoredSenateCount, selectedHouseCount, selectedSenateCount, snapshots } =
     await buildSelectedLegislativeRollCallSnapshots()
+  const snapshotById = new Map(snapshots.map((snapshot) => [snapshot.id, snapshot]))
   const metricsByPersonId = new Map()
 
   for (const person of [...senators, ...representatives]) {
@@ -621,6 +788,15 @@ async function main() {
   }
 
   dataset.people = people.map((person) => {
+    if (person.branchId === 'executive' && person.executiveCongressServiceHistory?.length) {
+      const services = rebuildExecutiveCongressServiceHistory(
+        person.executiveCongressServiceHistory,
+        snapshotById,
+      )
+
+      return rebuildExecutiveTrumpMetrics(person, services, scoredHouseCount, scoredSenateCount)
+    }
+
     if (person.branchId !== 'legislative') {
       return person
     }

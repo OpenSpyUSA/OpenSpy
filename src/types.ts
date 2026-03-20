@@ -12,6 +12,7 @@ export interface DisclosureHolding {
   derivedSourceLabel?: string
   derivedSourceUrl?: string
   label: string
+  owner?: string
   value: string
 }
 
@@ -34,6 +35,7 @@ export interface CareerRecord {
 export interface DisclosureLiability {
   amount: string
   creditor: string
+  owner?: string
   type: string
 }
 
@@ -138,6 +140,7 @@ export interface GovernmentPerson {
   agencyFundingModel?: string
   alignment: Alignment
   alignmentLabel: string
+  aliases?: string[]
   appointmentNote?: string
   appointedBy?: string
   branchId: BranchId
@@ -155,6 +158,7 @@ export interface GovernmentPerson {
   birthDate?: string
   birthYear?: number
   careerHistory?: CareerRecord[]
+  displayName?: string
   executiveCongressServiceHistory?: ExecutiveCongressServiceRecord[]
   education?: EducationRecord[]
   highestDegree?: string
@@ -163,6 +167,7 @@ export interface GovernmentPerson {
   imageUrl?: string
   leadership?: string
   name: string
+  officialName?: string
   office?: string
   partyCode?: string
   phone?: string
@@ -170,6 +175,8 @@ export interface GovernmentPerson {
   financialDisclosureLabel?: string
   financialDisclosureNote?: string
   financialDisclosureSearchHint?: string
+  financialDisclosureSearchLastName?: string
+  financialDisclosureSearchName?: string
   financialDisclosureUrl?: string
   financialAnnualReportUrl?: string
   financialFilingDate?: string

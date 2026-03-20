@@ -12,7 +12,8 @@
     "ios:sync": "npm run build && npx cap sync ios",
     "lint": "eslint .",
     "preview": "vite preview",
-    "sync:data": "node scripts/generate-government-data.mjs"
+    "sync:data": "node scripts/generate-government-data.mjs",
+    "audit:votes": "node scripts/auditLegislativeTrumpVotes.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.2.0",

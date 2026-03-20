@@ -34,6 +34,7 @@ import type {
   Alignment,
   BranchId,
   BranchSection,
+  DisclosureTrade,
   ExecutiveCongressRollCallVote,
   ExecutiveCongressServiceRecord,
   GovernmentBranch,
@@ -657,6 +658,55 @@ function getSupremeCourtOfficialWording(caseItem: SupremeCourtCase) {
 
 function shouldShowAnnualDisclosureReportLink(person: GovernmentPerson) {
   return person.sectionId !== 'senate'
+}
+
+function isTradeOnOrAfter2026(trade: DisclosureTrade) {
+  const matched = trade.date.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+
+  if (!matched) {
+    return false
+  }
+
+  const [, month, day, year] = matched
+  return `${year}-${month}-${day}` >= '2026-01-01'
+}
+
+function formatDisclosureOwner(owner?: string) {
+  const normalized = owner?.trim()
+
+  if (!normalized) {
+    return null
+  }
+
+  const upper = normalized.toUpperCase()
+
+  if (upper === 'SP' || upper.includes('SPOUSE')) {
+    return 'Spouse'
+  }
+
+  if (upper === 'JT' || upper.includes('JOINT')) {
+    return 'Joint'
+  }
+
+  if (upper === 'DC' || upper.includes('CHILD') || upper.includes('DEPENDENT')) {
+    return 'Child'
+  }
+
+  if (upper === 'SELF' || upper === 'FILER') {
+    return 'Self'
+  }
+
+  return normalized
+}
+
+function DisclosureOwnerBadge({ owner }: { owner?: string }) {
+  const label = formatDisclosureOwner(owner)
+
+  if (!label) {
+    return null
+  }
+
+  return <span className="disclosure-owner-badge">{label}</span>
 }
 
 function isInferredSupremeCourtJusticeStance(caseItem: SupremeCourtCase, justiceId: string) {
@@ -2268,11 +2318,6 @@ function DetailPanel({
           </p>
         ) : null}
         {person.branchId !== 'legislative' && person.wealthNote ? <p>{person.wealthNote}</p> : null}
-        {person.financialFilingDate ? (
-          <p>
-            <strong>Latest annual filing date:</strong> {person.financialFilingDate}
-          </p>
-        ) : null}
       </section>
 
       {person.topHoldings && person.topHoldings.length > 0 ? (
@@ -2281,7 +2326,10 @@ function DetailPanel({
           <ul className="detail-list">
             {person.topHoldings.map((holding) => (
               <li className="holding-item" key={`${person.id}-${holding.label}`}>
-                <span className="holding-name">{holding.label}</span>
+                <div className="holding-heading">
+                  <span className="holding-name">{holding.label}</span>
+                  <DisclosureOwnerBadge owner={holding.owner} />
+                </div>
                 <span className="holding-value">{holding.value}</span>
                 {holding.derivedEstimate ? (
                   <span className="holding-derived">
@@ -2309,26 +2357,46 @@ function DetailPanel({
           <h3>Liabilities</h3>
           <ul className="detail-list">
             {person.liabilities.map((liability) => (
-              <li key={`${person.id}-${liability.creditor}-${liability.type}`}>
-                {liability.creditor}: {liability.type} ({liability.amount})
+              <li
+                className="disclosure-line-item"
+                key={`${person.id}-${liability.creditor}-${liability.type}`}
+              >
+                <DisclosureOwnerBadge owner={liability.owner} />
+                <span>
+                  {liability.creditor}: {liability.type} ({liability.amount})
+                </span>
               </li>
             ))}
           </ul>
         </section>
       ) : null}
 
-      {person.recentTrades && person.recentTrades.length > 0 ? (
-        <section className="detail-block">
-          <h3>Recent Trades</h3>
-          <ul className="detail-list">
-            {person.recentTrades.map((trade) => (
-              <li key={`${person.id}-${trade.assetName}-${trade.date}-${trade.amount}`}>
-                {trade.date}: {trade.type} {trade.assetName} ({trade.amount})
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      {(() => {
+        const recent2026Trades = person.recentTrades?.filter(isTradeOnOrAfter2026) ?? []
+
+        if (recent2026Trades.length === 0) {
+          return null
+        }
+
+        return (
+          <section className="detail-block">
+            <h3>2026 PTR Trades</h3>
+            <ul className="detail-list">
+              {recent2026Trades.map((trade) => (
+                <li
+                  className="disclosure-line-item"
+                  key={`${person.id}-${trade.assetName}-${trade.date}-${trade.amount}`}
+                >
+                  <DisclosureOwnerBadge owner={trade.owner} />
+                  <span>
+                    {trade.date}: {trade.type} {trade.assetName} ({trade.amount})
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      })()}
 
       <section className="detail-links">
         <a href={person.sourceUrl} rel="noreferrer" target="_blank">
