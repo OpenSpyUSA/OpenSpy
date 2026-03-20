@@ -2273,7 +2273,6 @@ function DetailPanel({
             <strong>Latest annual filing date:</strong> {person.financialFilingDate}
           </p>
         ) : null}
-        {person.financialDisclosureNote ? <p>{person.financialDisclosureNote}</p> : null}
       </section>
 
       {person.topHoldings && person.topHoldings.length > 0 ? (
