@@ -12,6 +12,8 @@ import { manualIndependentAgencyBudgetsByDepartment } from './manualIndependentA
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const outPath = resolve(__dirname, '../public/data/governmentData.json')
+const independentAgencyPortraitDirectory = resolve(__dirname, '../public/portraits/independent-agencies')
+const independentAgencyPortraitExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif']
 
 const REQUEST_HEADERS = {
   accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -1199,6 +1201,24 @@ const INDEPENDENT_AGENCY_SERVICE_OVERRIDES = new Map([
   ],
 ])
 
+function findIndependentAgencyLocalPortraitPath(name) {
+  if (!name) {
+    return null
+  }
+
+  const slug = slugify(name)
+
+  for (const extension of independentAgencyPortraitExtensions) {
+    const portraitFileName = `${slug}${extension}`
+
+    if (existsSync(resolve(independentAgencyPortraitDirectory, portraitFileName))) {
+      return `/portraits/independent-agencies/${portraitFileName}`
+    }
+  }
+
+  return null
+}
+
 const INDEPENDENT_AGENCY_ID_OVERRIDES = new Map([
   ['Commodity Futures Trading Commission', 'executive-michael-s-selig'],
   ['Federal Communications Commission', 'executive-brendan-carr'],
@@ -1548,9 +1568,12 @@ async function buildIndependentAgencyHeads() {
       ...(INDEPENDENT_AGENCY_SERVICE_OVERRIDES.get(item.name) ?? {}),
       ...(INDEPENDENT_AGENCY_PROFILE_OVERRIDES.get(item.name) ?? {}),
     }
-    const imageUrl = INDEPENDENT_AGENCY_IMAGE_OVERRIDES.get(item.name) ?? override.imageUrl
     const seed = await fetchIndependentAgencyProfileSeed(item).catch(() => ({}))
     const name = override.name ?? seed.name
+    const imageUrl =
+      findIndependentAgencyLocalPortraitPath(name) ??
+      INDEPENDENT_AGENCY_IMAGE_OVERRIDES.get(item.name) ??
+      override.imageUrl
 
     if (!name) {
       const cachedMatch = previousPeople.find(
@@ -5476,7 +5499,7 @@ function buildExecutiveBranch(executivePeople) {
       {
         countLabel: `${executivePeople.filter((person) => person.sectionId === 'cabinet').length} department heads`,
         description:
-          'These are the heads of the 15 executive departments that report into the cabinet structure.',
+          'These are the heads of the 15 executive departments in the Cabinet.',
         id: 'cabinet',
         label: 'Cabinet Departments',
         personIds: executivePeople

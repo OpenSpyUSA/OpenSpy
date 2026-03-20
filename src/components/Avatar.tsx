@@ -13,6 +13,10 @@ function resolveImageUrl(imageUrl?: string) {
     return imageUrl
   }
 
+  if (/^http:\/\//i.test(imageUrl)) {
+    return `https://${imageUrl.slice('http://'.length)}`
+  }
+
   if (/^(?:https?:)?\/\//i.test(imageUrl) || imageUrl.startsWith('data:')) {
     return imageUrl
   }
@@ -45,6 +49,7 @@ export function Avatar({
           className="avatar-image"
           loading="lazy"
           onError={() => setFailedSrc(resolvedImageUrl ?? null)}
+          referrerPolicy="no-referrer"
           src={resolvedImageUrl}
         />
       ) : (

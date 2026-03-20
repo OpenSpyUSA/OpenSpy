@@ -5,10 +5,10 @@ export const manualDepartmentBudgetsByDepartment = {
     discretionaryAmount: '$28.5B',
     discretionaryLabel: 'FY 2026 discretionary budget authority',
     note:
-      "State's FY 2026 Budget in Brief describes $31.2 billion in total resources, including $28.5 billion in discretionary budget authority plus consular fee revenues and smaller mandatory amounts.",
-    sourceLabel: 'State FY 2026 Budget in Brief',
+      "State's FY 2026 request materials describe about $31.2 billion in total resources, including about $28.5 billion in discretionary budget authority plus consular fee revenues and smaller mandatory amounts.",
+    sourceLabel: 'White House FY 2026 Budget Appendix',
     sourceUrl:
-      'https://www.state.gov/wp-content/uploads/2025/05/FY26-Budget-in-Brief-Sec.-One-Pager_Final.pdf',
+      'https://www.whitehouse.gov/wp-content/uploads/2025/05/appendix_fy2026.pdf',
   },
   'Department of the Treasury': {
     totalAmount: '$12.4B',
@@ -67,9 +67,9 @@ export const manualDepartmentBudgetsByDepartment = {
     discretionaryLabel: 'FY 2026 discretionary budget authority',
     note:
       "Commerce's FY 2026 budget request describes $15.2 billion in total funding, including $8.4 billion in discretionary budget authority.",
-    sourceLabel: 'Commerce FY 2026 Budget Request',
+    sourceLabel: 'Commerce FY 2026 Congressional Budget Justification',
     sourceUrl:
-      'https://www.commerce.gov/news/fact-sheets/2025/05/fact-sheet-department-commerce-fiscal-year-2026-budget-request',
+      'https://www.commerce.gov/about/budget-and-performance/fy-2026-congressional-budget-justification',
   },
   'Department of Labor': {
     totalAmount: '$53.3B',
