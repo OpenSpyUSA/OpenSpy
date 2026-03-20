@@ -656,8 +656,20 @@ function getSupremeCourtOfficialWording(caseItem: SupremeCourtCase) {
   return supremeCourtCaseOfficialWording[caseItem.id] ?? []
 }
 
+function isExecutiveOgeDirectPdfUrl(person: GovernmentPerson, url?: string) {
+  return (
+    person.branchId === 'executive' &&
+    typeof url === 'string' &&
+    /^https:\/\/extapps2\.oge\.gov\/201\/Presiden\.nsf\//i.test(url)
+  )
+}
+
 function shouldShowAnnualDisclosureReportLink(person: GovernmentPerson) {
-  return Boolean(person.financialAnnualReportUrl) && person.sectionId !== 'senate'
+  return (
+    Boolean(person.financialAnnualReportUrl) &&
+    person.sectionId !== 'senate' &&
+    !isExecutiveOgeDirectPdfUrl(person, person.financialAnnualReportUrl)
+  )
 }
 
 function parseDisclosureDateToTimestamp(value?: string) {
@@ -729,7 +741,7 @@ function shouldShowTradeSourceLink(person: GovernmentPerson, trade: DisclosureTr
     return false
   }
 
-  return person.sectionId !== 'senate'
+  return person.sectionId !== 'senate' && !isExecutiveOgeDirectPdfUrl(person, trade.sourceUrl)
 }
 
 function resolvePersonLink(url: string) {
