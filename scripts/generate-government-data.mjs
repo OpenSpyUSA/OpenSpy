@@ -14,6 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const outPath = resolve(__dirname, '../public/data/governmentData.json')
 const independentAgencyPortraitDirectory = resolve(__dirname, '../public/portraits/independent-agencies')
 const independentAgencyPortraitExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.avif']
+const wikimediaImageUrlCache = new Map()
 
 const REQUEST_HEADERS = {
   accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -1222,6 +1223,44 @@ function findIndependentAgencyLocalPortraitPath(name) {
   return null
 }
 
+async function resolveStableWikimediaImageUrl(imageUrl) {
+  if (
+    !imageUrl ||
+    !/^https?:\/\/commons\.wikimedia\.org\/wiki\/Special:FilePath\//i.test(imageUrl)
+  ) {
+    return imageUrl
+  }
+
+  const normalizedImageUrl = imageUrl.replace(/^http:\/\//i, 'https://')
+
+  if (wikimediaImageUrlCache.has(normalizedImageUrl)) {
+    return wikimediaImageUrlCache.get(normalizedImageUrl)
+  }
+
+  try {
+    const specialPathTitle = decodeURIComponent(
+      normalizedImageUrl.replace(/^https?:\/\/commons\.wikimedia\.org\/wiki\/Special:FilePath\//i, ''),
+    )
+    const params = new URLSearchParams({
+      action: 'query',
+      format: 'json',
+      titles: `File:${specialPathTitle}`,
+      prop: 'imageinfo',
+      iiprop: 'url',
+      iiurlwidth: '512',
+    })
+    const payload = await fetchJson(`https://commons.wikimedia.org/w/api.php?${params}`)
+    const pages = Object.values(payload?.query?.pages ?? {})
+    const imageInfo = pages.find((page) => page?.imageinfo?.[0])?.imageinfo?.[0]
+    const resolvedImageUrl = imageInfo?.thumburl ?? imageInfo?.url ?? normalizedImageUrl
+    wikimediaImageUrlCache.set(normalizedImageUrl, resolvedImageUrl)
+    return resolvedImageUrl
+  } catch {
+    wikimediaImageUrlCache.set(normalizedImageUrl, normalizedImageUrl)
+    return normalizedImageUrl
+  }
+}
+
 const INDEPENDENT_AGENCY_ID_OVERRIDES = new Map([
   ['Commodity Futures Trading Commission', 'executive-michael-s-selig'],
   ['Federal Communications Commission', 'executive-brendan-carr'],
@@ -1573,10 +1612,11 @@ async function buildIndependentAgencyHeads() {
     }
     const seed = await fetchIndependentAgencyProfileSeed(item).catch(() => ({}))
     const name = override.name ?? seed.name
-    const imageUrl =
+    const rawImageUrl =
       findIndependentAgencyLocalPortraitPath(name) ??
       INDEPENDENT_AGENCY_IMAGE_OVERRIDES.get(item.name) ??
       override.imageUrl
+    const imageUrl = await resolveStableWikimediaImageUrl(rawImageUrl)
 
     if (!name) {
       const cachedMatch = previousPeople.find(
@@ -1584,10 +1624,12 @@ async function buildIndependentAgencyHeads() {
       )
 
       if (cachedMatch) {
+        const cachedImageUrl = await resolveStableWikimediaImageUrl(imageUrl ?? cachedMatch.imageUrl)
+
         return {
           ...clonePerson(cachedMatch),
           department: item.name,
-          imageUrl: imageUrl ?? cachedMatch.imageUrl,
+          imageUrl: cachedImageUrl,
           sortOrder: 30 + index,
           subtitle: item.name,
         }
