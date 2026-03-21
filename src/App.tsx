@@ -1673,6 +1673,9 @@ function HomeView({
         <p className="hero-copy">{homeCopy.copy}</p>
       </section>
       <section className="branch-orbit" aria-label="Three branches of government">
+        <p className="branch-orbit__note" role="note">
+          Some official links may open only from a U.S. IP address or a U.S. VPN node.
+        </p>
         {data.branches.map((branch) => {
           const count = data.people.filter((person) =>
             branch.id === 'legislative'
