@@ -2,162 +2,51 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import {
+  assertSenateMatchGuardrail,
+  buildNormalizedNameTokens,
+  classifySenateNameMatch,
+  isSenateNonExactMatch,
+  normalizeNameMatch,
+  senateNonExactMatchGuardrailsByPersonId,
+} from './legislativeVoteMatching.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const datasetPath = resolve(__dirname, '../public/data/governmentData.json')
 const notePath = resolve(__dirname, '../notes/senate-roll-call-name-audit.md')
 
-const FIRST_NAME_EQUIVALENTS = new Map(
-  [
-    ['bernie', ['bernard']],
-    ['bill', ['william']],
-    ['chuck', ['charles']],
-    ['chris', ['christopher']],
-    ['jack', ['john']],
-    ['jacky', ['jacklyn', 'jackie']],
-    ['jim', ['james']],
-    ['katie', ['katherine']],
-    ['maggie', ['margaret']],
-    ['thom', ['thomas']],
-    ['tim', ['timothy']],
-  ].flatMap(([key, values]) => [
-    [key, [key, ...values]],
-    ...values.map((value) => [value, [key, ...values]]),
-  ]),
-)
+async function fetchText(url) {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const response = await fetch(url, {
+      headers: {
+        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'no-cache',
+        pragma: 'no-cache',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
+      },
+      signal: AbortSignal.timeout(15000),
+    }).catch(() => null)
 
-function normalizeNameMatch(value) {
-  return value
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\b(jr|jr\.|sr|sr\.|ii|iii|iv|v)\b/gi, ' ')
-    .replace(/[^a-zA-Z\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase()
-}
+    if (response?.ok) {
+      return response.text()
+    }
 
-function removeSingleLetterNameTokens(value) {
-  return value
-    .split(' ')
-    .filter((token) => token.length > 1)
-    .join(' ')
-}
+    if (response && ![403, 429].includes(response.status) && response.status < 500) {
+      throw new Error(`Failed to fetch ${url}: ${response.status}`)
+    }
 
-function buildNormalizedNameTokens(value) {
-  return removeSingleLetterNameTokens(normalizeNameMatch(value))
-    .split(' ')
-    .filter(Boolean)
-}
-
-function getEquivalentFirstNames(value) {
-  return FIRST_NAME_EQUIVALENTS.get(value) ?? [value]
-}
-
-function classifyFirstNameMatch(personFirstName, voteFirstName) {
-  if (!personFirstName || !voteFirstName) {
-    return null
+    await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)))
   }
 
-  if (personFirstName === voteFirstName) {
-    return 'exact'
-  }
-
-  if (
-    (personFirstName.startsWith(voteFirstName) || voteFirstName.startsWith(personFirstName)) &&
-    Math.min(personFirstName.length, voteFirstName.length) >= 3
-  ) {
-    return 'prefix'
-  }
-
-  const personEquivalents = getEquivalentFirstNames(personFirstName)
-  const voteEquivalents = getEquivalentFirstNames(voteFirstName)
-
-  if (personEquivalents.some((candidate) => voteEquivalents.includes(candidate))) {
-    return 'equivalent'
-  }
-
-  return null
-}
-
-function classifySurnameMatch(personLastOne, personLastTwo, voteLastName) {
-  if (personLastOne === voteLastName) {
-    return 'last_one_exact'
-  }
-
-  if (personLastTwo === voteLastName) {
-    return 'last_two_exact'
-  }
-
-  if (voteLastName.endsWith(` ${personLastOne}`)) {
-    return 'vote_last_extends_person_last'
-  }
-
-  if (personLastTwo.endsWith(` ${voteLastName}`)) {
-    return 'vote_last_is_tail_of_compound'
-  }
-
-  return null
-}
-
-function classifySenateNameMatch(voteEntry, person) {
-  if (person.stateCode !== voteEntry.stateCode) {
-    return null
-  }
-
-  const voteFirstName = buildNormalizedNameTokens(voteEntry.firstName ?? voteEntry.name)[0] ?? ''
-  const voteLastName = removeSingleLetterNameTokens(normalizeNameMatch(voteEntry.lastName ?? voteEntry.name))
-  const personTokens = buildNormalizedNameTokens(person.name)
-
-  if (personTokens.length === 0) {
-    return null
-  }
-
-  const personFirstName = personTokens[0]
-  const personLastOne = personTokens.slice(-1).join(' ')
-  const personLastTwo = personTokens.slice(-2).join(' ')
-  const surnameMode = classifySurnameMatch(personLastOne, personLastTwo, voteLastName)
-
-  if (!surnameMode) {
-    return null
-  }
-
-  const firstNameMode = classifyFirstNameMatch(personFirstName, voteFirstName)
-
-  if (!firstNameMode) {
-    return null
-  }
-
-  return {
-    firstNameMode,
-    personFirstName,
-    personLastOne,
-    personLastTwo,
-    rawVoteName: `${voteEntry.firstName} ${voteEntry.lastName}`.trim(),
-    surnameMode,
-    voteFirstName,
-    voteLastName,
-  }
+  throw new Error(`Failed to fetch ${url} after retries`)
 }
 
 function buildSenateRollCallXmlUrl(congress, session, voteNumber) {
   return `https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${String(
     voteNumber,
   ).padStart(5, '0')}.xml`
-}
-
-async function fetchText(url) {
-  const response = await fetch(url, {
-    headers: {
-      'user-agent': 'OpenSpy Senate name audit',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: ${response.status}`)
-  }
-
-  return response.text()
 }
 
 function parseSenateVoteXml(xml) {
@@ -198,7 +87,31 @@ function sentenceCaseLabel(value) {
     .replace(/\b\w/g, (character) => character.toUpperCase())
 }
 
-function buildNote(summary, senatorsWithNotes) {
+function getAuditCategoriesForMatch(person, match) {
+  const categories = []
+  const displayNeedsCleanup =
+    normalizeNameMatch(person.name) !== buildNormalizedNameTokens(person.name).join(' ')
+
+  if (displayNeedsCleanup) {
+    categories.push('display_name_cleanup')
+  }
+
+  if (match.firstNameMode === 'equivalent') {
+    categories.push('equivalent_first_name')
+  }
+
+  if (match.firstNameMode === 'prefix') {
+    categories.push('prefix_first_name')
+  }
+
+  if (match.surnameMode !== 'last_one_exact') {
+    categories.push('compound_or_extended_surname')
+  }
+
+  return categories
+}
+
+function buildNote(summary, displayCleanupOnlySenators, nonExactGuardrailSenators, guardrailDrift) {
   const lines = [
     '# Senate Roll-Call Name Audit',
     '',
@@ -213,18 +126,31 @@ function buildNote(summary, senatorsWithNotes) {
     `- selected Senate roll calls checked: ${summary.selectedEvents}`,
     `- current senators checked: ${summary.currentSenators}`,
     `- senators with fully exact first-name and surname matching on all matched votes: ${summary.exactOnlySenators}`,
-    `- senators needing non-exact handling in at least one matched vote: ${summary.nonExactSenators}`,
+    `- senators needing any display-name cleanup but still matching exactly after normalization: ${summary.displayCleanupOnlySenators}`,
+    `- senators requiring a non-exact runtime whitelist rule: ${summary.nonExactGuardrailSenators}`,
+    `- current Senate non-exact whitelist entries in code: ${summary.guardrailEntries}`,
     `- senator-event ambiguous matches: ${summary.ambiguousSenatorEvents}`,
     `- same-entry ambiguous collisions: ${summary.ambiguousEntryCollisions}`,
+    `- guardrail drift findings: ${summary.guardrailDriftCount}`,
     '',
-    '## Non-Exact Senators',
+    '## Display-Cleanup Only Senators',
     '',
   ]
 
-  if (senatorsWithNotes.length === 0) {
-    lines.push('No current senator needed non-exact handling in the checked vote set.')
+  if (displayCleanupOnlySenators.length === 0) {
+    lines.push('None.')
   } else {
-    for (const senator of senatorsWithNotes) {
+    for (const senator of displayCleanupOnlySenators) {
+      lines.push(`- ${senator.name} (${senator.stateCode})`)
+    }
+  }
+
+  lines.push('', '## Non-Exact Runtime Guardrail Senators', '')
+
+  if (nonExactGuardrailSenators.length === 0) {
+    lines.push('None.')
+  } else {
+    for (const senator of nonExactGuardrailSenators) {
       const categories = senator.categories.map(sentenceCaseLabel).join('; ')
       const examples = senator.examples
         .map((example) => `${example.eventLabel} -> XML \`${example.rawVoteName}\``)
@@ -238,16 +164,17 @@ function buildNote(summary, senatorsWithNotes) {
 
   lines.push('', '## Guardrail', '')
   lines.push(
-    'House roll-call scoring is now guarded separately: the build scripts hard-fail if any code path tries to use House name matching instead of House Clerk bioguide ID lookup.',
+    'House roll-call scoring is guarded separately: the build scripts hard-fail if any code path tries to use House name matching instead of House Clerk bioguide ID lookup.',
+  )
+  lines.push(
+    'Senate roll-call scoring now permits non-exact name matching only for a fixed whitelist of audited senators and audited XML name forms. Any new non-exact name form throws instead of silently scoring.',
   )
 
-  if (summary.ambiguousEntryExamples.length > 0) {
-    lines.push('', '## Ambiguous Entry Examples', '')
+  if (guardrailDrift.length > 0) {
+    lines.push('', '## Guardrail Drift', '')
 
-    for (const example of summary.ambiguousEntryExamples) {
-      lines.push(
-        `- ${example.eventLabel}: XML \`${example.rawVoteName}\` in ${example.stateCode} matched ${example.matches.join(', ')}`,
-      )
+    for (const item of guardrailDrift) {
+      lines.push(`- ${item}`)
     }
   }
 
@@ -275,6 +202,7 @@ async function main() {
       {
         categories: new Set(),
         examples: [],
+        hasNonExactMatch: false,
         id: senator.id,
         matchedEvents: 0,
         name: senator.name,
@@ -284,9 +212,10 @@ async function main() {
   )
 
   const ambiguousEntryCollisions = []
+  const guardrailDrift = []
   let ambiguousSenatorEvents = 0
 
-  await mapWithConcurrency(selectedEvents, 8, async (event) => {
+  await mapWithConcurrency(selectedEvents, 2, async (event) => {
     const xmlUrl = buildSenateRollCallXmlUrl(event.congress, event.session, event.rollCallNumber)
     const xml = await fetchText(xmlUrl)
     const entries = parseSenateVoteXml(xml)
@@ -316,27 +245,25 @@ async function main() {
 
       record.matchedEvents += 1
 
-      const displayNeedsCleanup =
-        normalizeNameMatch(senator.name) !== buildNormalizedNameTokens(senator.name).join(' ')
-
-      if (displayNeedsCleanup) {
-        record.categories.add('display_name_cleanup')
+      const categories = getAuditCategoriesForMatch(senator, match)
+      for (const category of categories) {
+        record.categories.add(category)
       }
 
-      if (match.firstNameMode === 'equivalent') {
-        record.categories.add('equivalent_first_name')
-      }
+      if (isSenateNonExactMatch(match)) {
+        record.hasNonExactMatch = true
 
-      if (match.firstNameMode === 'prefix') {
-        record.categories.add('prefix_first_name')
-      }
-
-      if (match.surnameMode !== 'last_one_exact') {
-        record.categories.add('compound_or_extended_surname')
+        try {
+          assertSenateMatchGuardrail(senator, match, event.id)
+        } catch (error) {
+          guardrailDrift.push(
+            `${senator.name} (${senator.stateCode}) on ${event.id}: ${error instanceof Error ? error.message : String(error)}`,
+          )
+        }
       }
 
       if (
-        (match.firstNameMode !== 'exact' || match.surnameMode !== 'last_one_exact') &&
+        (isSenateNonExactMatch(match) || categories.includes('display_name_cleanup')) &&
         record.examples.length < 3
       ) {
         record.examples.push({
@@ -365,41 +292,67 @@ async function main() {
     }
   })
 
-  const senatorsWithNotes = [...senatorAudit.values()]
-    .filter((record) => record.categories.size > 0)
+  const auditedSenators = [...senatorAudit.values()]
+  const displayCleanupOnlySenators = auditedSenators
+    .filter(
+      (record) =>
+        record.categories.size === 1 &&
+        record.categories.has('display_name_cleanup') &&
+        !record.hasNonExactMatch,
+    )
+    .sort((left, right) => left.name.localeCompare(right.name))
+    .map((record) => ({
+      name: record.name,
+      stateCode: record.stateCode,
+    }))
+
+  const nonExactGuardrailSenators = auditedSenators
+    .filter((record) => record.hasNonExactMatch)
     .map((record) => ({
       ...record,
-      categories: [...record.categories],
+      categories: [...record.categories].filter((category) => category !== 'display_name_cleanup'),
     }))
-    .sort((left, right) => {
-      if (right.categories.length !== left.categories.length) {
-        return right.categories.length - left.categories.length
-      }
+    .sort((left, right) => left.name.localeCompare(right.name))
 
-      return left.name.localeCompare(right.name)
-    })
-
-  const exactOnlySenators = [...senatorAudit.values()].filter(
+  const exactOnlySenators = auditedSenators.filter(
     (record) => record.matchedEvents > 0 && record.categories.size === 0,
   ).length
+
+  const observedNonExactIds = new Set(nonExactGuardrailSenators.map((record) => record.id))
+  const missingWhitelistIds = [...senateNonExactMatchGuardrailsByPersonId.keys()].filter(
+    (personId) => !observedNonExactIds.has(personId),
+  )
+  for (const personId of missingWhitelistIds) {
+    const senator = senators.find((person) => person.id === personId)
+    guardrailDrift.push(
+      `Whitelist entry ${personId} (${senator?.name ?? 'unknown'}) did not appear as a non-exact match in the current selected vote set.`,
+    )
+  }
+
   const summary = {
     ambiguousEntryCollisions: ambiguousEntryCollisions.length,
-    ambiguousEntryExamples: ambiguousEntryCollisions.slice(0, 10),
     ambiguousSenatorEvents,
     currentSenators: senators.length,
+    displayCleanupOnlySenators: displayCleanupOnlySenators.length,
     exactOnlySenators,
-    nonExactSenators: senatorsWithNotes.length,
+    guardrailDriftCount: guardrailDrift.length,
+    guardrailEntries: senateNonExactMatchGuardrailsByPersonId.size,
+    nonExactGuardrailSenators: nonExactGuardrailSenators.length,
     selectedEvents: selectedEvents.length,
   }
 
-  writeFileSync(notePath, buildNote(summary, senatorsWithNotes))
+  writeFileSync(
+    notePath,
+    buildNote(summary, displayCleanupOnlySenators, nonExactGuardrailSenators, guardrailDrift),
+  )
 
   console.log(
     JSON.stringify(
       {
         ...summary,
+        guardrailDrift,
         notePath,
-        senatorsWithNotes: senatorsWithNotes.map((record) => ({
+        nonExactGuardrailSenators: nonExactGuardrailSenators.map((record) => ({
           categories: record.categories,
           examples: record.examples,
           name: record.name,
@@ -410,6 +363,14 @@ async function main() {
       2,
     ),
   )
+
+  if (
+    ambiguousEntryCollisions.length > 0 ||
+    ambiguousSenatorEvents > 0 ||
+    guardrailDrift.length > 0
+  ) {
+    process.exitCode = 1
+  }
 }
 
 main().catch((error) => {

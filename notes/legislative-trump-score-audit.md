@@ -52,3 +52,5 @@ A zero or very low sample does not always mean a matching problem. It can also m
 This note is only an internal audit memo. The public site should continue to display the score, sample size, and confidence values rather than this debugging history.
 
 For the latest Senate matcher edge cases by person name, see `notes/senate-roll-call-name-audit.md`.
+
+As of 2026-03-21, Senate roll-call scoring also has a stronger runtime guardrail: non-exact Senate name matching is allowed only for an audited whitelist of known nickname / compound-surname cases. Any new non-exact name form now throws instead of silently matching.

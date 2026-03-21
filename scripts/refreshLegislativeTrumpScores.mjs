@@ -6,6 +6,10 @@ import {
   houseTrumpRollCallPool,
   senateTrumpRollCallPool,
 } from './legislativeTrumpRollCalls.mjs'
+import {
+  getHouseCastForRepresentative as getGuardedHouseCastForRepresentative,
+  getMatchedSenateVoteEntryForPerson,
+} from './legislativeVoteMatching.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const datasetPath = resolve(__dirname, '../public/data/governmentData.json')
@@ -47,9 +51,6 @@ const FIRST_NAME_EQUIVALENTS = new Map(
   ]),
 )
 
-const HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE =
-  'House roll-call matching by name is forbidden. Use bioguideId-based lookup only.'
-
 function buildNormalizedNameTokens(value) {
   return removeSingleLetterNameTokens(normalizeNameMatch(value))
     .split(' ')
@@ -82,18 +83,6 @@ function firstNamesLikelyMatch(left, right) {
 function extractBioguideIdFromImageUrl(imageUrl) {
   const match = imageUrl?.match(/\/photo\/[A-Z]\/([A-Z0-9]+)\.jpg$/)
   return match ? match[1] : undefined
-}
-
-function getHouseCastForRepresentative(entries, person) {
-  const bioguideId = extractBioguideIdFromImageUrl(person.imageUrl)
-
-  if (!bioguideId) {
-    throw new Error(
-      `Missing House bioguideId for ${person.id}. ${HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE}`,
-    )
-  }
-
-  return entries.get(bioguideId)
 }
 
 function findMatchingSenator(voteEntry, senators) {
@@ -700,7 +689,7 @@ async function main() {
     if (snapshot.chamber === 'house') {
       for (const person of representatives) {
         const metrics = metricsByPersonId.get(person.id)
-        const cast = getHouseCastForRepresentative(snapshot.entries, person)
+        const cast = getGuardedHouseCastForRepresentative(snapshot.entries, person)
 
         if (!metrics) {
           continue
@@ -755,10 +744,8 @@ async function main() {
         continue
       }
 
-      const matchedEntry = snapshot.entries.find((entry) => {
-        const candidate = findMatchingSenator(entry, [person])
-        return candidate?.id === person.id
-      })
+      const matched = getMatchedSenateVoteEntryForPerson(snapshot.entries, person, snapshot.id)
+      const matchedEntry = matched?.entry
 
       if (!matchedEntry) {
         metrics.rollCallPositions[snapshot.id] = 'not_in_office'

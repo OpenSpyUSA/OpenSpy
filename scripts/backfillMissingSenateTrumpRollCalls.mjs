@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { senateTrumpRollCallPool } from './legislativeTrumpRollCalls.mjs'
+import { findMatchingSenatorForVoteEntry } from './legislativeVoteMatching.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const datasetPath = resolve(__dirname, '../public/data/governmentData.json')
@@ -191,6 +192,12 @@ function buildSenateRollCallPageUrl(congress, session, voteNumber) {
   ).padStart(5, '0')}.htm`
 }
 
+function buildSenateRollCallXmlUrl(congress, session, voteNumber) {
+  return `https://www.senate.gov/legislative/LIS/roll_call_votes/vote${congress}${session}/vote_${congress}_${session}_${String(
+    voteNumber,
+  ).padStart(5, '0')}.xml`
+}
+
 async function fetchText(url) {
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const response = await fetch(url, {
@@ -219,31 +226,31 @@ async function fetchText(url) {
   throw new Error(`Failed to fetch ${url} after retries`)
 }
 
-function parseSenateVoteHtml(html) {
-  const question = cleanHtmlText(html.match(/<question>([\s\S]*?)<\/question>/i)?.[1] ?? '')
-  const rollCallNumber = Number(html.match(/<b>\s*Vote Number:\s*<\/b>\s*(\d+)/i)?.[1] ?? Number.NaN)
-  const date = cleanHtmlText(html.match(/<b>\s*Vote Date:\s*<\/b>([\s\S]*?)<\/div>/i)?.[1] ?? '')
-  const resultText = cleanHtmlText(html.match(/<b>\s*Vote Result:\s*<\/b>([\s\S]*?)<\/div>/i)?.[1] ?? '')
-  const billNumber = cleanHtmlText(
-    html.match(/<B>(?:Measure|Nomination) Number:\s*<\/B>\s*<a [^>]+>([\s\S]*?)<\/a>/i)?.[1] ?? '',
-  )
-  const title = cleanHtmlText(
-    html.match(/<B>(?:Measure Title|Nomination Description):\s*<\/B>([\s\S]*?)<\/div>/i)?.[1] ?? '',
-  )
-  const yeaTotal = Number(html.match(/YEAs(?:<span [^>]+>)?(\d+)/i)?.[1] ?? Number.NaN)
-  const nayTotal = Number(html.match(/NAYs<\/div>\s*<div[^>]*>(\d+)/i)?.[1] ?? Number.NaN)
-  const entries = []
-
-  for (const match of html.matchAll(
-    /(?:<span class="contenttext">|<br>)([^<(]+?)\s*\(([DRI])-([A-Z]{2})\),\s*<b>([^<]+)<\/b>/g,
-  )) {
-    entries.push({
-      cast: cleanHtmlText(match[4]),
-      partyCode: cleanHtmlText(match[2]),
-      stateCode: cleanHtmlText(match[3]),
-      surname: cleanHtmlText(match[1]),
-    })
-  }
+function parseSenateVoteXml(xml) {
+  const rollCallNumber = Number(xml.match(/<vote_number>(\d+)<\/vote_number>/)?.[1] ?? Number.NaN)
+  const billNumber =
+    xml.match(/<document_name>([\s\S]*?)<\/document_name>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
+  const date = xml.match(/<vote_date>([^<]+)<\/vote_date>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
+  const question = xml.match(/<question>([\s\S]*?)<\/question>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
+  const resultText =
+    xml.match(/<vote_result_text>([\s\S]*?)<\/vote_result_text>/)?.[1]?.replace(/\s+/g, ' ').trim() ??
+    xml.match(/<vote_result>([\s\S]*?)<\/vote_result>/)?.[1]?.replace(/\s+/g, ' ').trim() ??
+    ''
+  const title = xml.match(/<vote_title>([\s\S]*?)<\/vote_title>/)?.[1]?.replace(/\s+/g, ' ').trim() ?? ''
+  const yeaTotal = Number(xml.match(/<yeas>(\d+)<\/yeas>/)?.[1] ?? Number.NaN)
+  const nayTotal = Number(xml.match(/<nays>(\d+)<\/nays>/)?.[1] ?? Number.NaN)
+  const entries = [
+    ...xml.matchAll(
+      /<member>[\s\S]*?<last_name>([^<]+)<\/last_name>[\s\S]*?<first_name>([^<]+)<\/first_name>[\s\S]*?<party>([^<]*)<\/party>[\s\S]*?<state>([^<]*)<\/state>[\s\S]*?<vote_cast>([^<]+)<\/vote_cast>[\s\S]*?<\/member>/g,
+    ),
+  ].map((match) => ({
+    cast: match[5].trim(),
+    firstName: match[2].trim(),
+    lastName: match[1].trim(),
+    name: `${match[2].trim()} ${match[1].trim()}`.trim(),
+    partyCode: match[3].trim(),
+    stateCode: match[4].trim(),
+  }))
 
   return {
     billNumber: billNumber || undefined,
@@ -256,29 +263,6 @@ function parseSenateVoteHtml(html) {
     title,
     yeaTotal,
   }
-}
-
-function findMatchingSenatorFromPageEntry(entry, senators) {
-  const normalizedSurname = removeSingleLetterNameTokens(normalizeNameMatch(entry.surname))
-  const candidates = senators.filter((person) => person.stateCode === entry.stateCode)
-  const matches = candidates.filter((person) => {
-    const tokens = buildNormalizedNameTokens(person.name)
-    const personLastOne = tokens.slice(-1).join(' ')
-    const personLastTwo = tokens.slice(-2).join(' ')
-
-    return (
-      normalizedSurname === personLastOne ||
-      normalizedSurname === personLastTwo ||
-      normalizedSurname.endsWith(` ${personLastOne}`) ||
-      personLastTwo.endsWith(` ${normalizedSurname}`)
-    )
-  })
-
-  if (matches.length === 1) {
-    return matches[0]
-  }
-
-  return null
 }
 
 function toStoredSnapshot(event, parsed, sourceUrl) {
@@ -361,8 +345,9 @@ async function main() {
   const newEventsById = new Map()
 
   for (const event of targetEvents) {
+    const xmlUrl = buildSenateRollCallXmlUrl(event.congress, event.session, event.voteNumber)
     const sourceUrl = buildSenateRollCallPageUrl(event.congress, event.session, event.voteNumber)
-    const parsed = parseSenateVoteHtml(await fetchText(sourceUrl))
+    const parsed = parseSenateVoteXml(await fetchText(xmlUrl))
     const storedSnapshot = toStoredSnapshot(event, parsed, sourceUrl)
     const matchedSenatorIds = new Set()
     const unmatchedEntries = []
@@ -370,10 +355,11 @@ async function main() {
     newEventsById.set(event.id, storedSnapshot)
 
     for (const entry of parsed.entries) {
-      const matchedSenator = findMatchingSenatorFromPageEntry(entry, senators)
+      const matched = findMatchingSenatorForVoteEntry(entry, senators, event.id)
+      const matchedSenator = matched?.person
 
       if (!matchedSenator) {
-        unmatchedEntries.push(`${entry.surname} (${entry.partyCode}-${entry.stateCode})`)
+        unmatchedEntries.push(`${entry.lastName} (${entry.partyCode}-${entry.stateCode})`)
         continue
       }
 

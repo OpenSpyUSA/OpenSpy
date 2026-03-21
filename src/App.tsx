@@ -18,6 +18,7 @@ import {
   getRollCallThresholdLabel,
 } from './legislativeRollCallFormat'
 import { LegislativeMap } from './components/LegislativeMap'
+import { getRollCallVideoLink } from './legislativeRollCallVideo'
 import './App.css'
 import {
   formatAgeLabel,
@@ -1820,6 +1821,7 @@ function DetailPanel({
     const narrative = describeLegislativeRollCall(rollCall)
     const referenceLine = formatRollCallReferenceLine(rollCall)
     const recordedLine = formatRollCallRecordedLine(rollCall)
+    const rollCallVideoLink = getRollCallVideoLink(rollCall)
 
     return (
       <aside className="detail-panel detail-panel--filled">
@@ -1894,10 +1896,15 @@ function DetailPanel({
           </section>
         ) : null}
 
-        <section className="detail-links">
+        <section className={`detail-links${rollCallVideoLink ? ' detail-links--pair' : ''}`}>
           <a href={rollCall.sourceUrl} rel="noreferrer" target="_blank">
-            Official source
+            Official Vote
           </a>
+          {rollCallVideoLink ? (
+            <a href={rollCallVideoLink.url} rel="noreferrer" target="_blank">
+              {rollCallVideoLink.label}
+            </a>
+          ) : null}
         </section>
       </aside>
     )
@@ -2117,6 +2124,7 @@ function DetailPanel({
                         vote as LegislativeTrumpRollCall,
                       )
                       const recordedLine = formatRollCallRecordedLine(vote as LegislativeTrumpRollCall)
+                      const voteVideoLink = getRollCallVideoLink(vote)
 
                       return (
                         <li
@@ -2143,9 +2151,16 @@ function DetailPanel({
                           {referenceLine ? (
                             <p className="executive-congress-vote-item__meta">{referenceLine}</p>
                           ) : null}
-                          <a href={vote.sourceUrl} rel="noreferrer" target="_blank">
-                            Official source
-                          </a>
+                          <div className="executive-congress-vote-item__links">
+                            <a href={vote.sourceUrl} rel="noreferrer" target="_blank">
+                              Official Vote
+                            </a>
+                            {voteVideoLink ? (
+                              <a href={voteVideoLink.url} rel="noreferrer" target="_blank">
+                                {voteVideoLink.label}
+                              </a>
+                            ) : null}
+                          </div>
                         </li>
                       )
                     })}

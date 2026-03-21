@@ -6,6 +6,10 @@ import {
   houseTrumpRollCallPool,
   senateTrumpRollCallPool,
 } from './legislativeTrumpRollCalls.mjs'
+import {
+  getHouseCastForRepresentative as getGuardedHouseCastForRepresentative,
+  getMatchedSenateVoteEntryForPerson,
+} from './legislativeVoteMatching.mjs'
 import { manualCareerHistoryById } from './manualCareerHistory.mjs'
 import { manualDepartmentBudgetsByDepartment } from './manualDepartmentBudgets.mjs'
 import { manualIndependentAgencyBudgetsByDepartment } from './manualIndependentAgencyBudgets.mjs'
@@ -3285,9 +3289,6 @@ const FIRST_NAME_EQUIVALENTS = new Map(
   ]),
 )
 
-const HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE =
-  'House roll-call matching by name is forbidden. Use bioguideId-based lookup only.'
-
 const executiveCongressServiceOverrides = new Map([
   [
     'executive-jd-vance',
@@ -3601,19 +3602,7 @@ function findMatchingSenator(voteEntry, senators) {
 function findMatchingRepresentative(voteEntry, representatives) {
   void voteEntry
   void representatives
-  throw new Error(HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE)
-}
-
-function getHouseCastForRepresentative(entries, person) {
-  const bioguideId = extractBioguideIdFromImageUrl(person.imageUrl)
-
-  if (!bioguideId) {
-    throw new Error(
-      `Missing House bioguideId for ${person.id}. ${HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE}`,
-    )
-  }
-
-  return entries.get(bioguideId)
+  throw new Error('House roll-call matching by name is forbidden. Use bioguideId-based lookup only.')
 }
 
 function findMatchingExecutiveCongressVoteEntry(voteEntries, service, fallbackName) {
@@ -4159,7 +4148,7 @@ async function buildTrumpRelationshipContext(executivePeople, senators, represen
   for (const snapshot of snapshots) {
     if (snapshot.chamber === 'house') {
       for (const person of representatives) {
-        const cast = getHouseCastForRepresentative(snapshot.entries, person)
+        const cast = getGuardedHouseCastForRepresentative(snapshot.entries, person)
         const metrics = metricsByPersonId.get(person.id)
 
         if (!metrics) {
@@ -4215,10 +4204,8 @@ async function buildTrumpRelationshipContext(executivePeople, senators, represen
         continue
       }
 
-      const matchedEntry = snapshot.entries.find((entry) => {
-        const candidate = findMatchingSenator(entry, [person])
-        return candidate?.id === person.id
-      })
+      const matched = getMatchedSenateVoteEntryForPerson(snapshot.entries, person, snapshot.id)
+      const matchedEntry = matched?.entry
 
       if (!matchedEntry) {
         metrics.rollCallPositions[snapshot.id] = 'not_in_office'

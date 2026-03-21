@@ -2674,6 +2674,12 @@
   line-height: 1.45;
 }
 
+.executive-congress-vote-item__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
 .justice-case-item {
   display: grid;
   gap: 8px;
