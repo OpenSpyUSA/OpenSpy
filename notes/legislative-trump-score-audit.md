@@ -24,6 +24,8 @@ This repair fixed real false negatives, including cases like `Richard J. Durbin`
 
 House roll-call matching is different. It uses the member's official bioguide ID extracted from the image URL and matches it against the House Clerk XML `name-id` field, so House scoring is not exposed to the same middle-initial or nickname bug class.
 
+As of 2026-03-21, the build scripts also hard-fail if any code path tries to fall back to House name matching. The live House scoring path must use the House Clerk bioguide ID lookup only.
+
 Initial House audit result before the late-2025 / early-2026 House roll-call expansion:
 
 - current House members checked: 438
@@ -48,3 +50,5 @@ A zero or very low sample does not always mean a matching problem. It can also m
 - missed or abstained votes
 
 This note is only an internal audit memo. The public site should continue to display the score, sample size, and confidence values rather than this debugging history.
+
+For the latest Senate matcher edge cases by person name, see `notes/senate-roll-call-name-audit.md`.

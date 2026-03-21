@@ -3285,6 +3285,9 @@ const FIRST_NAME_EQUIVALENTS = new Map(
   ]),
 )
 
+const HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE =
+  'House roll-call matching by name is forbidden. Use bioguideId-based lookup only.'
+
 const executiveCongressServiceOverrides = new Map([
   [
     'executive-jd-vance',
@@ -3596,30 +3599,21 @@ function findMatchingSenator(voteEntry, senators) {
 }
 
 function findMatchingRepresentative(voteEntry, representatives) {
-  const normalizedVoteName = removeSingleLetterNameTokens(normalizeNameMatch(voteEntry.name))
-  const candidates = representatives.filter((person) => person.stateCode === voteEntry.stateCode)
+  void voteEntry
+  void representatives
+  throw new Error(HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE)
+}
 
-  return (
-    candidates.find((person) => {
-      const tokens = buildNormalizedNameTokens(person.name)
+function getHouseCastForRepresentative(entries, person) {
+  const bioguideId = extractBioguideIdFromImageUrl(person.imageUrl)
 
-      if (tokens.length === 0) {
-        return false
-      }
+  if (!bioguideId) {
+    throw new Error(
+      `Missing House bioguideId for ${person.id}. ${HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE}`,
+    )
+  }
 
-      const personLastOne = tokens.slice(-1).join(' ')
-      const personLastTwo = tokens.slice(-2).join(' ')
-
-      return (
-        normalizedVoteName === personLastOne ||
-        normalizedVoteName === personLastTwo ||
-        normalizedVoteName.startsWith(`${personLastOne} `) ||
-        normalizedVoteName.startsWith(`${personLastTwo} `) ||
-        normalizedVoteName.endsWith(` ${personLastOne}`) ||
-        normalizedVoteName.endsWith(` ${personLastTwo}`)
-      )
-    }) ?? null
-  )
+  return entries.get(bioguideId)
 }
 
 function findMatchingExecutiveCongressVoteEntry(voteEntries, service, fallbackName) {
@@ -4165,8 +4159,7 @@ async function buildTrumpRelationshipContext(executivePeople, senators, represen
   for (const snapshot of snapshots) {
     if (snapshot.chamber === 'house') {
       for (const person of representatives) {
-        const bioguideId = extractBioguideIdFromImageUrl(person.imageUrl)
-        const cast = bioguideId ? snapshot.entries.get(bioguideId) : undefined
+        const cast = getHouseCastForRepresentative(snapshot.entries, person)
         const metrics = metricsByPersonId.get(person.id)
 
         if (!metrics) {

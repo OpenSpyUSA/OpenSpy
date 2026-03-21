@@ -13,7 +13,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "sync:data": "node scripts/generate-government-data.mjs",
-    "audit:votes": "node scripts/auditLegislativeTrumpVotes.mjs"
+    "audit:votes": "node scripts/auditLegislativeTrumpVotes.mjs",
+    "audit:senate-vote-names": "node scripts/auditSenateVoteNameMatching.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.2.0",

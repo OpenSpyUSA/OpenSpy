@@ -47,6 +47,9 @@ const FIRST_NAME_EQUIVALENTS = new Map(
   ]),
 )
 
+const HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE =
+  'House roll-call matching by name is forbidden. Use bioguideId-based lookup only.'
+
 function buildNormalizedNameTokens(value) {
   return removeSingleLetterNameTokens(normalizeNameMatch(value))
     .split(' ')
@@ -79,6 +82,18 @@ function firstNamesLikelyMatch(left, right) {
 function extractBioguideIdFromImageUrl(imageUrl) {
   const match = imageUrl?.match(/\/photo\/[A-Z]\/([A-Z0-9]+)\.jpg$/)
   return match ? match[1] : undefined
+}
+
+function getHouseCastForRepresentative(entries, person) {
+  const bioguideId = extractBioguideIdFromImageUrl(person.imageUrl)
+
+  if (!bioguideId) {
+    throw new Error(
+      `Missing House bioguideId for ${person.id}. ${HOUSE_NAME_MATCHING_FORBIDDEN_MESSAGE}`,
+    )
+  }
+
+  return entries.get(bioguideId)
 }
 
 function findMatchingSenator(voteEntry, senators) {
@@ -685,8 +700,7 @@ async function main() {
     if (snapshot.chamber === 'house') {
       for (const person of representatives) {
         const metrics = metricsByPersonId.get(person.id)
-        const bioguideId = extractBioguideIdFromImageUrl(person.imageUrl)
-        const cast = bioguideId ? snapshot.entries.get(bioguideId) : undefined
+        const cast = getHouseCastForRepresentative(snapshot.entries, person)
 
         if (!metrics) {
           continue
