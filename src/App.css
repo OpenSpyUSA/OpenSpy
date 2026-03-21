@@ -199,6 +199,7 @@
     rgba(255, 255, 255, 0.72);
   color: var(--ink-soft);
   font-size: 0.92rem;
+  font-weight: 700;
   line-height: 1.45;
   text-align: center;
   box-shadow: var(--shadow-soft);
