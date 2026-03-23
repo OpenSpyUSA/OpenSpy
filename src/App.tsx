@@ -29,6 +29,7 @@ import {
 } from './personMeta'
 import { describeLegislativeRollCall } from './legislativeRollCallMeta'
 import { FIFTY_STATE_CODES, STATE_CODE_TO_NAME } from './stateMeta'
+import { STATE_PROFILE_META } from './stateProfileMeta'
 import { formatTrumpScore, getTrumpBand } from './trumpScore'
 import { formatXHandle } from './xProfile'
 import type {
@@ -54,6 +55,7 @@ const caseDateFormatter = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
   year: 'numeric',
 })
+const populationCountFormatter = new Intl.NumberFormat('en-US')
 
 type RouteState = {
   branchId: BranchId | null
@@ -122,6 +124,25 @@ function createPartyCounts(): Record<Alignment, number> {
     nonpartisan: 0,
     republican: 0,
   }
+}
+
+function formatPopulationCount(value: number) {
+  return populationCountFormatter.format(value)
+}
+
+function formatStateGdpLabel(gdpMillions: number) {
+  const gdpBillions = gdpMillions / 1000
+
+  if (gdpBillions >= 1000) {
+    return `$${(gdpBillions / 1000).toFixed(1)}T`
+  }
+
+  return `$${gdpBillions.toFixed(1)}B`
+}
+
+function formatStateGdpPerCapitaLabel(gdpMillions: number, population: number) {
+  const dollarsPerPerson = (gdpMillions * 1_000_000) / population
+  return `$${Math.round(dollarsPerPerson).toLocaleString('en-US')}`
 }
 
 function capitalizeAlignment(alignment: Alignment) {
@@ -2536,6 +2557,9 @@ function App() {
     selectedBranch?.id === 'legislative' && selectedStateCode
       ? legislativeStateSummaries.find((summary) => summary.stateCode === selectedStateCode) ?? null
       : null
+  const selectedStateProfile = selectedStateSummary
+    ? STATE_PROFILE_META[selectedStateSummary.stateCode] ?? null
+    : null
   const statsPeople =
     visiblePeople.length > 0
       ? visiblePeople
@@ -2871,6 +2895,37 @@ function App() {
             selectedStateCode={selectedStateCode}
             summaries={legislativeStateSummaries}
           />
+
+          {selectedStateSummary && selectedStateProfile ? (
+            <section className="section-card state-profile-card">
+              <div className="state-profile-card__header">
+                <p className="eyebrow">State snapshot</p>
+                <h2>{selectedStateSummary.stateName}</h2>
+              </div>
+              <div className="state-profile-card__grid">
+                <article className="state-profile-card__item">
+                  <span>Population</span>
+                  <strong>{formatPopulationCount(selectedStateProfile.population)}</strong>
+                  <small>2025 estimate</small>
+                </article>
+                <article className="state-profile-card__item">
+                  <span>GDP</span>
+                  <strong>{formatStateGdpLabel(selectedStateProfile.gdpMillions)}</strong>
+                  <small>2024 current-dollar GDP</small>
+                </article>
+                <article className="state-profile-card__item">
+                  <span>GDP per capita</span>
+                  <strong>
+                    {formatStateGdpPerCapitaLabel(
+                      selectedStateProfile.gdpMillions,
+                      selectedStateProfile.population,
+                    )}
+                  </strong>
+                  <small>Derived from 2024 GDP and 2025 population</small>
+                </article>
+              </div>
+            </section>
+          ) : null}
 
           <section className="toolbar">
             <label className="toolbar-search">

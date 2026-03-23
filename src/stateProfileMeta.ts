@@ -1,0 +1,313 @@
+export interface StateProfileMeta {
+  gdpMillions: number
+  headquartersCompany: string
+  headquartersLocation: string
+  population: number
+}
+
+export const STATE_PROFILE_POPULATION_SOURCE_URL =
+  'https://www.statsamerica.org/sip/rank_list.aspx?ct=S23&rank_label=pop1'
+export const STATE_PROFILE_GDP_SOURCE_URL = 'https://apps.bea.gov/regional/zip/SAGDP.zip'
+
+export const STATE_PROFILE_META: Record<string, StateProfileMeta> = {
+  AL: {
+    population: 5193088,
+    gdpMillions: 325345.1,
+    headquartersCompany: 'Regions Financial',
+    headquartersLocation: 'Birmingham',
+  },
+  AK: {
+    population: 737270,
+    gdpMillions: 71567.2,
+    headquartersCompany: 'GCI',
+    headquartersLocation: 'Anchorage',
+  },
+  AZ: {
+    population: 7623818,
+    gdpMillions: 570088.6,
+    headquartersCompany: 'Freeport-McMoRan',
+    headquartersLocation: 'Phoenix',
+  },
+  AR: {
+    population: 3114791,
+    gdpMillions: 188339.6,
+    headquartersCompany: 'Walmart',
+    headquartersLocation: 'Bentonville',
+  },
+  CA: {
+    population: 39355309,
+    gdpMillions: 4048108.1,
+    headquartersCompany: 'Apple',
+    headquartersLocation: 'Cupertino',
+  },
+  CO: {
+    population: 6012561,
+    gdpMillions: 557633,
+    headquartersCompany: 'Crocs',
+    headquartersLocation: 'Broomfield',
+  },
+  CT: {
+    population: 3688496,
+    gdpMillions: 356834.9,
+    headquartersCompany: 'Stanley Black & Decker',
+    headquartersLocation: 'New Britain',
+  },
+  DE: {
+    population: 1059952,
+    gdpMillions: 110971.8,
+    headquartersCompany: 'DuPont',
+    headquartersLocation: 'Wilmington',
+  },
+  FL: {
+    population: 23462518,
+    gdpMillions: 1726709.9,
+    headquartersCompany: 'Publix',
+    headquartersLocation: 'Lakeland',
+  },
+  GA: {
+    population: 11302748,
+    gdpMillions: 881508.2,
+    headquartersCompany: 'Coca-Cola',
+    headquartersLocation: 'Atlanta',
+  },
+  HI: {
+    population: 1432820,
+    gdpMillions: 117627.4,
+    headquartersCompany: 'Hawaiian Electric Industries',
+    headquartersLocation: 'Honolulu',
+  },
+  ID: {
+    population: 2029733,
+    gdpMillions: 129018.2,
+    headquartersCompany: 'Micron Technology',
+    headquartersLocation: 'Boise',
+  },
+  IL: {
+    population: 12719141,
+    gdpMillions: 1148106.1,
+    headquartersCompany: "McDonald's",
+    headquartersLocation: 'Chicago',
+  },
+  IN: {
+    population: 6973333,
+    gdpMillions: 519516.5,
+    headquartersCompany: 'Eli Lilly',
+    headquartersLocation: 'Indianapolis',
+  },
+  IA: {
+    population: 3238387,
+    gdpMillions: 265794.5,
+    headquartersCompany: 'Principal Financial Group',
+    headquartersLocation: 'Des Moines',
+  },
+  KS: {
+    population: 2977220,
+    gdpMillions: 230522.1,
+    headquartersCompany: 'Koch',
+    headquartersLocation: 'Wichita',
+  },
+  KY: {
+    population: 4606864,
+    gdpMillions: 295375.3,
+    headquartersCompany: 'Yum! Brands',
+    headquartersLocation: 'Louisville',
+  },
+  LA: {
+    population: 4618189,
+    gdpMillions: 329172.8,
+    headquartersCompany: 'Entergy',
+    headquartersLocation: 'New Orleans',
+  },
+  ME: {
+    population: 1414874,
+    gdpMillions: 99174.1,
+    headquartersCompany: 'L.L.Bean',
+    headquartersLocation: 'Freeport',
+  },
+  MD: {
+    population: 6265347,
+    gdpMillions: 546028.4,
+    headquartersCompany: 'Lockheed Martin',
+    headquartersLocation: 'Bethesda',
+  },
+  MA: {
+    population: 7154084,
+    gdpMillions: 778523.4,
+    headquartersCompany: 'Fidelity Investments',
+    headquartersLocation: 'Boston',
+  },
+  MI: {
+    population: 10127884,
+    gdpMillions: 702466.9,
+    headquartersCompany: 'Ford',
+    headquartersLocation: 'Dearborn',
+  },
+  MN: {
+    population: 5830405,
+    gdpMillions: 507687.8,
+    headquartersCompany: 'Target',
+    headquartersLocation: 'Minneapolis',
+  },
+  MS: {
+    population: 2954160,
+    gdpMillions: 158192.4,
+    headquartersCompany: 'C Spire',
+    headquartersLocation: 'Ridgeland',
+  },
+  MO: {
+    population: 6270541,
+    gdpMillions: 448713.7,
+    headquartersCompany: 'Enterprise Mobility',
+    headquartersLocation: 'St. Louis',
+  },
+  MT: {
+    population: 1144694,
+    gdpMillions: 78441,
+    headquartersCompany: 'Glacier Bancorp',
+    headquartersLocation: 'Kalispell',
+  },
+  NE: {
+    population: 2018006,
+    gdpMillions: 189242.7,
+    headquartersCompany: 'Berkshire Hathaway',
+    headquartersLocation: 'Omaha',
+  },
+  NV: {
+    population: 3282188,
+    gdpMillions: 269010.5,
+    headquartersCompany: 'MGM Resorts',
+    headquartersLocation: 'Las Vegas',
+  },
+  NH: {
+    population: 1415342,
+    gdpMillions: 119336.6,
+    headquartersCompany: 'Planet Fitness',
+    headquartersLocation: 'Hampton',
+  },
+  NJ: {
+    population: 9548215,
+    gdpMillions: 846000.4,
+    headquartersCompany: 'Johnson & Johnson',
+    headquartersLocation: 'New Brunswick',
+  },
+  NM: {
+    population: 2125498,
+    gdpMillions: 147084.9,
+    headquartersCompany: 'Array Technologies',
+    headquartersLocation: 'Albuquerque',
+  },
+  NY: {
+    population: 20002427,
+    gdpMillions: 2322138.9,
+    headquartersCompany: 'JPMorgan Chase',
+    headquartersLocation: 'New York City',
+  },
+  NC: {
+    population: 11197968,
+    gdpMillions: 844209,
+    headquartersCompany: 'Bank of America',
+    headquartersLocation: 'Charlotte',
+  },
+  ND: {
+    population: 799358,
+    gdpMillions: 80058.3,
+    headquartersCompany: 'Scheels',
+    headquartersLocation: 'Fargo',
+  },
+  OH: {
+    population: 11900510,
+    gdpMillions: 923140.6,
+    headquartersCompany: 'Procter & Gamble',
+    headquartersLocation: 'Cincinnati',
+  },
+  OK: {
+    population: 4123288,
+    gdpMillions: 263695.1,
+    headquartersCompany: 'Devon Energy',
+    headquartersLocation: 'Oklahoma City',
+  },
+  OR: {
+    population: 4273586,
+    gdpMillions: 330250.1,
+    headquartersCompany: 'Nike',
+    headquartersLocation: 'Beaverton',
+  },
+  PA: {
+    population: 13059432,
+    gdpMillions: 1007873.9,
+    headquartersCompany: 'Comcast',
+    headquartersLocation: 'Philadelphia',
+  },
+  RI: {
+    population: 1114521,
+    gdpMillions: 80381.1,
+    headquartersCompany: 'CVS Health',
+    headquartersLocation: 'Woonsocket',
+  },
+  SC: {
+    population: 5570274,
+    gdpMillions: 357074.4,
+    headquartersCompany: 'Sonoco',
+    headquartersLocation: 'Hartsville',
+  },
+  SD: {
+    population: 935094,
+    gdpMillions: 76795.8,
+    headquartersCompany: 'Black Hills Corp.',
+    headquartersLocation: 'Rapid City',
+  },
+  TN: {
+    population: 7315076,
+    gdpMillions: 561201.2,
+    headquartersCompany: 'FedEx',
+    headquartersLocation: 'Memphis',
+  },
+  TX: {
+    population: 31709821,
+    gdpMillions: 2769766.2,
+    headquartersCompany: 'Tesla',
+    headquartersLocation: 'Austin',
+  },
+  UT: {
+    population: 3538904,
+    gdpMillions: 299471.3,
+    headquartersCompany: 'Ancestry',
+    headquartersLocation: 'Lehi',
+  },
+  VT: {
+    population: 644663,
+    gdpMillions: 46276.1,
+    headquartersCompany: "Ben & Jerry's",
+    headquartersLocation: 'South Burlington',
+  },
+  VA: {
+    population: 8880107,
+    gdpMillions: 761733.8,
+    headquartersCompany: 'Capital One',
+    headquartersLocation: 'McLean',
+  },
+  WA: {
+    population: 8001020,
+    gdpMillions: 856013.6,
+    headquartersCompany: 'Microsoft',
+    headquartersLocation: 'Redmond',
+  },
+  WV: {
+    population: 1766147,
+    gdpMillions: 106475.1,
+    headquartersCompany: 'WesBanco',
+    headquartersLocation: 'Wheeling',
+  },
+  WI: {
+    population: 5972787,
+    gdpMillions: 453298.6,
+    headquartersCompany: 'Harley-Davidson',
+    headquartersLocation: 'Milwaukee',
+  },
+  WY: {
+    population: 588753,
+    gdpMillions: 51498.1,
+    headquartersCompany: "Taco John's",
+    headquartersLocation: 'Cheyenne',
+  },
+}

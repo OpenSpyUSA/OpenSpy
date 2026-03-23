@@ -1693,6 +1693,67 @@
   gap: 22px;
 }
 
+.state-profile-card {
+  gap: 18px;
+}
+
+.state-profile-card__header {
+  display: grid;
+  gap: 6px;
+}
+
+.state-profile-card__header .eyebrow {
+  margin-bottom: 0;
+}
+
+.state-profile-card__header h2 {
+  font-size: clamp(1.8rem, 2.2vw, 2.5rem);
+  line-height: 0.98;
+}
+
+.state-profile-card__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.state-profile-card__item {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-height: 118px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  background:
+    radial-gradient(circle at top left, rgba(52, 120, 246, 0.07), transparent 42%),
+    radial-gradient(circle at bottom right, rgba(255, 90, 82, 0.08), transparent 38%),
+    rgba(255, 255, 255, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 16px 36px rgba(15, 23, 42, 0.05);
+}
+
+.state-profile-card__item span {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.state-profile-card__item strong {
+  font-size: clamp(1.35rem, 2.2vw, 1.95rem);
+  line-height: 1.02;
+  color: var(--ink);
+}
+
+.state-profile-card__item small {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
 .map-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.85fr);
@@ -1779,6 +1840,36 @@
   fill: var(--ink);
   font-size: 12px;
   font-weight: 800;
+}
+
+.state-label--democratic .state-label__badge {
+  fill: color-mix(in srgb, var(--democratic) 12%, rgba(255, 255, 255, 0.96));
+  stroke: color-mix(in srgb, var(--democratic) 44%, rgba(17, 34, 58, 0.18));
+}
+
+.state-label--democratic .state-label__count,
+.state-label--democratic .state-label__abbr {
+  fill: var(--democratic);
+}
+
+.state-label--republican .state-label__badge {
+  fill: color-mix(in srgb, var(--republican) 12%, rgba(255, 255, 255, 0.96));
+  stroke: color-mix(in srgb, var(--republican) 48%, rgba(17, 34, 58, 0.18));
+}
+
+.state-label--republican .state-label__count,
+.state-label--republican .state-label__abbr {
+  fill: var(--republican);
+}
+
+.state-label--independent .state-label__badge {
+  fill: color-mix(in srgb, var(--independent) 12%, rgba(255, 255, 255, 0.96));
+  stroke: color-mix(in srgb, var(--independent) 44%, rgba(17, 34, 58, 0.18));
+}
+
+.state-label--independent .state-label__count,
+.state-label--independent .state-label__abbr {
+  fill: var(--independent);
 }
 
 .state-label.is-selected .state-label__badge {
@@ -2808,6 +2899,10 @@
     gap: 14px;
   }
 
+  .state-profile-card__grid {
+    grid-template-columns: 1fr;
+  }
+
   .case-justice-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2953,6 +3048,11 @@
   .map-stage,
   .state-focus {
     padding: 14px;
+  }
+
+  .state-profile-card__item {
+    min-height: 0;
+    padding: 16px;
   }
 
   .map-legend {
