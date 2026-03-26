@@ -13,6 +13,95 @@ export type TrumpTruthPost = {
 export const TRUMP_TRUTH_SNAPSHOT = {
   posts: [
     {
+      archiveUrl: 'https://trumpstruth.org/statuses/37468',
+      id: '116293169358563364',
+      kind: 'truth',
+      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116293169358563364',
+      publishedAt: '2026-03-26T02:42:20Z',
+      previewImageUrl: null,
+      text:
+        'NY AG Letitia James referred again for criminal prosecution for alleged homeowner insurance fraud: https://justthenews.com/government/courts-law/545ny-ag-letitia-james-referred-again-criminal-prosecution-homeowner',
+    },
+    {
+      archiveUrl: 'https://trumpstruth.org/statuses/37467',
+      id: '116291185984825094',
+      kind: 'truth',
+      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116291185984825094',
+      publishedAt: '2026-03-25T18:17:56Z',
+      previewImageUrl: null,
+      text:
+        'My meeting with the Highly Respected President of China, President Xi Jinping, which was originally postponed due to our Military operation in Iran, has been rescheduled, and will take place in Beijing on May 14th and 15th. First Lady Melania and I will also host President Xi and Madame Peng for a reciprocal visit in Washington, D.C., at a later date, this year. Our Representatives are finalizing preparations for these Historic Visits. I look very much forward to spending time with President Xi in what will be, I am sure, a Monumental Event. Thank you for your attention to this matter! President DONALD J. TRUMP',
+    },
+    {
+      archiveUrl: 'https://trumpstruth.org/statuses/37465',
+      id: '116290852675177057',
+      kind: 'truth',
+      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116290852675177057',
+      publishedAt: '2026-03-25T16:53:10Z',
+      previewImageUrl: null,
+      text:
+        'We are asking for expedited Judicial Review because they are robbing our Country blind, “Centers” that don’t exist are being paid tremendous amounts of money, and yet we have Court Orders not letting us proceed. They are being protected by our unbelievably Corrupt and OUT OF CONTROL Court System! Billions of Dollars are being “handed over” to CROOKS, and the Courts won’t let us do anything about it. Again, EXPEDITE! President DONALD J. TRUMP',
+    },
+    {
+      archiveUrl: 'https://trumpstruth.org/statuses/37466',
+      id: '116290846597255331',
+      kind: 'truth',
+      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116290846597255331',
+      publishedAt: '2026-03-25T16:51:38Z',
+      previewImageUrl: null,
+      text:
+        'Speaker of the House Mike Johnson and Senate Majority Leader John Thune have been working to pass a clean extension of FISA Section 702, a Law that was passed many years ago by Congress to collect Intelligence on Foreigners and Noncitizens. When used properly, FISA is an effective tool to keep Americans safe. For these reasons, I have called for a clean 18-month extension, HOWEVER, the Critical and Common Sense Reforms that were made in the last Reauthorization of FISA must remain intact to protect the American People from abuses. Nobody understands this better than me, as I was a victim of the worst and most illegal abuse of FISA in our Nation’s History, by Radical Left Lunatics who lied to the FISA Court to spy on my 2016 Presidential Campaign in their attempt to RIG the Election in favor of Crooked Hillary Clinton. That is why, since the first day of my already Historic Second Term, my Administration has worked tirelessly to ensure these Reforms are being aggressively executed at every level of the Executive Branch to keep Americans safe, while protecting their sacred Civil Liberties guaranteed by our Great Constitution. With the ongoing successful Military activities against the Terrorist Iranian Regime, it is more important than ever that we remain vigilant, PROTECT our Homeland, Troops, and Diplomats stationed abroad, and maintain our ability to quickly stop bad actors seeking to cause harm to our People and our Country. The fact is, whether you like FISA or not, it is extremely important to our Military. I have spoken to many Generals about this, and they consider it vital. Not one said, even tacitly, that they can do without it — especially right now with our brilliant Military Operation in Iran. Thank you for your attention to this very important matter! President DONALD J. TRUMP',
+    },
+    {
+      archiveUrl: 'https://trumpstruth.org/statuses/37464',
+      id: '116290799193660420',
+      kind: 'truth',
+      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116290799193660420',
+      publishedAt: '2026-03-25T16:39:34Z',
+      previewImageUrl: null,
+      text:
+        'I am so proud of our ICE Patriots! They were unfairly maligned by the Lunatic Democrats for years, and now, at the Airports, in addition to what they are supposed to be doing, they are helping people with bags, even picking up and cleaning areas. They are so proud to be there! The fact is, they shouldn’t have to do this, but they are rehabbing a fake image given to them by Radical Left Democrat politicians. The Public is loving ICE, so the Democrats, unwittingly, did us a favor — They are Great American Patriots, they just happen to have much larger, and harder, muscles than most — which is what they’re supposed to have. Thank you to ICE for the GREAT job you are doing. America very much appreciates it! President DONALD J. TRUMP',
+    },
+    {
+      archiveUrl: 'https://trumpstruth.org/statuses/37463',
+      id: '116290528260288417',
+      kind: 'truth',
+      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116290528260288417',
+      publishedAt: '2026-03-25T15:30:40Z',
+      previewImageUrl: null,
+      text:
+        'The Radical Left, Country Hating Democrats are trying to create inner chaos to take away from the great military achievement we are having in Iran. They hate seeing us WIN so completely and decisively, but the American public sees what is going on. AMERICA FIRST! President DJT',
+    },
+    {
+      archiveUrl: 'https://trumpstruth.org/statuses/37462',
+      id: '116290510170055349',
+      kind: 'truth',
+      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116290510170055349',
+      publishedAt: '2026-03-25T15:26:04Z',
+      previewImageUrl: null,
+      text: 'MAKE AMERICA GREAT AGAIN!!!',
+    },
+    {
+      archiveUrl: 'https://trumpstruth.org/statuses/37461',
+      id: '116290505546059162',
+      kind: 'truth',
+      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116290505546059162',
+      publishedAt: '2026-03-25T15:24:54Z',
+      previewImageUrl: null,
+      text:
+        'The Democrats don’t want to make any deal unless Amnesty and Citizenship is given to millions of Criminals who have entered our Country illegally, many of whom have been convicted of serious crimes. PROTECT AMERICA! President DJT',
+    },
+    {
+      archiveUrl: 'https://trumpstruth.org/statuses/37460',
+      id: '116290465114134220',
+      kind: 'truth',
+      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116290465114134220',
+      publishedAt: '2026-03-25T15:14:37Z',
+      previewImageUrl: null,
+      text:
+        'Blame the Democrats for the Airport’s mess. They want our Country to do badly. They want our Country to fail. They broke the already signed Bill because they want to take care of Criminals who enter our Country illegally, rather than American citizens. Thank you to our great ICE Patriots for helping. It makes a big difference. I may call up the National Guard for more help. President DJT.',
+    },
+    {
       archiveUrl: 'https://trumpstruth.org/statuses/37459',
       id: '116290206738569856',
       kind: 'truth',
@@ -22,95 +111,8 @@ export const TRUMP_TRUTH_SNAPSHOT = {
       text:
         'Trump and Pirro deserve credit for big cuts to Washington, DC crime: https://www.washingtonexaminer.com/opinion/beltway-confidential/4498245/trump-and-pirro-deserve-credit-for-big-cuts-to-washington-dc-crime/',
     },
-    {
-      archiveUrl: 'https://trumpstruth.org/statuses/37457',
-      previewImageUrl: 'https://truth-archive.us-iad-1.linodeobjects.com/attachments/15763/3188e7848cde8119.png',
-      id: '116287761828408706',
-      kind: 'truth',
-      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116287761828408706',
-      publishedAt: '2026-03-25T03:47:08Z',
-      text: 'Terrible!\n\nhttps://x.com/jamesokeefeiii/status/2036527947255788007?s=46',
-    },
-    {
-      archiveUrl: 'https://trumpstruth.org/statuses/37458',
-      id: '116287754799935332',
-      kind: 'truth',
-      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116287754799935332',
-      publishedAt: '2026-03-25T03:45:21Z',
-      previewImageUrl: null,
-      text:
-        'Iran’s flex of long-range ballistic missiles vindicates Trump, may change European calculus: https://justthenews.com/government/security/irans-flex-long-range-ballistic-missiles-vindicates-trump-threat-perception',
-    },
-    {
-      archiveUrl: 'https://trumpstruth.org/statuses/37455',
-      id: '116287752129128324',
-      kind: 'truth',
-      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116287752129128324',
-      publishedAt: '2026-03-25T03:44:40Z',
-      previewImageUrl: null,
-      text:
-        'Trump admin looks to streamline permitting, lower costs to help make home ownership more attainable: https://justthenews.com/politics-policy/regulation/trump-administration-looks-streamline-home-permitting-and-bring-down',
-    },
-    {
-      archiveUrl: 'https://trumpstruth.org/statuses/37456',
-      id: '116287749682881628',
-      kind: 'truth',
-      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116287749682881628',
-      publishedAt: '2026-03-25T03:44:02Z',
-      previewImageUrl: null,
-      text:
-        'Fishing expedition: Docs expose expansive FBI surveillance of Trump allies, possible illegality: https://justthenews.com/government/congress/fishing-expedition-new-docs-lay-bare-expansive-fbi-surveillance-targeting-trump',
-    },
-    {
-      archiveUrl: 'https://trumpstruth.org/statuses/37453',
-      previewImageUrl: 'https://truth-archive.us-iad-1.linodeobjects.com/attachments/15761/6ec9755d7def4563.jpg',
-      id: '116287683741019472',
-      kind: 'media',
-      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116287683741019472',
-      publishedAt: '2026-03-25T03:27:16Z',
-      text: '',
-    },
-    {
-      archiveUrl: 'https://trumpstruth.org/statuses/37454',
-      previewImageUrl: 'https://truth-archive.us-iad-1.linodeobjects.com/attachments/15762/d88145e6cceffec7.jpg',
-      id: '116287679930753202',
-      kind: 'media',
-      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116287679930753202',
-      publishedAt: '2026-03-25T03:26:18Z',
-      text: '',
-    },
-    {
-      archiveUrl: 'https://trumpstruth.org/statuses/37452',
-      previewImageUrl: 'https://truth-archive.us-iad-1.linodeobjects.com/attachments/15760/ac15be3c10e58069.jpg',
-      id: '116286710096907230',
-      kind: 'truth',
-      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116286710096907230',
-      publishedAt: '2026-03-24T23:19:40Z',
-      text:
-        'Highly Respected Prime Minister of Hungary, Viktor Orbán, is a truly strong and powerful Leader, with a proven track record of delivering phenomenal results. He fights tirelessly for, and loves, his Great Country and People, just like I do for the United States of America. Viktor works hard to Protect Hungary, Grow the Economy, Create Jobs, Promote Trade, Stop Illegal Immigration, and Ensure LAW AND ORDER! Relations between Hungary and the United States have reached new heights of cooperation and spectacular achievement under my Administration, thanks largely to Prime Minister Orbán. I look forward to continuing working closely with him so that both of our Countries can further advance this tremendous path to SUCCESS and cooperation. I was proud to ENDORSE Viktor for Re-Election in 2022, and am honored to do so again. Election Day is April 12, 2026. Hungary: GET OUT AND VOTE FOR VIKTOR ORBÁN. He is a true friend, fighter, and WINNER, and has my Complete and Total Endorsement for Re-Election as Prime Minister of Hungary — VIKTOR ORBÁN WILL NEVER LET THE GREAT PEOPLE OF HUNGARY DOWN. I AM WITH HIM ALL THE WAY! PRESIDENT DONALD J. TRUMP',
-    },
-    {
-      archiveUrl: 'https://trumpstruth.org/statuses/37450',
-      id: '116285916990204668',
-      kind: 'truth',
-      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116285916990204668',
-      publishedAt: '2026-03-24T19:57:58Z',
-      previewImageUrl: null,
-      text:
-        'It is my Great Honor to endorse T.W. Shannon, an America First Patriot who is running for Lieutenant Governor of Oklahoma, a place I love and WON BIG, winning all 77 out of 77 Counties in 2016, 2020, and 2024!\n\nAs the youngest House Speaker in Oklahoma’s History, the National Chair of Black Voices for Trump and, as a former Senior Appointee at the U.S. Department of Agriculture in my Administration, T.W. has proven he has the Courage and Wisdom to deliver strong results for the incredible people of his State and Nation — He has truly been with us from the beginning! As your next Lieutenant Governor, T.W. will work hard to Grow our Economy, Cut Taxes and Regulations, Support our Amazing Farmers and Ranchers, Promote MADE IN THE U.S.A., Unleash American Energy DOMINANCE, Keep our Border SECURE, Stop Migrant Crime, Advance Election Integrity, Ensure LAW AND ORDER, Strengthen our Military, Veterans, and Law Enforcement, and Protect our always under siege Second Amendment.\n\nT.W. Shannon has my Complete and Total Endorsement to be the next Lieutenant Governor of Oklahoma — HE WILL NEVER LET YOU DOWN!',
-    },
-    {
-      archiveUrl: 'https://trumpstruth.org/statuses/37451',
-      previewImageUrl: 'https://truth-archive.us-iad-1.linodeobjects.com/attachments/15759/8c65b4a1a8734b49.jpg',
-      id: '116285908636437489',
-      kind: 'truth',
-      originalUrl: 'https://truthsocial.com/@realDonaldTrump/116285908636437489',
-      publishedAt: '2026-03-24T19:55:50Z',
-      text:
-        'It is my Great Honor to endorse State Representative Michelle Davis, a REAL Republican running for Indiana\'s 41st State Senate District (which I won by 33 points!), against RINO incumbent Greg Walker! Michelle will be a fantastic replacement for Walker who, for whatever reason, voted against Redistricting in Indiana, which puts the United States Congress in jeopardy. Walker and his RINO friends made Indiana, a State I love and have been very good to, the only State in the Country that essentially said they don’t care about what happens in the United States Congress. We could have easily picked up two seats in Indiana, so Walker, an America Last politician, put our Majority in the House of Representatives at risk, thereby putting our Country in a very dangerous position in losing some of the magnificent gains that we have made over the last year, since I assumed the Office of President.\n\nState Representative Michelle Davis, on the other hand, strongly voted WITH Republicans to pass Redistricting in the State House, unlike “RINO” Greg Walker, who voted with the Democrats in the State Senate to stop it. As your next State Senator, Michelle will fight tirelessly to Protect "Hoosier" Values, Advocate for the Working Men and Women of Indiana, Grow our Economy, Cut Taxes and Regulations, Promote American Manufacturing, Advance MADE IN THE U.S.A., Unleash American Energy DOMINANCE, Keep our Border SECURE, Support our Military, Veterans, and Law Enforcement, Advance Election Integrity, and Defend our always under siege Second Amendment.\n\nMichelle Davis has my Complete and Total Endorsement to be the next State Senator from Indiana\'s 41st Senate District. Unlike incumbent Greg Walker, a “RINO” LOSER who has failed the fantastic people of Indiana so badly, MICHELLE DAVIS IS A WINNER WHO WILL NOT LET YOU DOWN!',
-    },
   ] satisfies TrumpTruthPost[],
   sourceLabel: "Trump's Truth feed",
   sourceUrl: 'https://trumpstruth.org/feed',
-  updatedAt: '2026-03-25T14:08:54Z',
+  updatedAt: '2026-03-26T02:42:20Z',
 } as const
