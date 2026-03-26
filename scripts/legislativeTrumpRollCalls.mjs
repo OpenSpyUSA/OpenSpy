@@ -46,6 +46,15 @@ function selectedBroadHouse(id, year, rollNumber, category, options = {}) {
   })
 }
 
+function selectedBroadSenate(id, congress, session, voteNumber, category, options = {}) {
+  return senate(id, congress, session, voteNumber, category, {
+    scoreIncluded: false,
+    selected: true,
+    signalTier: 'broad_admin_related',
+    ...options,
+  })
+}
+
 const selectedHouseRollCalls = [
   selectedHouse('house-ahca-rule-pq', 2017, 252, 'health-care', {
     label: 'American Health Care Act rule',
@@ -1117,6 +1126,106 @@ const selectedSenateRollCalls = [
 ]
 
 const senateCandidateExtras = [
+  senate('senate-ratcliffe-motion-to-proceed', 119, 1, 9, 'nominations', {
+    label: 'Ratcliffe motion to proceed',
+  }),
+  senate('senate-kash-patel-motion-to-proceed', 119, 1, 56, 'nominations', {
+    highlight: true,
+    label: 'Kash Patel motion to proceed',
+  }),
+  senate('senate-kash-patel-cloture', 119, 1, 60, 'nominations', {
+    highlight: true,
+    label: 'Kash Patel cloture',
+  }),
+  senate('senate-kash-patel-confirm', 119, 1, 61, 'nominations', {
+    highlight: true,
+    label: 'Kash Patel confirmation',
+  }),
+  senate('senate-budget-resolution-motion-to-proceed', 119, 1, 58, 'reconciliation', {
+    highlight: true,
+    label: 'FY2025 budget resolution motion to proceed',
+  }),
+  senate('senate-budget-resolution-adoption', 119, 1, 87, 'reconciliation', {
+    highlight: true,
+    label: 'FY2025 budget resolution adoption',
+  }),
+  selectedBroadSenate('senate-boem-cra-motion-to-proceed', 119, 1, 91, 'energy', {
+    label: 'BOEM archaeology rule disapproval motion to proceed',
+  }),
+  selectedBroadSenate('senate-boem-cra-passage', 119, 1, 92, 'energy', {
+    highlight: true,
+    label: 'BOEM archaeology rule disapproval',
+  }),
+  selectedBroadSenate('senate-epa-methane-cra-motion-to-proceed', 119, 1, 96, 'energy', {
+    label: 'EPA methane fee rule disapproval motion to proceed',
+  }),
+  selectedBroadSenate('senate-epa-methane-cra-passage', 119, 1, 97, 'energy', {
+    highlight: true,
+    label: 'EPA methane fee rule disapproval',
+  }),
+  selectedBroadSenate('senate-irs-crypto-cra-motion-to-proceed', 119, 1, 101, 'taxes', {
+    label: 'IRS crypto reporting rule disapproval motion to proceed',
+  }),
+  selectedBroadSenate('senate-irs-crypto-cra-passage', 119, 1, 102, 'taxes', {
+    highlight: true,
+    label: 'IRS crypto reporting rule disapproval',
+  }),
+  selectedBroadSenate('senate-cfpb-payments-cra-motion-to-proceed', 119, 1, 103, 'trade', {
+    label: 'CFPB digital payments rule disapproval motion to proceed',
+  }),
+  selectedBroadSenate('senate-cfpb-payments-cra-passage', 119, 1, 106, 'trade', {
+    highlight: true,
+    label: 'CFPB digital payments rule disapproval',
+  }),
+  senate('senate-driscoll-cloture', 119, 1, 88, 'nominations', {
+    label: 'Daniel Driscoll cloture',
+  }),
+  senate('senate-driscoll-confirm', 119, 1, 90, 'nominations', {
+    highlight: true,
+    label: 'Daniel Driscoll confirmation',
+  }),
+  senate('senate-blanche-cloture', 119, 1, 104, 'nominations', {
+    label: 'Todd Blanche cloture',
+  }),
+  senate('senate-blanche-confirm', 119, 1, 105, 'nominations', {
+    highlight: true,
+    label: 'Todd Blanche confirmation',
+  }),
+  senate('senate-edgar-cloture', 119, 1, 107, 'immigration', {
+    label: 'Troy Edgar cloture',
+  }),
+  senate('senate-edgar-confirm', 119, 1, 108, 'immigration', {
+    highlight: true,
+    label: 'Troy Edgar confirmation',
+  }),
+  senate('senate-bradbury-cloture', 119, 1, 112, 'nominations', {
+    label: 'Steven Bradbury cloture',
+  }),
+  senate('senate-bradbury-confirm', 119, 1, 113, 'nominations', {
+    highlight: true,
+    label: 'Steven Bradbury confirmation',
+  }),
+  senate('senate-slater-cloture', 119, 1, 114, 'nominations', {
+    label: 'Abigail Slater cloture',
+  }),
+  senate('senate-slater-confirm', 119, 1, 115, 'nominations', {
+    highlight: true,
+    label: 'Abigail Slater confirmation',
+  }),
+  senate('senate-sonderling-cloture', 119, 1, 118, 'nominations', {
+    label: 'Keith Sonderling cloture',
+  }),
+  senate('senate-sonderling-confirm', 119, 1, 119, 'nominations', {
+    highlight: true,
+    label: 'Keith Sonderling confirmation',
+  }),
+  senate('senate-pulte-cloture', 119, 1, 120, 'nominations', {
+    label: 'William Pulte cloture',
+  }),
+  senate('senate-pulte-confirm', 119, 1, 121, 'nominations', {
+    highlight: true,
+    label: 'William Pulte confirmation',
+  }),
   senate('senate-mattis-confirm', 115, 1, 29, 'nominations', {
     label: 'James Mattis confirmation',
   }),

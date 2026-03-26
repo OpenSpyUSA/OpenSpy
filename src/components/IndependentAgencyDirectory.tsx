@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   compareIndependentAgenciesByImportance,
   INDEPENDENT_AGENCY_SOURCE_LABEL,
@@ -5,6 +6,7 @@ import {
   independentAgencyCatalog,
   independentAgencyTotal,
 } from '../independentAgencyCatalog'
+import { getIndependentAgencySealCandidates } from '../independentAgencySeals'
 import type { GovernmentPerson } from '../types'
 
 function normalizeAgencyKey(value: string | undefined) {
@@ -46,6 +48,58 @@ function getProfiledAgencyPeople(
       return agencyPeopleByDepartment.get(normalizeAgencyKey(item.name)) ?? null
     })
     .filter(Boolean) as GovernmentPerson[]
+}
+
+function getAgencyFallbackLabel(agencyName: string) {
+  const stripped = agencyName.replace(/\s+\([^)]*\)/g, '').trim()
+  const words = stripped
+    .split(/[^A-Za-z0-9]+/)
+    .filter(Boolean)
+    .filter((word) => !['and', 'for', 'of', 'the', 'to'].includes(word.toLowerCase()))
+
+  if (words.length === 0) {
+    return stripped.slice(0, 3).toUpperCase()
+  }
+
+  if (words.length === 1) {
+    return words[0].slice(0, 3).toUpperCase()
+  }
+
+  return words
+    .slice(0, 3)
+    .map((word) => word[0]?.toUpperCase() ?? '')
+    .join('')
+}
+
+function AgencySealImage({ agencyName }: { agencyName: string }) {
+  const candidates = getIndependentAgencySealCandidates(agencyName)
+  const [candidateIndex, setCandidateIndex] = useState(0)
+  const currentCandidate = candidates[candidateIndex]
+
+  if (!currentCandidate) {
+    return (
+      <div
+        aria-label={`${agencyName} badge`}
+        className="agency-node__seal-frame agency-node__seal-frame--fallback"
+        title={agencyName}
+      >
+        <span className="agency-node__seal-fallback">{getAgencyFallbackLabel(agencyName)}</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="agency-node__seal-frame">
+      <img
+        alt={`${agencyName} seal`}
+        className="agency-node__seal"
+        decoding="async"
+        loading="lazy"
+        onError={() => setCandidateIndex((index) => index + 1)}
+        src={currentCandidate}
+      />
+    </div>
+  )
 }
 
 export function IndependentAgencyDirectory({
@@ -167,24 +221,27 @@ export function IndependentAgencyDirectory({
                           selectedPersonId === profiledPerson.id ? ' is-selected' : ''
                         }`}
                       >
-                        <span className="agency-node__copy">
-                          {agencyWebsite ? (
-                            <a
-                              className="agency-node__primary-link"
-                              href={agencyWebsite}
-                              rel="noreferrer"
-                              target="_blank"
-                            >
-                              <strong>{item.name}</strong>
-                              <span>{item.typeLabel}</span>
-                            </a>
-                          ) : (
-                            <>
-                              <strong>{item.name}</strong>
-                              <span>{item.typeLabel}</span>
-                            </>
-                          )}
-                        </span>
+                        <div className="agency-node__lead">
+                          <AgencySealImage agencyName={item.name} />
+                          <span className="agency-node__copy">
+                            {agencyWebsite ? (
+                              <a
+                                className="agency-node__primary-link"
+                                href={agencyWebsite}
+                                rel="noreferrer"
+                                target="_blank"
+                              >
+                                <strong>{item.name}</strong>
+                                <span>{item.typeLabel}</span>
+                              </a>
+                            ) : (
+                              <>
+                                <strong>{item.name}</strong>
+                                <span>{item.typeLabel}</span>
+                              </>
+                            )}
+                          </span>
+                        </div>
                         <button
                           className="agency-node__status agency-node__status--button"
                           onClick={() => onOpenPerson(profiledPerson.id)}
@@ -195,24 +252,27 @@ export function IndependentAgencyDirectory({
                       </div>
                     ) : (
                       <div className="agency-node">
-                        <span className="agency-node__copy">
-                          {agencyWebsite ? (
-                            <a
-                              className="agency-node__primary-link"
-                              href={agencyWebsite}
-                              rel="noreferrer"
-                              target="_blank"
-                            >
-                              <strong>{item.name}</strong>
-                              <span>{item.typeLabel}</span>
-                            </a>
-                          ) : (
-                            <>
-                              <strong>{item.name}</strong>
-                              <span>{item.typeLabel}</span>
-                            </>
-                          )}
-                        </span>
+                        <div className="agency-node__lead">
+                          <AgencySealImage agencyName={item.name} />
+                          <span className="agency-node__copy">
+                            {agencyWebsite ? (
+                              <a
+                                className="agency-node__primary-link"
+                                href={agencyWebsite}
+                                rel="noreferrer"
+                                target="_blank"
+                              >
+                                <strong>{item.name}</strong>
+                                <span>{item.typeLabel}</span>
+                              </a>
+                            ) : (
+                              <>
+                                <strong>{item.name}</strong>
+                                <span>{item.typeLabel}</span>
+                              </>
+                            )}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </li>

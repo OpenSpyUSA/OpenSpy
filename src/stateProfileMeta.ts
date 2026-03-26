@@ -8,6 +8,8 @@ export interface StateProfileMeta {
 export const STATE_PROFILE_POPULATION_SOURCE_URL =
   'https://www.statsamerica.org/sip/rank_list.aspx?ct=S23&rank_label=pop1'
 export const STATE_PROFILE_GDP_SOURCE_URL = 'https://apps.bea.gov/regional/zip/SAGDP.zip'
+export const STATE_PROFILE_DEBT_SOURCE_URL =
+  'https://api.census.gov/data/timeseries/govsstatefin?get=NAME,AMOUNT&AGG_DESC=SF0429&for=state:*&YEAR=2024'
 
 export const STATE_PROFILE_META: Record<string, StateProfileMeta> = {
   AL: {
@@ -310,4 +312,57 @@ export const STATE_PROFILE_META: Record<string, StateProfileMeta> = {
     headquartersCompany: "Taco John's",
     headquartersLocation: 'Cheyenne',
   },
+}
+
+export const STATE_PROFILE_DEBT_OUTSTANDING_THOUSANDS: Record<string, number> = {
+  AL: 10994029,
+  AK: 5721235,
+  AZ: 6884137,
+  AR: 8053482,
+  CA: 166390802,
+  CO: 23572297,
+  CT: 33266071,
+  DE: 3686167,
+  FL: 20143226,
+  GA: 14051683,
+  HI: 11718278,
+  ID: 728591,
+  IL: 43377789,
+  IN: 8521138,
+  IA: 8055307,
+  KS: 7163254,
+  KY: 10078603,
+  LA: 16091231,
+  ME: 5302748,
+  MD: 25899424,
+  MA: 65869149,
+  MI: 25015350,
+  MN: 17029999,
+  MS: 7724729,
+  MO: 6989175,
+  MT: 2756388,
+  NE: 3393827,
+  NV: 2888477,
+  NH: 7575803,
+  NJ: 57228760,
+  NM: 7117737,
+  NY: 120585799,
+  NC: 13132128,
+  ND: 4889927,
+  OH: 32289981,
+  OK: 10150025,
+  OR: 16906795,
+  PA: 48666398,
+  RI: 11411369,
+  SC: 15361779,
+  SD: 4665146,
+  TN: 9025872,
+  TX: 70050561,
+  UT: 5553351,
+  VT: 2666996,
+  VA: 33732476,
+  WA: 30618657,
+  WV: 15080412,
+  WI: 22793690,
+  WY: 1255325,
 }

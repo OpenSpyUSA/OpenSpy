@@ -7,6 +7,27 @@ export interface SourceLink {
   url: string
 }
 
+export type EconomyMetricTone = 'cool' | 'neutral' | 'warm'
+export type EconomyHistoryRange = '1y' | '2y' | '5y' | '10y'
+
+export interface EconomyHistoryPoint {
+  label: string
+  value: number
+}
+
+export interface EconomyMetric {
+  category: string
+  detail: string
+  history?: EconomyHistoryPoint[]
+  id: string
+  label: string
+  sourceDate: string
+  sourceLabel: string
+  sourceUrl: string
+  tone?: EconomyMetricTone
+  value: string
+}
+
 export interface DisclosureHolding {
   derivedEstimate?: string
   derivedSourceLabel?: string
@@ -121,6 +142,14 @@ export interface ExecutiveCongressServiceRecord {
   votes: ExecutiveCongressRollCallVote[]
 }
 
+export interface PublicControversyRecord {
+  date: string
+  sourceLabel: string
+  sourceUrl: string
+  whatHappened: string
+  whyCriticized: string
+}
+
 export interface LegislativeTrumpRollCallSummary {
   houseCandidateCount: number
   houseScoredCount: number
@@ -172,6 +201,7 @@ export interface GovernmentPerson {
   office?: string
   partyCode?: string
   phone?: string
+  publicControversies?: PublicControversyRecord[]
   salaryAmount?: string
   financialDisclosureLabel?: string
   financialDisclosureNote?: string
@@ -233,6 +263,7 @@ export interface GovernmentBranch {
 
 export interface GovernmentDataset {
   branches: GovernmentBranch[]
+  economySnapshot?: EconomyMetric[]
   generatedAt: string
   legislativeTrumpRollCalls?: LegislativeTrumpRollCallSummary
   people: GovernmentPerson[]
@@ -255,4 +286,22 @@ export interface StateDelegationSummary {
   senators: GovernmentPerson[]
   representatives: GovernmentPerson[]
   totalPartyCounts: Record<Alignment, number>
+}
+
+export type InfrastructureCategory = 'airport' | 'datacenter' | 'university' | 'nuclear'
+export type InfrastructureMarkerImportance = 1 | 2 | 3
+
+export interface InfrastructureMarker {
+  category: InfrastructureCategory
+  city: string
+  code?: string
+  id: string
+  importance: InfrastructureMarkerImportance
+  latitude: number
+  longitude: number
+  note: string
+  sortOrder: number
+  stateCode: string
+  subtitle: string
+  title: string
 }

@@ -516,6 +516,8 @@ function parseSenateVoteXml(xml) {
   )) {
     entries.push({
       cast: match[5].trim(),
+      firstName: match[2].trim(),
+      lastName: match[1].trim(),
       name: `${match[2].trim()} ${match[1].trim()}`.trim(),
       partyCode: match[3].trim(),
       stateCode: match[4].trim(),
@@ -589,7 +591,10 @@ async function mapWithConcurrency(items, concurrency, mapper) {
   return results
 }
 
-async function buildSelectedLegislativeRollCallSnapshots() {
+async function buildSelectedLegislativeRollCallSnapshots(existingSelectedEvents = []) {
+  const existingSnapshotById = new Map(
+    existingSelectedEvents.map((snapshot) => [snapshot.id, snapshot]),
+  )
   const selectedHouseRollCalls = houseTrumpRollCallPool.filter((item) => item.selected)
   const selectedSenateRollCalls = senateTrumpRollCallPool.filter((item) => item.selected)
   const scoredHouseRollCalls = selectedHouseRollCalls.filter((item) => item.scoreIncluded !== false)
@@ -597,6 +602,27 @@ async function buildSelectedLegislativeRollCallSnapshots() {
   const selectedRollCalls = [...selectedHouseRollCalls, ...selectedSenateRollCalls]
 
   const snapshots = await mapWithConcurrency(selectedRollCalls, 6, async (event) => {
+    const existingSnapshot = existingSnapshotById.get(event.id)
+
+    if (existingSnapshot) {
+      return {
+        ...existingSnapshot,
+        ...event,
+        actionTime: existingSnapshot.actionTime,
+        billNumber: existingSnapshot.billNumber,
+        congress: existingSnapshot.congress,
+        date: existingSnapshot.date,
+        nayTotal: existingSnapshot.nayTotal,
+        question: existingSnapshot.question,
+        rollCallNumber: existingSnapshot.rollCallNumber,
+        session: existingSnapshot.session,
+        sourceUrl: existingSnapshot.sourceUrl,
+        title: existingSnapshot.title,
+        trumpOutcome: existingSnapshot.trumpOutcome,
+        yeaTotal: existingSnapshot.yeaTotal,
+      }
+    }
+
     if (event.chamber === 'house') {
       const xmlUrl = buildHouseRollCallXmlUrl(event.year, event.rollNumber)
       const parsed = parseHouseVoteXml(await fetchText(xmlUrl))
@@ -660,6 +686,45 @@ async function buildSelectedLegislativeRollCallSnapshots() {
   }
 }
 
+function applyStoredRollCallPosition(metrics, snapshot, position, evidenceLine = null) {
+  metrics.rollCallPositions[snapshot.id] = position
+
+  if (position === 'not_in_office') {
+    if (snapshot.scoreIncluded !== false) {
+      metrics.notInOfficeCount += 1
+    }
+
+    return
+  }
+
+  if (position === 'missed') {
+    if (snapshot.scoreIncluded !== false) {
+      metrics.missedCount += 1
+    }
+
+    return
+  }
+
+  if (snapshot.scoreIncluded === false) {
+    return
+  }
+
+  metrics.sampleSize += 1
+
+  if (position === 'pro') {
+    metrics.proVotes += 1
+  } else if (position === 'anti') {
+    metrics.antiVotes += 1
+  }
+
+  if (snapshot.highlight && metrics.evidence.length < 4) {
+    metrics.evidence.push(
+      evidenceLine ??
+        `${snapshot.label}: ${position === 'pro' ? 'pro-Trump side' : 'not pro-Trump side'}.`,
+    )
+  }
+}
+
 async function main() {
   const dataset = JSON.parse(readFileSync(datasetPath, 'utf8'))
   const people = dataset.people ?? []
@@ -667,8 +732,9 @@ async function main() {
   const representatives = people.filter(
     (person) => person.branchId === 'legislative' && person.sectionId === 'house',
   )
+  const existingSelectedEvents = dataset.legislativeTrumpRollCalls?.selectedEvents ?? []
   const { scoredHouseCount, scoredSenateCount, selectedHouseCount, selectedSenateCount, snapshots } =
-    await buildSelectedLegislativeRollCallSnapshots()
+    await buildSelectedLegislativeRollCallSnapshots(existingSelectedEvents)
   const snapshotById = new Map(snapshots.map((snapshot) => [snapshot.id, snapshot]))
   const metricsByPersonId = new Map()
 
@@ -689,49 +755,40 @@ async function main() {
     if (snapshot.chamber === 'house') {
       for (const person of representatives) {
         const metrics = metricsByPersonId.get(person.id)
-        const cast = getGuardedHouseCastForRepresentative(snapshot.entries, person)
 
         if (!metrics) {
           continue
         }
 
+        if (!(snapshot.entries instanceof Map)) {
+          applyStoredRollCallPosition(
+            metrics,
+            snapshot,
+            person.trumpRollCallPositions?.[snapshot.id] ?? 'not_in_office',
+          )
+          continue
+        }
+
+        const cast = getGuardedHouseCastForRepresentative(snapshot.entries, person)
+
         if (!cast) {
-          metrics.rollCallPositions[snapshot.id] = 'not_in_office'
-          if (snapshot.scoreIncluded !== false) {
-            metrics.notInOfficeCount += 1
-          }
+          applyStoredRollCallPosition(metrics, snapshot, 'not_in_office')
           continue
         }
 
         if (isSkippedLegislativeCast(cast)) {
-          metrics.rollCallPositions[snapshot.id] = 'missed'
-          if (snapshot.scoreIncluded !== false) {
-            metrics.missedCount += 1
-          }
+          applyStoredRollCallPosition(metrics, snapshot, 'missed')
           continue
         }
 
         const isProTrump =
           normalizeLegislativeCast(cast) === normalizeLegislativeCast(snapshot.proTrumpCast)
-        metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
-
-        if (snapshot.scoreIncluded === false) {
-          continue
-        }
-
-        metrics.sampleSize += 1
-
-        if (isProTrump) {
-          metrics.proVotes += 1
-        } else {
-          metrics.antiVotes += 1
-        }
-
-        if (snapshot.highlight && metrics.evidence.length < 4) {
-          metrics.evidence.push(
-            `${snapshot.label}: ${cast} (${isProTrump ? 'pro-Trump side' : 'not pro-Trump side'}).`,
-          )
-        }
+        applyStoredRollCallPosition(
+          metrics,
+          snapshot,
+          isProTrump ? 'pro' : 'anti',
+          `${snapshot.label}: ${cast} (${isProTrump ? 'pro-Trump side' : 'not pro-Trump side'}).`,
+        )
       }
 
       continue
@@ -744,47 +801,37 @@ async function main() {
         continue
       }
 
+      if (!Array.isArray(snapshot.entries)) {
+        applyStoredRollCallPosition(
+          metrics,
+          snapshot,
+          person.trumpRollCallPositions?.[snapshot.id] ?? 'not_in_office',
+        )
+        continue
+      }
+
       const matched = getMatchedSenateVoteEntryForPerson(snapshot.entries, person, snapshot.id)
       const matchedEntry = matched?.entry
 
       if (!matchedEntry) {
-        metrics.rollCallPositions[snapshot.id] = 'not_in_office'
-        if (snapshot.scoreIncluded !== false) {
-          metrics.notInOfficeCount += 1
-        }
+        applyStoredRollCallPosition(metrics, snapshot, 'not_in_office')
         continue
       }
 
       if (isSkippedLegislativeCast(matchedEntry.cast)) {
-        metrics.rollCallPositions[snapshot.id] = 'missed'
-        if (snapshot.scoreIncluded !== false) {
-          metrics.missedCount += 1
-        }
+        applyStoredRollCallPosition(metrics, snapshot, 'missed')
         continue
       }
 
       const isProTrump =
         normalizeLegislativeCast(matchedEntry.cast) ===
         normalizeLegislativeCast(snapshot.proTrumpCast)
-      metrics.rollCallPositions[snapshot.id] = isProTrump ? 'pro' : 'anti'
-
-      if (snapshot.scoreIncluded === false) {
-        continue
-      }
-
-      metrics.sampleSize += 1
-
-      if (isProTrump) {
-        metrics.proVotes += 1
-      } else {
-        metrics.antiVotes += 1
-      }
-
-      if (snapshot.highlight && metrics.evidence.length < 4) {
-        metrics.evidence.push(
-          `${snapshot.label}: ${matchedEntry.cast} (${isProTrump ? 'pro-Trump side' : 'not pro-Trump side'}).`,
-        )
-      }
+      applyStoredRollCallPosition(
+        metrics,
+        snapshot,
+        isProTrump ? 'pro' : 'anti',
+        `${snapshot.label}: ${matchedEntry.cast} (${isProTrump ? 'pro-Trump side' : 'not pro-Trump side'}).`,
+      )
     }
   }
 

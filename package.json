@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "sync:data": "node scripts/generate-government-data.mjs",
+    "verify:economy": "node scripts/verify-economy-snapshot.mjs",
     "audit:votes": "node scripts/auditLegislativeTrumpVotes.mjs",
     "audit:senate-vote-names": "node scripts/auditSenateVoteNameMatching.mjs"
   },
@@ -25,7 +26,8 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "topojson-client": "^3.1.0",
-    "us-atlas": "^3.0.1"
+    "us-atlas": "^3.0.1",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.2.0",

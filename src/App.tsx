@@ -6,8 +6,16 @@ import {
   useEffectEvent,
   useState,
 } from 'react'
+import type { CSSProperties } from 'react'
 import { Avatar } from './components/Avatar'
+import { ExecutiveMilitaryGlobe } from './components/ExecutiveMilitaryGlobe'
 import { IndependentAgencyDirectory } from './components/IndependentAgencyDirectory'
+import {
+  EXECUTIVE_SHUTDOWN_AREA_GROUPS,
+  EXECUTIVE_SHUTDOWN_EVENTS,
+  EXECUTIVE_SHUTDOWN_EVENT_MAP,
+} from './executiveShutdownMeta'
+import { EXECUTIVE_AREA_SEAL_URLS } from './executiveAreaSeals'
 import { HOUSE_VACANCIES } from './houseVacancies'
 import { compareIndependentAgenciesByImportance } from './independentAgencyCatalog'
 import { LegislativeVoteMatrix } from './components/LegislativeVoteMatrix'
@@ -20,6 +28,8 @@ import {
 import { LegislativeMap } from './components/LegislativeMap'
 import { getRollCallVideoLink } from './legislativeRollCallVideo'
 import './App.css'
+import trumpTruthAvatarUrl from './assets/trump-truth-avatar.jpeg'
+import trumpTruthHeaderUrl from './assets/trump-truth-header.jpeg'
 import {
   formatAgeLabel,
   getCompactAgeValue,
@@ -30,12 +40,20 @@ import {
 import { describeLegislativeRollCall } from './legislativeRollCallMeta'
 import { FIFTY_STATE_CODES, STATE_CODE_TO_NAME } from './stateMeta'
 import { STATE_PROFILE_META } from './stateProfileMeta'
+import {
+  STATE_PROFILE_DEBT_OUTSTANDING_THOUSANDS,
+  STATE_PROFILE_DEBT_SOURCE_URL,
+} from './stateProfileMeta'
+import { TRUMP_TRUTH_SNAPSHOT, type TrumpTruthPost } from './trumpTruthSnapshot'
 import { formatTrumpScore, getTrumpBand } from './trumpScore'
 import { formatXHandle } from './xProfile'
 import type {
   Alignment,
   BranchId,
+  EconomyHistoryPoint,
+  EconomyHistoryRange,
   BranchSection,
+  EconomyMetric,
   ExecutiveCongressRollCallVote,
   ExecutiveCongressServiceRecord,
   GovernmentBranch,
@@ -56,15 +74,56 @@ const caseDateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
 })
 const populationCountFormatter = new Intl.NumberFormat('en-US')
+const trumpTruthDateFormatter = new Intl.DateTimeFormat('en-US', {
+  day: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  month: 'long',
+  timeZone: 'America/New_York',
+  year: 'numeric',
+})
+const shutdownTimelineMonthFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  timeZone: 'UTC',
+  year: 'numeric',
+})
+const shutdownChipMonthDayFormatter = new Intl.DateTimeFormat('en-US', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
+})
+const shutdownChipMonthDayYearFormatter = new Intl.DateTimeFormat('en-US', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
+  year: 'numeric',
+})
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+type ExecutivePageId = 'profiles' | 'systems'
 
 type RouteState = {
   branchId: BranchId | null
+  executivePage: ExecutivePageId | null
   personId: string | null
 }
 
 type SupremeCourtCaseSelection = {
   caseItem: SupremeCourtCase
   groupLabel: string
+}
+
+type ExecutiveOverviewCard = {
+  id: string
+  countLabel: string
+  title: string
+}
+
+type ExecutivePageCard = {
+  description: string
+  eyebrow: string
+  id: ExecutivePageId
+  title: string
 }
 
 type PartyFilter = Alignment | 'all'
@@ -75,6 +134,26 @@ type AudienceMode = 'citizen' | 'observer'
 const JUDICIAL_INFERENCE_NOTE =
   "A \"?\" means this justice's stance is inferred from the Court's result or a partial public statement, rather than fully listed justice-by-justice in the official text."
 const AUDIENCE_MODE_STORAGE_KEY = 'open-spy-audience-mode'
+const executivePageIdSet = new Set<ExecutivePageId>(['profiles', 'systems'])
+const EXECUTIVE_PAGE_META: Record<
+  ExecutivePageId,
+  { chooserDescription: string; chooserEyebrow: string; chooserTitle: string; heading: string }
+> = {
+  profiles: {
+    chooserDescription:
+      'White House, Cabinet Departments, executive profile cards, and the Trump Social block.',
+    chooserEyebrow: 'Page one',
+    chooserTitle: 'Profiles and Social',
+    heading: 'Profiles and Social',
+  },
+  systems: {
+    chooserDescription:
+      'Shutdown timeline, independent-agency landscape, and the military footprint map.',
+    chooserEyebrow: 'Page two',
+    chooserTitle: 'Shutdowns and Systems',
+    heading: 'Shutdowns and Systems',
+  },
+}
 
 const HOME_AUDIENCE_COPY: Record<
   AudienceMode,
@@ -95,6 +174,10 @@ const HOME_AUDIENCE_COPY: Record<
     title: "Let's spy on the U.S. government.",
   },
 }
+
+const HOME_FLAG_STAR_ROWS = [6, 5, 6, 5, 6, 5, 6, 5, 6] as const
+const HOME_FLAG_STAR_PATH =
+  'M0 -2.8L0.78 -0.92H2.8L1.12 0.38L1.76 2.44L0 1.22L-1.76 2.44L-1.12 0.38L-2.8 -0.92H-0.78Z'
 
 function isAudienceMode(value: string | null): value is AudienceMode {
   return value === 'citizen' || value === 'observer'
@@ -130,6 +213,54 @@ function formatPopulationCount(value: number) {
   return populationCountFormatter.format(value)
 }
 
+function formatTrumpTruthDate(value: string) {
+  return trumpTruthDateFormatter.format(new Date(value))
+}
+
+function formatShutdownTimelineMonth(value: Date) {
+  return shutdownTimelineMonthFormatter.format(value)
+}
+
+function formatShutdownChipLabel(startDate: string, endDate: string | null) {
+  const start = parseUtcDate(startDate)
+
+  if (!endDate) {
+    return `Shutdown since ${shutdownChipMonthDayYearFormatter.format(start)}`
+  }
+
+  const end = parseUtcDate(endDate)
+  const sameYear = start.getUTCFullYear() === end.getUTCFullYear()
+  const startLabel = sameYear
+    ? shutdownChipMonthDayFormatter.format(start)
+    : shutdownChipMonthDayYearFormatter.format(start)
+
+  return `Shutdown ${startLabel} to ${shutdownChipMonthDayYearFormatter.format(end)}`
+}
+
+function parseUtcDate(value: string) {
+  return new Date(`${value}T00:00:00Z`)
+}
+
+function getUtcStartOfDay(value: Date) {
+  return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()))
+}
+
+function addUtcDays(value: Date, days: number) {
+  return new Date(value.getTime() + days * MS_PER_DAY)
+}
+
+function getShutdownTimelineMonthTicks(rangeStart: Date, rangeEndExclusive: Date) {
+  const ticks: Date[] = []
+  const current = new Date(Date.UTC(rangeStart.getUTCFullYear(), rangeStart.getUTCMonth(), 1))
+
+  while (current < rangeEndExclusive) {
+    ticks.push(new Date(current.getTime()))
+    current.setUTCMonth(current.getUTCMonth() + 1)
+  }
+
+  return ticks
+}
+
 function formatStateGdpLabel(gdpMillions: number) {
   const gdpBillions = gdpMillions / 1000
 
@@ -142,6 +273,25 @@ function formatStateGdpLabel(gdpMillions: number) {
 
 function formatStateGdpPerCapitaLabel(gdpMillions: number, population: number) {
   const dollarsPerPerson = (gdpMillions * 1_000_000) / population
+  return `$${Math.round(dollarsPerPerson).toLocaleString('en-US')}`
+}
+
+function formatStateDebtLabel(debtThousands: number) {
+  const debtBillions = debtThousands / 1_000_000
+
+  if (debtBillions >= 1000) {
+    return `$${(debtBillions / 1000).toFixed(1)}T`
+  }
+
+  if (debtBillions >= 1) {
+    return `$${debtBillions.toFixed(1)}B`
+  }
+
+  return `$${(debtThousands / 1000).toFixed(1)}M`
+}
+
+function formatStateDebtPerCapitaLabel(debtThousands: number, population: number) {
+  const dollarsPerPerson = (debtThousands * 1000) / population
   return `$${Math.round(dollarsPerPerson).toLocaleString('en-US')}`
 }
 
@@ -866,37 +1016,65 @@ function shouldShowTrumpRelationship(person: GovernmentPerson) {
   return (person.executiveCongressServiceHistory?.length ?? 0) > 0
 }
 
+function isExecutivePageId(value: string | null | undefined): value is ExecutivePageId {
+  return executivePageIdSet.has(value as ExecutivePageId)
+}
+
 function parseHash(hash: string, peopleById?: Map<string, GovernmentPerson>): RouteState {
   const clean = hash.replace(/^#\/?/, '').trim()
 
   if (!clean) {
-    return { branchId: null, personId: null }
+    return { branchId: null, executivePage: null, personId: null }
   }
 
-  const [branchCandidate, personId] = clean.split('/')
+  const [branchCandidate, secondSegment, thirdSegment] = clean.split('/')
   const branchId = branchIdSet.has(branchCandidate as BranchId)
     ? (branchCandidate as BranchId)
     : null
 
   if (!branchId) {
-    return { branchId: null, personId: null }
+    return { branchId: null, executivePage: null, personId: null }
   }
 
+  const executivePage =
+    branchId === 'executive'
+      ? isExecutivePageId(secondSegment)
+        ? secondSegment
+        : null
+      : null
+  const personId =
+    branchId === 'executive'
+      ? executivePage
+        ? thirdSegment ?? null
+        : secondSegment ?? null
+      : secondSegment ?? null
   const selectedPerson = personId && peopleById ? peopleById.get(personId) : null
 
   if (selectedPerson && selectedPerson.branchId !== branchId) {
-    return { branchId, personId: null }
+    return { branchId, executivePage, personId: null }
   }
 
   return {
     branchId,
+    executivePage:
+      branchId === 'executive'
+        ? executivePage ?? (selectedPerson ? 'profiles' : null)
+        : null,
     personId: peopleById ? (selectedPerson ? personId : null) : personId ?? null,
   }
 }
 
-function toHash(branchId: BranchId | null, personId?: string | null) {
+function toHash(branchId: BranchId | null, personId?: string | null, executivePage?: ExecutivePageId | null) {
   if (!branchId) {
     return '#/'
+  }
+
+  if (branchId === 'executive') {
+    if (executivePage) {
+      return personId ? `#/executive/${executivePage}/${personId}` : `#/executive/${executivePage}`
+    }
+
+    return personId ? `#/executive/profiles/${personId}` : '#/executive'
   }
 
   return personId ? `#/${branchId}/${personId}` : `#/${branchId}`
@@ -1142,6 +1320,10 @@ function normalizeSearchText(value?: string | null) {
     .replace(/[^a-z0-9]+/gi, ' ')
     .trim()
     .toLowerCase()
+}
+
+function getCommitteeSlug(value: string) {
+  return normalizeSearchText(value).replace(/\s+/g, '-')
 }
 
 function buildLegislativeSearchHaystack(person: GovernmentPerson) {
@@ -1424,6 +1606,59 @@ function buildLegislativeChamberStats(people: GovernmentPerson[]) {
   ] as const
 }
 
+type LegislativeCommitteeSummary = {
+  committee: string
+  counts: Record<Alignment, number>
+  members: GovernmentPerson[]
+  slug: string
+}
+
+const HOUSE_COMMITTEES_SORTED_LAST = new Set(['Oversight and Government Reform'])
+
+function buildLegislativeCommitteeSummaries(people: GovernmentPerson[]) {
+  const summaries = new Map<string, LegislativeCommitteeSummary>()
+
+  for (const person of people) {
+    if (person.sectionId !== 'house' || !person.committees || person.committees.length === 0) {
+      continue
+    }
+
+    for (const rawCommittee of person.committees) {
+      const committee = rawCommittee.trim()
+
+      if (!committee) {
+        continue
+      }
+
+      const existingSummary = summaries.get(committee) ?? {
+        committee,
+        counts: createPartyCounts(),
+        members: [] as GovernmentPerson[],
+        slug: getCommitteeSlug(committee),
+      }
+
+      existingSummary.members.push(person)
+      existingSummary.counts[person.alignment] += 1
+      summaries.set(committee, existingSummary)
+    }
+  }
+
+  return [...summaries.values()].sort((left, right) => {
+    const leftPinnedLast = HOUSE_COMMITTEES_SORTED_LAST.has(left.committee)
+    const rightPinnedLast = HOUSE_COMMITTEES_SORTED_LAST.has(right.committee)
+
+    if (leftPinnedLast !== rightPinnedLast) {
+      return leftPinnedLast ? 1 : -1
+    }
+
+    if (right.members.length !== left.members.length) {
+      return right.members.length - left.members.length
+    }
+
+    return left.committee.localeCompare(right.committee)
+  })
+}
+
 function HouseVacancySection({
   selectedStateCode,
 }: {
@@ -1469,6 +1704,745 @@ function HouseVacancySection({
           </article>
         ))}
       </div>
+    </section>
+  )
+}
+
+function LegislativeCommitteeDetailSection({
+  onBack,
+  onOpenPerson,
+  selectedPersonId,
+  summary,
+}: {
+  onBack: () => void
+  onOpenPerson: (personId: string) => void
+  selectedPersonId: string | null
+  summary: LegislativeCommitteeSummary
+}) {
+  const sortedMembers = [...summary.members].sort(compareLegislativePeopleByService)
+
+  return (
+    <section className="section-card committee-detail-section" id="committee-detail">
+      <div className="section-card__header committee-detail-section__header">
+        <div>
+          <p className="eyebrow">House committee</p>
+          <h2>{summary.committee}</h2>
+        </div>
+        <button className="committee-detail-section__back" onClick={onBack} type="button">
+          Back to committees
+        </button>
+      </div>
+
+      <div className="committee-detail-section__stats">
+        <article className="committee-detail-stat">
+          <span>Total members</span>
+          <strong>{summary.members.length}</strong>
+        </article>
+        {(['democratic', 'republican', 'independent'] as const)
+          .filter((alignment) => summary.counts[alignment] > 0)
+          .map((alignment) => (
+            <article
+              className={`committee-detail-stat committee-detail-stat--${alignment}`}
+              key={`${summary.committee}-${alignment}`}
+            >
+              <span>{capitalizeAlignment(alignment)}</span>
+              <strong>{summary.counts[alignment]}</strong>
+            </article>
+          ))}
+      </div>
+
+      <p className="committee-detail-section__summary">
+        This page shows the full current House roster for this committee. Open any member
+        below to inspect biography, finance, and Trump-linked voting data.
+      </p>
+
+      <div className="people-grid people-grid--legislative">
+        {sortedMembers.map((person) => (
+          <PersonCard
+            isSelected={selectedPersonId === person.id}
+            key={person.id}
+            onOpen={onOpenPerson}
+            person={person}
+          />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function LegislativeCommitteeSection({
+  onOpenCommittee,
+  onOpenPerson,
+  people,
+  searchValue,
+  selectedCommitteeSlug,
+  selectedStateSummary,
+}: {
+  onOpenCommittee: (committeeSlug: string) => void
+  onOpenPerson: (personId: string) => void
+  people: GovernmentPerson[]
+  searchValue: string
+  selectedCommitteeSlug: string | null
+  selectedStateSummary: StateDelegationSummary | null
+}) {
+  const houseMembersWithCommittees = people.filter(
+    (person) => person.sectionId === 'house' && person.committees && person.committees.length > 0,
+  )
+  const committeeSummaries = buildLegislativeCommitteeSummaries(houseMembersWithCommittees)
+  const previewLimit =
+    selectedStateSummary || normalizeSearchText(searchValue) ? 10 : 6
+
+  return (
+    <section className="section-card committee-section">
+      <div className="section-card__header committee-section__header">
+        <div>
+          <p className="eyebrow">House committees</p>
+          <h2>{committeeSummaries.length} committees</h2>
+        </div>
+        <p>
+          {selectedStateSummary
+            ? `${houseMembersWithCommittees.length} visible representatives from ${selectedStateSummary.stateName} currently carry committee assignments here.`
+            : `${houseMembersWithCommittees.length} visible representatives currently carry House committee assignments in this view.`}
+        </p>
+      </div>
+
+      {committeeSummaries.length > 0 ? (
+        <div className="committee-grid">
+          {committeeSummaries.map((summary) => {
+            const visibleMembers = summary.members.slice(0, previewLimit)
+            const hiddenCount = Math.max(0, summary.members.length - visibleMembers.length)
+            const balanceChips = (
+              ['democratic', 'republican', 'independent'] as const
+            ).filter((alignment) => summary.counts[alignment] > 0)
+
+            return (
+              <article
+                className={`committee-card${
+                  selectedCommitteeSlug === summary.slug ? ' committee-card--selected' : ''
+                }`}
+                key={summary.committee}
+                onClick={() => onOpenCommittee(summary.slug)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    onOpenCommittee(summary.slug)
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="committee-card__top">
+                  <div className="committee-card__copy">
+                    <strong>{summary.committee}</strong>
+                    <span>
+                      {summary.members.length} member{summary.members.length === 1 ? '' : 's'} in current view
+                    </span>
+                  </div>
+                  <div className="committee-card__balance">
+                    {balanceChips.map((alignment) => (
+                      <span
+                        className={`committee-balance-chip committee-balance-chip--${alignment}`}
+                        key={`${summary.committee}-${alignment}`}
+                      >
+                        {summary.counts[alignment]} {capitalizeAlignment(alignment)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="committee-card__members">
+                  {visibleMembers.map((person) => (
+                    <button
+                      className={`committee-member-chip committee-member-chip--${person.alignment}`}
+                      key={`${summary.committee}-${person.id}`}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onOpenPerson(person.id)
+                      }}
+                      type="button"
+                    >
+                      {person.name}
+                    </button>
+                  ))}
+                  {hiddenCount > 0 ? (
+                    <span className="committee-member-chip committee-member-chip--more">
+                      +{hiddenCount} more
+                    </span>
+                  ) : null}
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="empty-results">
+          No House committee assignments match the current legislative filters.
+        </div>
+      )}
+    </section>
+  )
+}
+
+function ExecutiveShutdownSection() {
+  const timelineStart = parseUtcDate(
+    EXECUTIVE_SHUTDOWN_EVENTS.reduce((earliest, event) => {
+      return event.startDate < earliest ? event.startDate : earliest
+    }, EXECUTIVE_SHUTDOWN_EVENTS[0]?.startDate ?? '2025-10-01'),
+  )
+  const today = getUtcStartOfDay(new Date())
+  const timelineEndDay = EXECUTIVE_SHUTDOWN_EVENTS.reduce((latest, event) => {
+    const eventEnd = event.endDate ? parseUtcDate(event.endDate) : today
+
+    return eventEnd > latest ? eventEnd : latest
+  }, today)
+  const timelineEndExclusive = addUtcDays(timelineEndDay, 1)
+  const timelineSpan = Math.max(timelineEndExclusive.getTime() - timelineStart.getTime(), MS_PER_DAY)
+  const monthTicks = getShutdownTimelineMonthTicks(timelineStart, timelineEndExclusive)
+  const ongoingCount = EXECUTIVE_SHUTDOWN_EVENTS.filter((event) => event.status === 'ongoing').length
+  const timelineRowCount = EXECUTIVE_SHUTDOWN_AREA_GROUPS.reduce((count, group) => {
+    return count + group.areas.length
+  }, 0)
+
+  return (
+    <section className="section-card executive-shutdown-section">
+      <div className="section-card__header executive-shutdown-section__header">
+        <div>
+          <p className="eyebrow">Shutdown Timeline</p>
+          <h2>47th-term executive funding lapses</h2>
+        </div>
+        <p>
+          This is an appropriations view. A shutdown label here means the office sat inside
+          a lapsed funding bucket, not that every employee or function necessarily stopped
+          working.
+        </p>
+      </div>
+
+      <div className="executive-shutdown-timeline">
+        <div className="executive-shutdown-timeline__summary">
+          <article className="executive-shutdown-timeline__summary-card">
+            <span>Timeline span</span>
+            <strong>
+              {formatShutdownTimelineMonth(timelineStart)}-{formatShutdownTimelineMonth(timelineEndDay)}
+            </strong>
+          </article>
+          <article className="executive-shutdown-timeline__summary-card">
+            <span>Chart rows</span>
+            <strong>{timelineRowCount}</strong>
+          </article>
+          <article className="executive-shutdown-timeline__summary-card">
+            <span>Recorded lapses</span>
+            <strong>{EXECUTIVE_SHUTDOWN_EVENTS.length}</strong>
+          </article>
+          <article className="executive-shutdown-timeline__summary-card">
+            <span>Still ongoing</span>
+            <strong>{ongoingCount}</strong>
+          </article>
+        </div>
+
+        <div className="executive-shutdown-timeline__legend">
+          {EXECUTIVE_SHUTDOWN_EVENTS.map((event) => (
+            <article className="executive-shutdown-timeline__legend-item" key={event.id}>
+              <span
+                className={`executive-shutdown-timeline__legend-swatch executive-shutdown-timeline__legend-swatch--${event.id}`}
+              />
+              <div className="executive-shutdown-timeline__legend-copy">
+                <strong>{event.title}</strong>
+                <span>{event.dateLabel}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div className="executive-shutdown-timeline__axis">
+          <div className="executive-shutdown-timeline__axis-copy">
+            <span>Office or department</span>
+          </div>
+          <div className="executive-shutdown-timeline__axis-track">
+            {monthTicks.map((tick) => {
+              const left =
+                ((tick.getTime() - timelineStart.getTime()) / timelineSpan) * 100
+
+              return (
+                <div
+                  className="executive-shutdown-timeline__tick"
+                  key={tick.toISOString()}
+                  style={{ left: `${Math.min(100, Math.max(0, left))}%` }}
+                >
+                  <span>{formatShutdownTimelineMonth(tick)}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="executive-shutdown-timeline__group-list">
+          {EXECUTIVE_SHUTDOWN_AREA_GROUPS.map((group) => (
+            <section className="executive-shutdown-timeline__group" key={group.id}>
+              <div className="executive-shutdown-timeline__group-header">
+                <span>{group.label}</span>
+              </div>
+              <div className="executive-shutdown-timeline__rows">
+                {group.areas.map((area) => {
+                  const areaEvents = area.eventIds
+                    .map((eventId) => EXECUTIVE_SHUTDOWN_EVENT_MAP.get(eventId))
+                    .filter((event) => event != null)
+
+                  const timelineNote =
+                    areaEvents.length > 0
+                      ? areaEvents.map((event) => event.shortLabel).join(' • ')
+                      : 'No annual lapse marker'
+
+                  return (
+                    <article className="executive-shutdown-timeline__row" key={area.id}>
+                      <div className="executive-shutdown-timeline__row-copy">
+                        <strong>{area.label}</strong>
+                        <p>{timelineNote}</p>
+                      </div>
+                      <div className="executive-shutdown-timeline__lane">
+                        {monthTicks.map((tick) => {
+                          const tickLeft =
+                            ((tick.getTime() - timelineStart.getTime()) / timelineSpan) * 100
+
+                          return (
+                            <span
+                              className="executive-shutdown-timeline__gridline"
+                              key={`${area.id}-${tick.toISOString()}`}
+                              style={{ left: `${Math.min(100, Math.max(0, tickLeft))}%` }}
+                            />
+                          )
+                        })}
+                        {areaEvents.length > 0 ? (
+                          areaEvents.map((event) => {
+                            const eventStart = parseUtcDate(event.startDate)
+                            const eventEndDay = event.endDate ? parseUtcDate(event.endDate) : today
+                            const eventEndExclusive = addUtcDays(eventEndDay, 1)
+                            const left =
+                              ((eventStart.getTime() - timelineStart.getTime()) / timelineSpan) * 100
+                            const width =
+                              ((eventEndExclusive.getTime() - eventStart.getTime()) / timelineSpan) *
+                              100
+
+                            return (
+                              <div
+                                className={`executive-shutdown-timeline__bar executive-shutdown-timeline__bar--${event.id}`}
+                                key={`${area.id}-${event.id}`}
+                                style={{
+                                  left: `${Math.min(100, Math.max(0, left))}%`,
+                                  width: `${Math.min(100, Math.max(width, 1.6))}%`,
+                                }}
+                                aria-label={`${event.title} ${event.dateLabel}`}
+                                title={`${event.title} ${event.dateLabel}`}
+                              />
+                            )
+                          })
+                        ) : (
+                          <span className="executive-shutdown-timeline__no-lapse">
+                            No annual lapse marker
+                          </span>
+                        )}
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+
+      <div className="executive-shutdown-events">
+        {EXECUTIVE_SHUTDOWN_EVENTS.map((event) => (
+          <article
+            className={`executive-shutdown-event${
+              event.status === 'ongoing' ? ' executive-shutdown-event--ongoing' : ''
+            }`}
+            key={event.id}
+          >
+            <div className="executive-shutdown-event__top">
+              <span className="executive-shutdown-event__date">{event.dateLabel}</span>
+              <span
+                className={`shutdown-status-chip shutdown-status-chip--${event.status}`}
+              >
+                {event.status === 'ongoing' ? 'Ongoing' : 'Resolved'}
+              </span>
+            </div>
+            <h3>{event.title}</h3>
+            <p className="executive-shutdown-event__scope">{event.scopeLabel}</p>
+            <p>{event.summary}</p>
+            <div className="executive-shutdown-event__links">
+              {event.sourceLinks.map((link) => (
+                <a href={link.url} key={`${event.id}-${link.label}`} rel="noreferrer" target="_blank">
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="executive-shutdown-groups">
+        {EXECUTIVE_SHUTDOWN_AREA_GROUPS.map((group) => (
+          <section
+            className={`executive-shutdown-group executive-shutdown-group--${group.id}`}
+            key={group.id}
+          >
+            <div className="executive-shutdown-group__header">
+              <h3>{group.label}</h3>
+            </div>
+              <div className="executive-shutdown-area-grid">
+                {group.areas.map((area) => (
+                  <article className="executive-shutdown-area" key={area.id}>
+                    <div className="executive-shutdown-area__header">
+                      {EXECUTIVE_AREA_SEAL_URLS[area.id] ? (
+                        <div className="executive-shutdown-area__seal-frame">
+                          <img
+                            alt={`${area.label} seal`}
+                            className="executive-shutdown-area__seal"
+                            decoding="async"
+                            loading="lazy"
+                            src={EXECUTIVE_AREA_SEAL_URLS[area.id]}
+                          />
+                        </div>
+                      ) : null}
+                      <div className="executive-shutdown-area__title">
+                        <strong>{area.label}</strong>
+                        {area.workforceLabel ? (
+                          <span className="executive-shutdown-area__meta">
+                            {area.workforceLabel}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <div className="executive-shutdown-area__chips">
+                      {area.eventIds.length > 0 ? (
+                        area.eventIds.map((eventId) => {
+                          const event = EXECUTIVE_SHUTDOWN_EVENT_MAP.get(eventId)
+
+                          if (!event) {
+                            return null
+                          }
+
+                          return (
+                            <span
+                              className={`shutdown-event-chip shutdown-event-chip--${
+                                event.status === 'ongoing' ? 'ongoing' : 'resolved'
+                              }`}
+                              key={`${area.id}-${event.id}`}
+                            >
+                              {formatShutdownChipLabel(event.startDate, event.endDate)}
+                            </span>
+                          )
+                        })
+                      ) : (
+                        <span className="shutdown-event-chip shutdown-event-chip--none">
+                          No annual-lapse marker
+                        </span>
+                      )}
+                    </div>
+                    <p>{area.note}</p>
+                  </article>
+                ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function getTrumpTruthPostKindLabel(kind: TrumpTruthPost['kind']) {
+  switch (kind) {
+    case 'media':
+      return 'Media post'
+    case 'retruth':
+      return 'ReTruth'
+    default:
+      return 'Post'
+  }
+}
+
+function getTrumpTruthPostDisplayText(post: TrumpTruthPost) {
+  const trimmed = post.text.trim()
+
+  if (!trimmed) {
+    return ''
+  }
+
+  if (post.kind === 'retruth' && /^RT:\s*https?:\/\//i.test(trimmed)) {
+    return ''
+  }
+
+  return trimmed
+}
+
+function getTrumpTruthPostSummary(post: TrumpTruthPost) {
+  const displayText = getTrumpTruthPostDisplayText(post)
+
+  if (displayText) {
+    return displayText
+  }
+
+  switch (post.kind) {
+    case 'media':
+      return 'Media-only post captured in the archive snapshot.'
+    case 'retruth':
+      return 'ReTruthed post without standalone text in the current snapshot.'
+    default:
+      return 'Post captured without visible text in the current snapshot.'
+  }
+}
+
+function ExecutiveTrumpTruthSection() {
+  const leftPosts = TRUMP_TRUTH_SNAPSHOT.posts.slice(0, Math.ceil(TRUMP_TRUTH_SNAPSHOT.posts.length / 2))
+  const rightPosts = TRUMP_TRUTH_SNAPSHOT.posts.slice(Math.ceil(TRUMP_TRUTH_SNAPSHOT.posts.length / 2))
+  const truthProfileStyle = {
+    '--truth-header-image': `url(${trumpTruthHeaderUrl})`,
+  } as CSSProperties
+
+  const renderPostCard = (post: TrumpTruthPost, index: number) => (
+    <article
+      className={`executive-truth-card${post.previewImageUrl ? ' executive-truth-card--with-preview' : ''}`}
+      key={post.id}
+    >
+      <div className="executive-truth-card__rail">
+        <span>{String(index + 1).padStart(2, '0')}</span>
+      </div>
+
+      <div className="executive-truth-card__panel">
+        <div
+          className={`executive-truth-card__content${post.previewImageUrl ? ' executive-truth-card__content--with-preview' : ''}`}
+        >
+          {post.previewImageUrl ? (
+            <a className="executive-truth-card__thumb" href={post.archiveUrl} rel="noreferrer" target="_blank">
+              <img
+                alt={`Archived preview of Trump's ${getTrumpTruthPostKindLabel(post.kind).toLowerCase()} from ${formatTrumpTruthDate(post.publishedAt)}`}
+                className="executive-truth-card__image"
+                src={post.previewImageUrl}
+              />
+            </a>
+          ) : null}
+
+          <div className="executive-truth-card__copy">
+            <div className="executive-truth-card__topline">
+              <span className={`executive-truth-card__kind executive-truth-card__kind--${post.kind}`}>
+                {getTrumpTruthPostKindLabel(post.kind)}
+              </span>
+              <time className="executive-truth-card__date" dateTime={post.publishedAt}>
+                {formatTrumpTruthDate(post.publishedAt)}
+              </time>
+            </div>
+
+            <p className="executive-truth-card__summary">{getTrumpTruthPostSummary(post)}</p>
+
+            <div className="executive-truth-card__links">
+              <a href={post.originalUrl} rel="noreferrer" target="_blank">
+                Original
+              </a>
+              <a href={post.archiveUrl} rel="noreferrer" target="_blank">
+                Archive
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  )
+
+  return (
+    <section className="section-card executive-truth-section">
+      <div className="section-card__header executive-truth-section__header">
+        <div>
+          <p className="eyebrow executive-truth-section__eyebrow">
+            <img alt="Trump Truth Social profile image" className="executive-truth-section__badge" src={trumpTruthAvatarUrl} />
+            <span>Trump Social</span>
+          </p>
+          <h2>{TRUMP_TRUTH_SNAPSHOT.posts.length} most recent Truth Social posts</h2>
+        </div>
+        <p>
+          Snapshot from{' '}
+          <a href={TRUMP_TRUTH_SNAPSHOT.sourceUrl} rel="noreferrer" target="_blank">
+            {TRUMP_TRUTH_SNAPSHOT.sourceLabel}
+          </a>{' '}
+          as of {formatTrumpTruthDate(TRUMP_TRUTH_SNAPSHOT.updatedAt)}.
+        </p>
+      </div>
+
+      <div className="executive-truth-profile" style={truthProfileStyle}>
+        <div className="executive-truth-profile__banner" />
+        <div className="executive-truth-profile__meta">
+          <img
+            alt="Donald Trump Truth Social profile image"
+            className="executive-truth-profile__avatar"
+            src={trumpTruthAvatarUrl}
+          />
+          <div className="executive-truth-profile__identity">
+            <strong>Donald J. Trump</strong>
+            <span>@realDonaldTrump</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="executive-truth-stage">
+        <div className="executive-truth-grid">
+          <div className="executive-truth-column">{leftPosts.map((post, index) => renderPostCard(post, index))}</div>
+          <div className="executive-truth-column">
+            {rightPosts.map((post, index) => renderPostCard(post, index + leftPosts.length))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ExecutiveCabinetControversiesSection({
+  onOpenPerson,
+  people,
+  selectedPersonId,
+}: {
+  onOpenPerson: (personId: string) => void
+  people: GovernmentPerson[]
+  selectedPersonId: string | null
+}) {
+  const featuredPersonIds: string[] = [
+    'executive-pam-bondi',
+    'executive-pete-hegseth',
+    'executive-robert-f-kennedy-jr',
+    'executive-kristi-noem',
+    'executive-linda-mcmahon',
+    'executive-howard-lutnick',
+    'executive-sean-duffy',
+  ]
+  const featuredRank = new Map(featuredPersonIds.map((id, index) => [id, index]))
+  const featuredPeople = people
+    .filter((person) => featuredRank.has(person.id))
+    .sort((left, right) => {
+      return (featuredRank.get(left.id) ?? 999) - (featuredRank.get(right.id) ?? 999)
+    })
+    .filter((person) => (person.publicControversies?.length ?? 0) > 0)
+  const totalControversyCount = featuredPeople.reduce(
+    (sum, person) => sum + (person.publicControversies?.length ?? 0),
+    0,
+  )
+
+  if (!featuredPeople.length) {
+    return null
+  }
+
+  return (
+    <section className="section-card executive-controversy-section">
+      <div className="section-card__header">
+        <div>
+          <p className="eyebrow">
+            {totalControversyCount} controversy entries across {featuredPeople.length} selected Cabinet heads
+          </p>
+          <h2>Selected Public Controversies</h2>
+        </div>
+        <p>Higher-salience entries only. Click a name to open the full profile card.</p>
+      </div>
+
+      <div className="executive-controversy-list">
+        {featuredPeople.map((person) => {
+          const isSelected = selectedPersonId === person.id
+          const controversies = person.publicControversies ?? []
+
+          return (
+            <article className={`executive-controversy-card${isSelected ? ' is-selected' : ''}`} key={person.id}>
+              <div className="executive-controversy-card__top">
+                <div className="executive-controversy-card__title-group">
+                  <button
+                    className={`executive-controversy-card__person executive-controversy-card__person--${person.alignment}${
+                      isSelected ? ' is-selected' : ''
+                    }`}
+                    onClick={() => onOpenPerson(person.id)}
+                    type="button"
+                  >
+                    <span>{person.department ?? person.title}</span>
+                    <strong>{person.name}</strong>
+                  </button>
+                  <span className="executive-controversy-card__count">
+                    {controversies.length} {controversies.length === 1 ? 'entry' : 'entries'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="executive-controversy-entry-list">
+                {controversies.map((entry) => (
+                  <section
+                    className="executive-controversy-entry"
+                    key={`${person.id}-${entry.date}-${entry.sourceUrl}`}
+                  >
+                    <div className="executive-controversy-entry__meta">
+                      <time className="executive-controversy-card__date" dateTime={entry.date}>
+                        {formatCaseDate(entry.date)}
+                      </time>
+                      <a href={entry.sourceUrl} rel="noreferrer" target="_blank">
+                        {entry.sourceLabel}
+                      </a>
+                    </div>
+                    <p>
+                      <strong>What happened:</strong> {entry.whatHappened}
+                    </p>
+                    <p>
+                      <strong>Why it was criticized:</strong> {entry.whyCriticized}
+                    </p>
+                  </section>
+                ))}
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function ExecutiveOverviewSection({
+  cards,
+  onOpen,
+}: {
+  cards: ExecutiveOverviewCard[]
+  onOpen: (id: string) => void
+}) {
+  return (
+    <section className="executive-overview">
+      {cards.map((card) => (
+        <button className="executive-overview-card" key={card.id} onClick={() => onOpen(card.id)} type="button">
+          <span>{card.countLabel}</span>
+          <strong>{card.title}</strong>
+        </button>
+      ))}
+    </section>
+  )
+}
+
+function ExecutivePageChooserSection({
+  activePage,
+  cards,
+  onOpen,
+}: {
+  activePage: ExecutivePageId | null
+  cards: ExecutivePageCard[]
+  onOpen: (pageId: ExecutivePageId) => void
+}) {
+  return (
+    <section className="executive-page-chooser">
+      {cards.map((card) => {
+        const isActive = activePage === card.id
+
+        return (
+          <button
+            aria-pressed={isActive}
+            className={`executive-page-card${isActive ? ' is-active' : ''}`}
+            key={card.id}
+            onClick={() => onOpen(card.id)}
+            type="button"
+          >
+            <span>{card.eyebrow}</span>
+            <strong>{card.title}</strong>
+            <p>{card.description}</p>
+          </button>
+        )
+      })}
     </section>
   )
 }
@@ -1676,6 +2650,402 @@ function SupremeCourtCaseMatrix({
   )
 }
 
+function EconomySnapshotSection({ metrics }: { metrics: EconomyMetric[] }) {
+  const [historyRange, setHistoryRange] = useState<EconomyHistoryRange>('1y')
+
+  if (metrics.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="economy-strip" aria-labelledby="economy-strip-title">
+      <div className="economy-strip__intro">
+        <p className="eyebrow">Economy Snapshot</p>
+        <div className="economy-strip__intro-main">
+          <div className="economy-strip__intro-copy">
+            <h2 id="economy-strip-title">{metrics.length} official histories with selectable range.</h2>
+            <p>Switch every row between the last 1 year, 2 years, 5 years, or 10 years.</p>
+          </div>
+          <div className="economy-strip__controls" role="group" aria-label="Economy history range">
+            {(['1y', '2y', '5y', '10y'] as EconomyHistoryRange[]).map((range) => (
+              <button
+                aria-pressed={historyRange === range}
+                className={`economy-range-button${historyRange === range ? ' is-active' : ''}`}
+                key={range}
+                onClick={() => setHistoryRange(range)}
+                type="button"
+              >
+                {range.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="economy-history-list">
+        {metrics.map((metric) => {
+          const visibleHistory = getEconomyHistoryWindow(metric, historyRange)
+          const historyRangeLabel = getEconomyHistoryRangeLabel(visibleHistory)
+
+          return (
+            <article
+              className={`economy-history-row economy-history-row--${metric.tone ?? 'neutral'}`}
+              key={metric.id}
+            >
+              <div className="economy-history-row__summary">
+                <div className="economy-history-row__meta">
+                  <span>{metric.category}</span>
+                  <span>{metric.sourceDate}</span>
+                </div>
+                <div className="economy-history-row__heading">
+                  <h3>{metric.label}</h3>
+                  <strong className="economy-history-row__value">{metric.value}</strong>
+                </div>
+                {historyRangeLabel ? (
+                  <p className="economy-history-row__range">{historyRangeLabel}</p>
+                ) : null}
+                <p>{metric.detail}</p>
+                <a
+                  className="economy-history-row__source"
+                  href={metric.sourceUrl}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <span>{metric.sourceLabel}</span>
+                  <span>Open</span>
+                </a>
+              </div>
+              <div className="economy-history-row__plot-shell">
+                {visibleHistory.length >= 2 ? (
+                  <EconomyHistoryLine metric={metric} points={visibleHistory} range={historyRange} />
+                ) : null}
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function getEconomyHistoryPointCount(metricId: EconomyMetric['id'], range: EconomyHistoryRange) {
+  const yearlyPointCount = metricId === 'real-gdp' ? 4 : 12
+
+  switch (range) {
+    case '1y':
+      return yearlyPointCount
+    case '2y':
+      return yearlyPointCount * 2
+    case '5y':
+      return yearlyPointCount * 5
+    case '10y':
+      return yearlyPointCount * 10
+  }
+}
+
+function getEconomyHistoryWindow(metric: EconomyMetric, range: EconomyHistoryRange) {
+  if (!metric.history || metric.history.length === 0) {
+    return []
+  }
+
+  return metric.history.slice(-getEconomyHistoryPointCount(metric.id, range))
+}
+
+function getEconomyHistoryRangeLabel(points: EconomyHistoryPoint[]) {
+  if (points.length === 0) {
+    return null
+  }
+
+  return `${points[0].label} to ${points[points.length - 1].label}`
+}
+
+function getEconomyChartWidth(range: EconomyHistoryRange) {
+  switch (range) {
+    case '1y':
+      return 880
+    case '2y':
+      return 980
+    case '5y':
+      return 1160
+    case '10y':
+      return 1320
+  }
+}
+
+function formatEconomyAxisLabel(label: string) {
+  return label
+}
+
+function getEconomyAxisTickTargetCount() {
+  return 6
+}
+
+function getEconomyAxisTicks(points: EconomyHistoryPoint[]) {
+  if (points.length === 0) {
+    return []
+  }
+
+  const targetCount = Math.min(getEconomyAxisTickTargetCount(), points.length)
+  const seenIndices = new Set<number>()
+  const ticks: Array<{ index: number; label: string }> = []
+
+  for (let tickIndex = 0; tickIndex < targetCount; tickIndex += 1) {
+    const pointIndex =
+      targetCount === 1 ? 0 : Math.round(((points.length - 1) * tickIndex) / (targetCount - 1))
+
+    if (seenIndices.has(pointIndex)) {
+      continue
+    }
+
+    seenIndices.add(pointIndex)
+    ticks.push({
+      index: pointIndex,
+      label: formatEconomyAxisLabel(points[pointIndex].label),
+    })
+  }
+
+  return ticks
+}
+
+function formatEconomyDollarHistoryValue(value: number) {
+  const absoluteValue = Math.abs(value)
+  const sign = value < 0 ? '-' : ''
+
+  if (absoluteValue >= 1000) {
+    return `${sign}$${(absoluteValue / 1000).toFixed(2)}T`
+  }
+
+  return `${sign}$${absoluteValue.toFixed(1)}B`
+}
+
+function formatEconomyPriceHistoryValue(metricId: EconomyMetric['id'], value: number) {
+  if (metricId === 'gasoline-price') {
+    return `$${value.toFixed(2)}`
+  }
+
+  return `$${value.toFixed(2)}`
+}
+
+function formatEconomyHistoryValue(metricId: EconomyMetric['id'], value: number) {
+  switch (metricId) {
+    case 'payroll-jobs':
+      return `${value > 0 ? '+' : ''}${Math.round(value)}k`
+    case 'real-gdp':
+    case 'real-gdp-growth':
+      return `$${value.toFixed(2)}T`
+    case 'trade-balance':
+    case 'federal-receipts':
+    case 'federal-outlays':
+    case 'federal-deficit':
+      return formatEconomyDollarHistoryValue(value)
+    case 'wti-crude':
+    case 'brent-crude':
+    case 'gasoline-price':
+      return formatEconomyPriceHistoryValue(metricId, value)
+    case 'public-debt':
+      return `$${value.toFixed(3)}T`
+    case 'dow':
+    case 'sp500':
+      return value.toLocaleString('en-US', {
+        maximumFractionDigits: 0,
+      })
+    case 'labor-force-participation':
+    case 'unemployment-rate':
+      return `${value.toFixed(1)}%`
+    case 'fed-funds-rate':
+    case 'ten-year-treasury':
+      return `${value.toFixed(2)}%`
+    default:
+      return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`
+  }
+}
+
+function buildEconomyLineGeometry(points: EconomyHistoryPoint[], width: number, height: number) {
+  if (points.length === 0) {
+    return null
+  }
+
+  const paddingLeft = 44
+  const paddingRight = 44
+  const paddingTop = 28
+  const paddingBottom = 34
+  const values = points.map((point) => point.value)
+  let minValue = Math.min(...values)
+  let maxValue = Math.max(...values)
+
+  if (minValue === maxValue) {
+    minValue -= 1
+    maxValue += 1
+  }
+
+  const span = maxValue - minValue
+  const usableWidth = width - paddingLeft - paddingRight
+  const usableHeight = height - paddingTop - paddingBottom
+  const scaleX = points.length > 1 ? usableWidth / (points.length - 1) : 0
+  const mapY = (value: number) =>
+    height - paddingBottom - ((value - minValue) / span) * usableHeight
+  const chartPoints = points.map((point, index) => ({
+    ...point,
+    x: paddingLeft + index * scaleX,
+    y: mapY(point.value),
+  }))
+  const polyline = chartPoints.map((point) => `${point.x},${point.y}`).join(' ')
+  const lastPoint = points[points.length - 1]
+  const lastX = paddingLeft + (points.length - 1) * scaleX
+  const lastY = mapY(lastPoint.value)
+
+  return {
+    areaPath: `M ${paddingLeft},${height - paddingBottom} L ${polyline
+      .split(' ')
+      .join(' L ')} L ${lastX},${height - paddingBottom} Z`,
+    baselineY: minValue < 0 && maxValue > 0 ? mapY(0) : null,
+    chartPoints,
+    gridBottomY: height - paddingBottom,
+    gridTopY: paddingTop,
+    lastX,
+    lastY,
+    labelY: height - 8,
+    polyline,
+  }
+}
+
+function getEconomyChartValueEvery(metricId: EconomyMetric['id'], pointCount: number) {
+  if (metricId === 'real-gdp') {
+    if (pointCount <= 8) {
+      return 1
+    }
+
+    if (pointCount <= 20) {
+      return 4
+    }
+
+    return 8
+  }
+
+  if (pointCount <= 12) {
+    return 1
+  }
+
+  if (pointCount <= 24) {
+    return 3
+  }
+
+  if (pointCount <= 60) {
+    return 6
+  }
+
+  return 12
+}
+
+function EconomyHistoryLine({
+  metric,
+  points,
+  range,
+}: {
+  metric: EconomyMetric
+  points: EconomyHistoryPoint[]
+  range: EconomyHistoryRange
+}) {
+  const width = Math.max(760, getEconomyChartWidth(range))
+  const height = 164
+  const geometry = buildEconomyLineGeometry(points, width, height)
+
+  if (geometry == null) {
+    return null
+  }
+
+  const valueEvery = getEconomyChartValueEvery(metric.id, points.length)
+  const pointRadius = points.length > 60 ? 3.5 : 4.75
+  const axisTicks = getEconomyAxisTicks(points)
+  const axisTickByIndex = new Map(axisTicks.map((tick) => [tick.index, tick]))
+
+  const firstPoint = points[0]
+  const lastPoint = points[points.length - 1]
+  const ariaLabel = `${metric.label} history from ${firstPoint.label} ${formatEconomyHistoryValue(
+    metric.id,
+    firstPoint.value,
+  )} to ${lastPoint.label} ${formatEconomyHistoryValue(metric.id, lastPoint.value)}`
+
+  return (
+    <div className="economy-history-line">
+      <svg
+        aria-label={ariaLabel}
+        className="economy-history-line__svg"
+        role="img"
+        viewBox={`0 0 ${width} ${height}`}
+      >
+        {geometry.baselineY != null ? (
+          <line
+            className="economy-history-line__baseline"
+            x1="44"
+            x2={String(width - 44)}
+            y1={String(geometry.baselineY)}
+            y2={String(geometry.baselineY)}
+          />
+        ) : null}
+        {axisTicks.map((tick) => {
+          const tickPoint = geometry.chartPoints[tick.index]
+
+          return (
+            <line
+              className="economy-history-line__gridline"
+              key={`${metric.id}-grid-${tick.index}`}
+              x1={String(tickPoint.x)}
+              x2={String(tickPoint.x)}
+              y1={String(geometry.gridTopY)}
+              y2={String(geometry.gridBottomY)}
+            />
+          )
+        })}
+        <path className="economy-history-line__area" d={geometry.areaPath} />
+        <polyline className="economy-history-line__stroke" points={geometry.polyline} />
+        {geometry.chartPoints.map((point, pointIndex) => {
+          const isLastPoint = pointIndex === geometry.chartPoints.length - 1
+          const axisTick = axisTickByIndex.get(pointIndex)
+          const showValue = pointIndex % valueEvery === 0 || isLastPoint
+          const valueOffset = point.y < 42 ? 18 : -12
+          const valueClass = isLastPoint ? ' economy-history-line__value-text--current' : ''
+
+          return (
+            <Fragment key={`${metric.id}-${point.label}`}>
+              <g>
+                <title>
+                  {point.label} {formatEconomyHistoryValue(metric.id, point.value)}
+                </title>
+                <circle
+                  className="economy-history-line__dot"
+                  cx={String(point.x)}
+                  cy={String(point.y)}
+                  r={String(pointRadius)}
+                />
+              </g>
+              {showValue ? (
+                <text
+                  className={`economy-history-line__value-text${valueClass}`}
+                  textAnchor="middle"
+                  x={String(point.x)}
+                  y={String(point.y + valueOffset)}
+                >
+                  {formatEconomyHistoryValue(metric.id, point.value)}
+                </text>
+              ) : null}
+              {axisTick ? (
+                <text
+                  className="economy-history-line__tick-text"
+                  textAnchor="middle"
+                  x={String(point.x)}
+                  y={String(geometry.labelY)}
+                >
+                  {axisTick.label}
+                </text>
+              ) : null}
+            </Fragment>
+          )
+        })}
+      </svg>
+    </div>
+  )
+}
+
 function HomeView({
   audienceMode,
   data,
@@ -1690,14 +3060,51 @@ function HomeView({
   return (
     <main className="screen screen--home">
       <section className="hero-card hero-card--intro">
-        <p className="eyebrow">{homeCopy.eyebrow}</p>
-        <h1>{homeCopy.title}</h1>
-        <p className="hero-copy">{homeCopy.copy}</p>
+        <div className="hero-card__intro-copy">
+          <p className="eyebrow">{homeCopy.eyebrow}</p>
+          <h1>{homeCopy.title}</h1>
+          <p className="hero-copy">{homeCopy.copy}</p>
+          <p className="hero-note">
+            Some official links may open only from a U.S. IP address or a U.S. VPN node.
+          </p>
+        </div>
+        <div aria-hidden="true" className="hero-card__flag-shell">
+          <svg
+            className="hero-card__flag"
+            role="img"
+            viewBox="0 0 190 100"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <title>United States flag</title>
+            <rect fill="#ffffff" height="100" rx="8" width="190" />
+            {Array.from({ length: 13 }, (_, index) => (
+              <rect
+                fill={index % 2 === 0 ? '#b22234' : '#ffffff'}
+                height={100 / 13}
+                key={`home-flag-stripe-${index}`}
+                width="190"
+                y={(100 / 13) * index}
+              />
+            ))}
+            <rect fill="#3c3b6e" height={(100 / 13) * 7} width={190 * 0.4} />
+            {HOME_FLAG_STAR_ROWS.flatMap((starCount, rowIndex) => {
+              const startX = starCount === 6 ? 10 : 15.2
+              const gapX = 10.1
+              const y = 8 + rowIndex * 6
+
+              return Array.from({ length: starCount }, (_, starIndex) => (
+                <path
+                  d={HOME_FLAG_STAR_PATH}
+                  fill="#ffffff"
+                  key={`home-flag-star-${rowIndex}-${starIndex}`}
+                  transform={`translate(${startX + starIndex * gapX} ${y}) scale(0.9)`}
+                />
+              ))
+            })}
+          </svg>
+        </div>
       </section>
       <section className="branch-orbit" aria-label="Three branches of government">
-        <p className="branch-orbit__note" role="note">
-          Some official links may open only from a U.S. IP address or a U.S. VPN node.
-        </p>
         {data.branches.map((branch) => {
           const count = data.people.filter((person) =>
             branch.id === 'legislative'
@@ -1707,19 +3114,22 @@ function HomeView({
 
           return (
             <button
-              key={branch.id}
               className={`branch-orb branch-orb--${branch.id}`}
+              key={branch.id}
               onClick={() => onBranchSelect(branch.id)}
               type="button"
             >
               <span className="branch-orb__halo" />
-              <span className="branch-orb__label">{branch.name}</span>
-              <strong className="branch-orb__count">{count} profiles</strong>
-              <span className="branch-orb__summary">{branch.summary}</span>
+              <span className="branch-orb__content">
+                <span className="branch-orb__label">{branch.name}</span>
+                <strong className="branch-orb__count">{count} profiles</strong>
+                <span className="branch-orb__summary">{branch.summary}</span>
+              </span>
             </button>
           )
         })}
       </section>
+      <EconomySnapshotSection metrics={data.economySnapshot ?? []} />
     </main>
   )
 }
@@ -2454,6 +3864,7 @@ function App() {
   const [partyFilter, setPartyFilter] = useState<PartyFilter>('all')
   const [chamberFilter, setChamberFilter] = useState<ChamberFilter>('all')
   const [selectedStateCode, setSelectedStateCode] = useState<string | null>(null)
+  const [selectedCommitteeSlug, setSelectedCommitteeSlug] = useState<string | null>(null)
   const [selectedRollCallId, setSelectedRollCallId] = useState<string | null>(null)
   const [selectedSupremeCourtCaseId, setSelectedSupremeCourtCaseId] = useState<string | null>(null)
 
@@ -2466,6 +3877,7 @@ function App() {
   const peopleById = new Map(people.map((person) => [person.id, person]))
   const branchesById = new Map(branches.map((branch) => [branch.id, branch]))
   const selectedBranch = route.branchId ? branchesById.get(route.branchId) ?? null : null
+  const selectedExecutivePage = selectedBranch?.id === 'executive' ? route.executivePage : null
   const legislativePeople = people
     .filter((person) => person.branchId === 'legislative')
     .filter(shouldDisplayLegislativePerson)
@@ -2560,6 +3972,9 @@ function App() {
   const selectedStateProfile = selectedStateSummary
     ? STATE_PROFILE_META[selectedStateSummary.stateCode] ?? null
     : null
+  const selectedStateDebtOutstandingThousands = selectedStateSummary
+    ? STATE_PROFILE_DEBT_OUTSTANDING_THOUSANDS[selectedStateSummary.stateCode] ?? null
+    : null
   const statsPeople =
     visiblePeople.length > 0
       ? visiblePeople
@@ -2569,6 +3984,18 @@ function App() {
   const stats = selectedBranch ? buildBranchStats(selectedBranch, statsPeople) : []
   const legislativeStats =
     selectedBranch?.id === 'legislative' ? buildLegislativeChamberStats(statsPeople) : []
+  const allHouseCommitteeSummaries =
+    selectedBranch?.id === 'legislative'
+      ? buildLegislativeCommitteeSummaries(
+          legislativePeople.filter(
+            (person) => person.sectionId === 'house' && (person.committees?.length ?? 0) > 0,
+          ),
+        )
+      : []
+  const selectedCommitteeSummary =
+    selectedBranch?.id === 'legislative' && selectedCommitteeSlug
+      ? allHouseCommitteeSummaries.find((summary) => summary.slug === selectedCommitteeSlug) ?? null
+      : null
   const judicialJustices =
     selectedBranch?.id === 'judicial'
       ? visiblePeople
@@ -2601,6 +4028,72 @@ function App() {
           .flatMap(({ cases, groupLabel }) => cases.map((caseItem) => ({ caseItem, groupLabel })))
           .find(({ caseItem }) => caseItem.id === selectedSupremeCourtCaseId) ?? null
       : null
+  const executiveOverviewCards =
+    selectedBranch?.id === 'executive' && selectedExecutivePage === 'profiles'
+      ? ([
+          {
+            id: 'executive-trump-social',
+            countLabel: `${TRUMP_TRUTH_SNAPSHOT.posts.length} most recent Truth Social posts`,
+            title: 'Trump Social',
+          },
+          ...branchSections.map((section) => ({
+            id: `executive-${section.id}`,
+            countLabel: section.countLabel,
+            title: section.label,
+          })),
+        ] satisfies ExecutiveOverviewCard[])
+      : []
+  const executivePageCards =
+    selectedBranch?.id === 'executive'
+      ? ([
+          {
+            description: EXECUTIVE_PAGE_META.profiles.chooserDescription,
+            eyebrow: EXECUTIVE_PAGE_META.profiles.chooserEyebrow,
+            id: 'profiles',
+            title: EXECUTIVE_PAGE_META.profiles.chooserTitle,
+          },
+          {
+            description: EXECUTIVE_PAGE_META.systems.chooserDescription,
+            eyebrow: EXECUTIVE_PAGE_META.systems.chooserEyebrow,
+            id: 'systems',
+            title: EXECUTIVE_PAGE_META.systems.chooserTitle,
+          },
+        ] satisfies ExecutivePageCard[])
+      : []
+  const shouldShowExecutiveProfiles = selectedBranch?.id === 'executive' && selectedExecutivePage === 'profiles'
+  const shouldShowExecutiveSystems = selectedBranch?.id === 'executive' && selectedExecutivePage === 'systems'
+  const hasActiveDetailSelection =
+    selectedPerson != null || selectedRollCall != null || selectedSupremeCourtCase != null
+  const executiveCabinetPeople =
+    selectedBranch?.id === 'executive'
+      ? branchSections.find((section) => section.id === 'cabinet')?.people ?? []
+      : []
+
+  useEffect(() => {
+    if (selectedBranch?.id !== 'legislative') {
+      setSelectedCommitteeSlug(null)
+      return
+    }
+
+    if (chamberFilter === 'senate') {
+      setSelectedCommitteeSlug(null)
+    }
+  }, [chamberFilter, selectedBranch?.id])
+
+  useEffect(() => {
+    if (!selectedCommitteeSummary) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      document.getElementById('committee-detail')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [selectedCommitteeSummary])
 
   useEffect(() => {
     let active = true
@@ -2685,7 +4178,11 @@ function App() {
     selectedStateCode,
   ])
 
-  function navigateTo(branchId: BranchId | null, personId?: string | null) {
+  function navigateTo(
+    branchId: BranchId | null,
+    personId?: string | null,
+    executivePage?: ExecutivePageId | null,
+  ) {
     if (branchId !== 'legislative') {
       setSelectedRollCallId(null)
     }
@@ -2694,7 +4191,7 @@ function App() {
       setSelectedSupremeCourtCaseId(null)
     }
 
-    const nextHash = toHash(branchId, personId)
+    const nextHash = toHash(branchId, personId, executivePage)
 
     if (window.location.hash === nextHash) {
       setRoute(parseHash(nextHash, peopleById))
@@ -2708,6 +4205,12 @@ function App() {
     startTransition(() => navigateTo(branchId))
   }
 
+  function openExecutivePage(pageId: ExecutivePageId) {
+    setSelectedRollCallId(null)
+    setSelectedSupremeCourtCaseId(null)
+    startTransition(() => navigateTo('executive', null, pageId))
+  }
+
   function openPerson(personId: string) {
     if (!selectedBranch) {
       return
@@ -2715,7 +4218,13 @@ function App() {
 
     setSelectedRollCallId(null)
     setSelectedSupremeCourtCaseId(null)
-    startTransition(() => navigateTo(selectedBranch.id, personId))
+    startTransition(() =>
+      navigateTo(
+        selectedBranch.id,
+        personId,
+        selectedBranch.id === 'executive' ? selectedExecutivePage ?? 'profiles' : null,
+      ),
+    )
   }
 
   function closePerson() {
@@ -2733,7 +4242,13 @@ function App() {
       return
     }
 
-    startTransition(() => navigateTo(selectedBranch.id))
+    startTransition(() =>
+      navigateTo(
+        selectedBranch.id,
+        null,
+        selectedBranch.id === 'executive' ? selectedExecutivePage ?? 'profiles' : null,
+      ),
+    )
   }
 
   function openRollCall(rollCallId: string) {
@@ -2754,6 +4269,15 @@ function App() {
     }
   }
 
+  function openCommittee(committeeSlug: string) {
+    setSelectedCommitteeSlug(committeeSlug)
+    setSelectedRollCallId(null)
+  }
+
+  function closeCommittee() {
+    setSelectedCommitteeSlug(null)
+  }
+
   function selectState(stateCode: string) {
     setSelectedStateCode((current) => (current === stateCode ? null : stateCode))
   }
@@ -2772,6 +4296,7 @@ function App() {
     setPartyFilter('all')
     setChamberFilter('all')
     setSelectedStateCode(null)
+    setSelectedCommitteeSlug(null)
     setSelectedRollCallId(null)
     startTransition(() => navigateTo('legislative'))
   }
@@ -2779,6 +4304,13 @@ function App() {
   function handleAudienceSelect(mode: AudienceMode) {
     storeAudienceMode(mode)
     setAudienceMode(mode)
+  }
+
+  function scrollToSection(id: string) {
+    document.getElementById(id)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
   }
 
   if (!audienceMode) {
@@ -2835,11 +4367,24 @@ function App() {
               >
                 {isResettingLegislative ? 'Refreshing...' : selectedBranch.name}
               </button>
+            ) : selectedBranch.id === 'executive' && selectedExecutivePage ? (
+              <button
+                aria-label="Back to Executive pages"
+                className="branch-title-button"
+                onClick={() => navigateTo('executive')}
+                type="button"
+              >
+                {selectedBranch.name}
+              </button>
             ) : (
               <h1>{selectedBranch.name}</h1>
             )}
             {selectedBranch.id === 'legislative' && selectedStateSummary ? (
               <h2 className="branch-state-heading">{selectedStateSummary.stateName}</h2>
+            ) : selectedBranch.id === 'executive' && selectedExecutivePage ? (
+              <h2 className="branch-state-heading">
+                {EXECUTIVE_PAGE_META[selectedExecutivePage].heading}
+              </h2>
             ) : null}
           </div>
         </div>
@@ -2850,43 +4395,68 @@ function App() {
               delegations into lawmaking, appropriations, confirmations, and oversight.
             </p>
             <p className="branch-summary">{legislativeOverviewSummary}</p>
+            <p className="branch-banner__note">
+              Some official links may open only from a U.S. IP address or a U.S. VPN node.
+            </p>
+          </div>
+        ) : selectedBranch.id === 'executive' ? (
+          <div className="branch-banner__copy branch-banner__copy--executive">
+            <p className="branch-banner__lede">{selectedBranch.headline}</p>
+            <p className="branch-summary">{selectedBranch.summary}</p>
           </div>
         ) : (
           <div className="branch-banner__copy">
             <p>{selectedBranch.headline}</p>
             <p className="branch-summary">{selectedBranch.summary}</p>
+            <p className="branch-banner__note">
+              Some official links may open only from a U.S. IP address or a U.S. VPN node.
+            </p>
           </div>
         )}
-        <div
-          className={`branch-stats${
-            selectedBranch.id === 'legislative' ? ' branch-stats--legislative' : ''
-          }`}
-        >
-          {selectedBranch.id === 'legislative'
-            ? legislativeStats.map((group) => (
-                <section className="stat-group" key={group.id}>
-                  <p className="stat-group__label">{group.label}</p>
-                  <div className="stat-group__grid">
-                    {(['democratic', 'republican', 'independent'] as const).map((alignment) => (
-                      <div
-                        className={`stat-card stat-card--${alignment}`}
-                        key={`${group.id}-${alignment}`}
-                      >
-                        <strong>{group.counts[alignment]}</strong>
-                        <span>{capitalizeAlignment(alignment)}</span>
-                      </div>
-                    ))}
+        {selectedBranch.id !== 'executive' ? (
+          <div
+            className={`branch-stats${
+              selectedBranch.id === 'legislative' ? ' branch-stats--legislative' : ''
+            }`}
+          >
+            {selectedBranch.id === 'legislative'
+              ? legislativeStats.map((group) => (
+                  <section className="stat-group" key={group.id}>
+                    <p className="stat-group__label">{group.label}</p>
+                    <div className="stat-group__grid">
+                      {(['democratic', 'republican', 'independent'] as const).map((alignment) => (
+                        <div
+                          className={`stat-card stat-card--${alignment}`}
+                          key={`${group.id}-${alignment}`}
+                        >
+                          <strong>{group.counts[alignment]}</strong>
+                          <span>{capitalizeAlignment(alignment)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                ))
+              : stats.map((stat) => (
+                  <div className="stat-card" key={`${selectedBranch.id}-${stat.label}`}>
+                    <strong>{stat.value}</strong>
+                    <span>{stat.label}</span>
                   </div>
-                </section>
-              ))
-            : stats.map((stat) => (
-                <div className="stat-card" key={`${selectedBranch.id}-${stat.label}`}>
-                  <strong>{stat.value}</strong>
-                  <span>{stat.label}</span>
-                </div>
-              ))}
-        </div>
+                ))}
+          </div>
+        ) : null}
       </header>
+
+      {selectedBranch.id === 'executive' ? (
+        <ExecutivePageChooserSection
+          activePage={selectedExecutivePage}
+          cards={executivePageCards}
+          onOpen={openExecutivePage}
+        />
+      ) : null}
+
+      {selectedBranch.id === 'executive' && selectedExecutivePage === 'profiles' ? (
+        <ExecutiveOverviewSection cards={executiveOverviewCards} onOpen={scrollToSection} />
+      ) : null}
 
       {selectedBranch.id === 'legislative' ? (
         <>
@@ -2923,7 +4493,38 @@ function App() {
                   </strong>
                   <small>Derived from 2024 GDP and 2025 population</small>
                 </article>
+                {selectedStateDebtOutstandingThousands != null ? (
+                  <article className="state-profile-card__item">
+                    <span>State debt</span>
+                    <strong>{formatStateDebtLabel(selectedStateDebtOutstandingThousands)}</strong>
+                    <small>
+                      2024 total debt outstanding
+                    </small>
+                  </article>
+                ) : null}
+                {selectedStateDebtOutstandingThousands != null ? (
+                  <article className="state-profile-card__item">
+                    <span>Debt per capita</span>
+                    <strong>
+                      {formatStateDebtPerCapitaLabel(
+                        selectedStateDebtOutstandingThousands,
+                        selectedStateProfile.population,
+                      )}
+                    </strong>
+                    <small>
+                      Derived from 2024 Census debt and 2025 population
+                    </small>
+                  </article>
+                ) : null}
               </div>
+              {selectedStateDebtOutstandingThousands != null ? (
+                <p className="state-profile-card__source">
+                  Debt source: 2024 Census Annual Survey of State Government Finances, aggregate SF0429.{' '}
+                  <a href={STATE_PROFILE_DEBT_SOURCE_URL} rel="noreferrer" target="_blank">
+                    Official API
+                  </a>
+                </p>
+              ) : null}
             </section>
           ) : null}
 
@@ -2974,103 +4575,158 @@ function App() {
         </>
       ) : null}
 
-      <section className="branch-layout">
-        <div className="branch-sections">
-          {branchSections.map((section) => {
-            const chamberUsesMatrix =
-              selectedBranch.id === 'legislative' &&
-              (section.id === 'house' || section.id === 'senate') &&
-              section.rollCallEvents.length > 0
+      {(selectedBranch.id !== 'executive' || shouldShowExecutiveProfiles) ? (
+        <section className="branch-layout">
+          <div className="branch-sections">
+            {branchSections.map((section) => {
+              const chamberUsesMatrix =
+                selectedBranch.id === 'legislative' &&
+                (section.id === 'house' || section.id === 'senate') &&
+                section.rollCallEvents.length > 0
 
-            return (
-              <Fragment key={section.id}>
-                <section className={`section-card${chamberUsesMatrix ? ' section-card--matrix' : ''}`}>
-                  <div className="section-card__header">
-                    <div>
-                      <p className="eyebrow">{section.countLabel}</p>
-                      <h2>{section.label}</h2>
-                    </div>
-                    {!chamberUsesMatrix && section.description ? <p>{section.description}</p> : null}
-                  </div>
-
-                  {section.people.length ? (
-                    chamberUsesMatrix ? (
-                      <LegislativeVoteMatrix
-                        chamberLabel={section.label}
-                        events={section.rollCallEvents}
-                        onOpenRollCall={openRollCall}
-                        onOpenPerson={openPerson}
-                        people={section.people}
-                        selectedRollCallId={selectedRollCallId}
-                        selectedPersonId={selectedPerson?.id ?? null}
-                      />
-                    ) : (
-                      <div className={`people-grid people-grid--${selectedBranch.id}`}>
-                        {section.people.map((person) => (
-                          <PersonCard
-                            isSelected={selectedPerson?.id === person.id}
-                            key={person.id}
-                            onOpen={openPerson}
-                            person={person}
-                          />
-                        ))}
+              return (
+                <Fragment key={section.id}>
+                  <section
+                    className={`section-card${chamberUsesMatrix ? ' section-card--matrix' : ''}`}
+                    id={selectedBranch.id === 'executive' ? `executive-${section.id}` : undefined}
+                  >
+                    <div className="section-card__header">
+                      <div>
+                        <p className="eyebrow">{section.countLabel}</p>
+                        <h2>{section.label}</h2>
                       </div>
-                    )
-                  ) : (
-                    <div className="empty-results">
-                      No profiles match the current search and filter settings.
+                      {!chamberUsesMatrix && section.description ? <p>{section.description}</p> : null}
                     </div>
-                  )}
-                </section>
 
-                {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
-                  <SupremeCourtCaseMatrix
-                    cases={supremeCourtCases}
-                    eyebrow="Trump Administration Cases"
-                    justices={judicialJustices}
-                    onOpenCase={openSupremeCourtCase}
-                    onOpenPerson={openPerson}
-                    selectedCaseId={selectedSupremeCourtCaseId}
-                    selectedPersonId={selectedPerson?.id ?? null}
-                  />
-                ) : null}
-                {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
-                  <SupremeCourtCaseMatrix
-                    cases={supremeCourtPersonalCases}
-                    eyebrow="Trump Personal Cases"
-                    justices={judicialJustices}
-                    onOpenCase={openSupremeCourtCase}
-                    onOpenPerson={openPerson}
-                    selectedCaseId={selectedSupremeCourtCaseId}
-                    selectedPersonId={selectedPerson?.id ?? null}
-                    showScore={false}
-                  />
-                ) : null}
-              </Fragment>
-            )
-          })}
-        </div>
+                    {section.people.length ? (
+                      chamberUsesMatrix ? (
+                        <LegislativeVoteMatrix
+                          chamberLabel={section.label}
+                          events={section.rollCallEvents}
+                          onOpenRollCall={openRollCall}
+                          onOpenPerson={openPerson}
+                          people={section.people}
+                          selectedRollCallId={selectedRollCallId}
+                          selectedPersonId={selectedPerson?.id ?? null}
+                        />
+                      ) : (
+                        <div className={`people-grid people-grid--${selectedBranch.id}`}>
+                          {section.people.map((person) => (
+                            <PersonCard
+                              isSelected={selectedPerson?.id === person.id}
+                              key={person.id}
+                              onOpen={openPerson}
+                              person={person}
+                            />
+                          ))}
+                        </div>
+                      )
+                    ) : (
+                      <div className="empty-results">
+                        No profiles match the current search and filter settings.
+                      </div>
+                    )}
+                  </section>
 
-        <DetailPanel
-          branch={selectedBranch}
-          onClose={closePerson}
-          person={selectedPerson}
-          rollCall={selectedRollCall}
-          section={selectedSection}
-          supremeCourtCaseSelection={selectedSupremeCourtCase}
-        />
-      </section>
+                  {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
+                    <SupremeCourtCaseMatrix
+                      cases={supremeCourtCases}
+                      eyebrow="Trump Administration Cases"
+                      justices={judicialJustices}
+                      onOpenCase={openSupremeCourtCase}
+                      onOpenPerson={openPerson}
+                      selectedCaseId={selectedSupremeCourtCaseId}
+                      selectedPersonId={selectedPerson?.id ?? null}
+                    />
+                  ) : null}
+                  {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
+                    <SupremeCourtCaseMatrix
+                      cases={supremeCourtPersonalCases}
+                      eyebrow="Trump Personal Cases"
+                      justices={judicialJustices}
+                      onOpenCase={openSupremeCourtCase}
+                      onOpenPerson={openPerson}
+                      selectedCaseId={selectedSupremeCourtCaseId}
+                      selectedPersonId={selectedPerson?.id ?? null}
+                      showScore={false}
+                    />
+                  ) : null}
+                </Fragment>
+              )
+            })}
+          </div>
+
+          <DetailPanel
+            branch={selectedBranch}
+            onClose={closePerson}
+            person={selectedPerson}
+            rollCall={selectedRollCall}
+            section={selectedSection}
+            supremeCourtCaseSelection={selectedSupremeCourtCase}
+          />
+        </section>
+      ) : null}
 
       {selectedBranch.id === 'legislative' && chamberFilter !== 'senate' ? (
         <HouseVacancySection selectedStateCode={selectedStateCode} />
       ) : null}
 
-      {selectedBranch.id === 'executive' ? (
-        <IndependentAgencyDirectory
+      {selectedBranch.id === 'legislative' && chamberFilter !== 'senate' ? (
+        <LegislativeCommitteeSection
+          onOpenCommittee={openCommittee}
           onOpenPerson={openPerson}
-          peopleById={peopleById}
-          selectedPersonId={selectedPerson?.id ?? null}
+          people={visiblePeople}
+          searchValue={deferredSearch}
+          selectedCommitteeSlug={selectedCommitteeSlug}
+          selectedStateSummary={selectedStateSummary}
         />
+      ) : null}
+
+      {selectedBranch.id === 'legislative' && selectedCommitteeSummary ? (
+        <LegislativeCommitteeDetailSection
+          onBack={closeCommittee}
+          onOpenPerson={openPerson}
+          selectedPersonId={selectedPerson?.id ?? null}
+          summary={selectedCommitteeSummary}
+        />
+      ) : null}
+
+      {shouldShowExecutiveProfiles ? (
+        <div className="executive-secondary-stack">
+          <div id="executive-trump-social">
+            <ExecutiveTrumpTruthSection />
+          </div>
+          <ExecutiveCabinetControversiesSection
+            onOpenPerson={openPerson}
+            people={executiveCabinetPeople}
+            selectedPersonId={selectedPerson?.id ?? null}
+          />
+        </div>
+      ) : null}
+
+      {shouldShowExecutiveSystems ? (
+        <section className={`branch-layout${hasActiveDetailSelection ? '' : ' branch-layout--single'}`}>
+          <div className="branch-sections">
+            <ExecutiveShutdownSection />
+            <IndependentAgencyDirectory
+              onOpenPerson={openPerson}
+              peopleById={peopleById}
+              selectedPersonId={selectedPerson?.id ?? null}
+            />
+            <ExecutiveMilitaryGlobe />
+          </div>
+
+          {hasActiveDetailSelection ? (
+            <DetailPanel
+              branch={selectedBranch}
+              onClose={closePerson}
+              person={selectedPerson}
+              rollCall={selectedRollCall}
+              section={selectedSection}
+              supremeCourtCaseSelection={selectedSupremeCourtCase}
+            />
+          ) : null}
+        </section>
       ) : null}
     </main>
   )

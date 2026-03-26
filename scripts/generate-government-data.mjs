@@ -11,6 +11,7 @@ import {
   getMatchedSenateVoteEntryForPerson,
 } from './legislativeVoteMatching.mjs'
 import { manualCareerHistoryById } from './manualCareerHistory.mjs'
+import { manualPublicControversiesById } from './manualPublicControversies.mjs'
 import { manualDepartmentBudgetsByDepartment } from './manualDepartmentBudgets.mjs'
 import { manualIndependentAgencyBudgetsByDepartment } from './manualIndependentAgencyBudgets.mjs'
 import { resolvePersonNaming, stripDiacritics } from './personNaming.mjs'
@@ -85,6 +86,9 @@ function clonePerson(person) {
     financialDisclosureSearchName: person.financialDisclosureSearchName,
     liabilities: person.liabilities ? person.liabilities.map((entry) => ({ ...entry })) : undefined,
     officialName: person.officialName,
+    publicControversies: person.publicControversies
+      ? person.publicControversies.map((entry) => ({ ...entry }))
+      : undefined,
     recentTrades: person.recentTrades ? person.recentTrades.map((entry) => ({ ...entry })) : undefined,
     trumpEvidence: person.trumpEvidence ? [...person.trumpEvidence] : undefined,
     topHoldings: person.topHoldings ? person.topHoldings.map((entry) => ({ ...entry })) : undefined,
@@ -97,6 +101,19 @@ function applyManualCareerHistoryOverrides(people) {
       ? {
           ...person,
           careerHistory: manualCareerHistoryById[person.id].map((entry) => ({ ...entry })),
+        }
+      : person,
+  )
+}
+
+function applyManualPublicControversyOverrides(people) {
+  return people.map((person) =>
+    manualPublicControversiesById[person.id]
+      ? {
+          ...person,
+          publicControversies: manualPublicControversiesById[person.id].map((entry) => ({
+            ...entry,
+          })),
         }
       : person,
   )
@@ -216,6 +233,431 @@ const SOURCES = [
     url: 'https://en.wikipedia.org/',
   },
 ]
+
+const DEFAULT_ECONOMY_SNAPSHOT = [
+  {
+    category: 'Output',
+    detail: 'Real GDP level, Q4 2025 second estimate, chained 2017 dollars (SAAR).',
+    history: [
+      { label: 'Q1 24', value: 23.08 },
+      { label: 'Q2 24', value: 23.29 },
+      { label: 'Q3 24', value: 23.48 },
+      { label: 'Q4 24', value: 23.59 },
+      { label: 'Q1 25', value: 23.55 },
+      { label: 'Q2 25', value: 23.77 },
+      { label: 'Q3 25', value: 24.03 },
+      { label: 'Q4 25', value: 24.07 },
+    ],
+    id: 'real-gdp',
+    label: 'Real GDP',
+    sourceDate: 'Mar 13, 2026',
+    sourceLabel: 'FRED GDPC1 series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/GDPC1',
+    tone: 'cool',
+    value: '$24.07T',
+  },
+  {
+    category: 'Households',
+    detail: 'Personal income, monthly change for January 2026.',
+    history: [
+      { label: 'Jun 25', value: 0.19 },
+      { label: 'Jul 25', value: 0.67 },
+      { label: 'Aug 25', value: 0.49 },
+      { label: 'Sep 25', value: 0.39 },
+      { label: 'Oct 25', value: 0.11 },
+      { label: 'Nov 25', value: 0.36 },
+      { label: 'Dec 25', value: 0.29 },
+      { label: 'Jan 26', value: 0.43 },
+    ],
+    id: 'personal-income',
+    label: 'Personal income',
+    sourceDate: 'Mar 13, 2026',
+    sourceLabel: 'BEA Economy at a Glance',
+    sourceUrl: 'https://www.bea.gov/index.php/news/glance',
+    tone: 'cool',
+    value: '+0.4%',
+  },
+  {
+    category: 'Labor',
+    detail: 'Total nonfarm payroll change in February 2026.',
+    history: [
+      { label: 'Jul 25', value: 64 },
+      { label: 'Aug 25', value: -70 },
+      { label: 'Sep 25', value: 76 },
+      { label: 'Oct 25', value: -140 },
+      { label: 'Nov 25', value: 41 },
+      { label: 'Dec 25', value: -17 },
+      { label: 'Jan 26', value: 126 },
+      { label: 'Feb 26', value: -92 },
+    ],
+    id: 'payroll-jobs',
+    label: 'Payroll jobs',
+    sourceDate: 'Mar 6, 2026',
+    sourceLabel: 'BLS Employment Situation',
+    sourceUrl: 'https://www.bls.gov/news.release/empsit.htm',
+    tone: 'warm',
+    value: '-92k',
+  },
+  {
+    category: 'Labor',
+    detail: 'Civilian unemployment rate in February 2026.',
+    history: [
+      { label: 'Jun 25', value: 4.1 },
+      { label: 'Jul 25', value: 4.3 },
+      { label: 'Aug 25', value: 4.3 },
+      { label: 'Sep 25', value: 4.4 },
+      { label: 'Nov 25', value: 4.5 },
+      { label: 'Dec 25', value: 4.4 },
+      { label: 'Jan 26', value: 4.3 },
+      { label: 'Feb 26', value: 4.4 },
+    ],
+    id: 'unemployment-rate',
+    label: 'Unemployment rate',
+    sourceDate: 'Mar 6, 2026',
+    sourceLabel: 'BLS Employment Situation',
+    sourceUrl: 'https://www.bls.gov/news.release/empsit.htm',
+    tone: 'neutral',
+    value: '4.4%',
+  },
+  {
+    category: 'Labor',
+    detail: 'Civilian labor force participation rate in February 2026.',
+    history: [
+      { label: 'Jun 25', value: 62.3 },
+      { label: 'Jul 25', value: 62.2 },
+      { label: 'Aug 25', value: 62.3 },
+      { label: 'Sep 25', value: 62.5 },
+      { label: 'Nov 25', value: 62.5 },
+      { label: 'Dec 25', value: 62.4 },
+      { label: 'Jan 26', value: 62.1 },
+      { label: 'Feb 26', value: 62.0 },
+    ],
+    id: 'labor-force-participation',
+    label: 'Labor-force participation',
+    sourceDate: 'Mar 6, 2026',
+    sourceLabel: 'FRED CIVPART series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/CIVPART',
+    tone: 'neutral',
+    value: '62.0%',
+  },
+  {
+    category: 'Prices',
+    detail: 'CPI-U, 12 months ending February 2026.',
+    history: [
+      { label: 'Jun 25', value: 2.68 },
+      { label: 'Jul 25', value: 2.74 },
+      { label: 'Aug 25', value: 2.94 },
+      { label: 'Sep 25', value: 3.02 },
+      { label: 'Nov 25', value: 2.99 },
+      { label: 'Dec 25', value: 3.0 },
+      { label: 'Jan 26', value: 2.83 },
+      { label: 'Feb 26', value: 2.66 },
+    ],
+    id: 'cpi-inflation',
+    label: 'CPI inflation',
+    sourceDate: 'Mar 12, 2026',
+    sourceLabel: 'BLS Consumer Price Index',
+    sourceUrl: 'https://www.bls.gov/news.release/cpi.htm',
+    tone: 'warm',
+    value: '+2.4%',
+  },
+  {
+    category: 'Rates',
+    detail: 'Target range after the March 18, 2026 FOMC meeting.',
+    history: [
+      { label: 'Aug 25', value: 4.375 },
+      { label: 'Sep 25', value: 4.125 },
+      { label: 'Oct 25', value: 3.875 },
+      { label: 'Nov 25', value: 3.875 },
+      { label: 'Dec 25', value: 3.625 },
+      { label: 'Jan 26', value: 3.625 },
+      { label: 'Feb 26', value: 3.625 },
+      { label: 'Mar 26', value: 3.625 },
+    ],
+    id: 'fed-funds-rate',
+    label: 'Fed funds target',
+    sourceDate: 'Mar 18, 2026',
+    sourceLabel: 'Federal Reserve statement',
+    sourceUrl: 'https://www.federalreserve.gov/newsevents/pressreleases/monetary20260318a.htm',
+    tone: 'warm',
+    value: '3.5%-3.75%',
+  },
+  {
+    category: 'Rates',
+    detail: '10-year Treasury yield, latest posted daily curve rate.',
+    history: [
+      { label: 'Aug 25', value: 4.23 },
+      { label: 'Sep 25', value: 4.16 },
+      { label: 'Oct 25', value: 4.11 },
+      { label: 'Nov 25', value: 4.02 },
+      { label: 'Dec 25', value: 4.18 },
+      { label: 'Jan 26', value: 4.26 },
+      { label: 'Feb 26', value: 3.97 },
+      { label: 'Mar 26', value: 4.39 },
+    ],
+    id: 'ten-year-treasury',
+    label: '10-year Treasury',
+    sourceDate: 'Mar 23, 2026',
+    sourceLabel: 'Treasury yield curve',
+    sourceUrl:
+      'https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve&field_tdr_date_value=2026',
+    tone: 'neutral',
+    value: '4.34%',
+  },
+  {
+    category: 'Markets',
+    detail: 'S&P 500 index level, latest close in the public FRED series.',
+    history: [
+      { label: 'Apr 25', value: 5569.06 },
+      { label: 'May 25', value: 5911.69 },
+      { label: 'Jun 25', value: 6204.95 },
+      { label: 'Jul 25', value: 6339.39 },
+      { label: 'Aug 25', value: 6460.26 },
+      { label: 'Sep 25', value: 6688.46 },
+      { label: 'Oct 25', value: 6840.2 },
+      { label: 'Nov 25', value: 6849.09 },
+      { label: 'Dec 25', value: 6845.5 },
+      { label: 'Jan 26', value: 6939.03 },
+      { label: 'Feb 26', value: 6878.88 },
+      { label: 'Mar 26', value: 6556.37 },
+    ],
+    id: 'sp500',
+    label: 'S&P 500',
+    sourceDate: 'Mar 24, 2026',
+    sourceLabel: 'FRED SP500 series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/SP500',
+    tone: 'cool',
+    value: '6,556.37',
+  },
+  {
+    category: 'Markets',
+    detail: 'Dow Jones Industrial Average level, latest close in the public FRED series.',
+    history: [
+      { label: 'Apr 25', value: 40669.36 },
+      { label: 'May 25', value: 42270.07 },
+      { label: 'Jun 25', value: 44094.77 },
+      { label: 'Jul 25', value: 44130.98 },
+      { label: 'Aug 25', value: 45544.88 },
+      { label: 'Sep 25', value: 46397.89 },
+      { label: 'Oct 25', value: 47562.87 },
+      { label: 'Nov 25', value: 47716.42 },
+      { label: 'Dec 25', value: 48063.29 },
+      { label: 'Jan 26', value: 48892.47 },
+      { label: 'Feb 26', value: 48977.92 },
+      { label: 'Mar 26', value: 46124.06 },
+    ],
+    id: 'dow',
+    label: 'Dow',
+    sourceDate: 'Mar 24, 2026',
+    sourceLabel: 'FRED DJIA series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/DJIA',
+    tone: 'cool',
+    value: '46,124.06',
+  },
+  {
+    category: 'Energy',
+    detail: 'WTI crude oil spot price, latest daily observation in the public FRED series.',
+    history: [
+      { label: 'Apr 25', value: 59.55 },
+      { label: 'May 25', value: 61.46 },
+      { label: 'Jun 25', value: 66.3 },
+      { label: 'Jul 25', value: 70.36 },
+      { label: 'Aug 25', value: 64.36 },
+      { label: 'Sep 25', value: 63.17 },
+      { label: 'Oct 25', value: 61.75 },
+      { label: 'Nov 25', value: 58.58 },
+      { label: 'Dec 25', value: 57.26 },
+      { label: 'Jan 26', value: 64.5 },
+      { label: 'Feb 26', value: 66.96 },
+      { label: 'Mar 26', value: 93.39 },
+    ],
+    id: 'wti-crude',
+    label: 'WTI crude',
+    sourceDate: 'Mar 16, 2026',
+    sourceLabel: 'FRED DCOILWTICO series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/DCOILWTICO',
+    tone: 'warm',
+    value: '$93.39/bbl',
+  },
+  {
+    category: 'Energy',
+    detail: 'Brent crude oil spot price, latest daily observation in the public FRED series.',
+    history: [
+      { label: 'Apr 25', value: 63.37 },
+      { label: 'May 25', value: 64.32 },
+      { label: 'Jun 25', value: 68.15 },
+      { label: 'Jul 25', value: 73.43 },
+      { label: 'Aug 25', value: 67.83 },
+      { label: 'Sep 25', value: 68.52 },
+      { label: 'Oct 25', value: 65.44 },
+      { label: 'Nov 25', value: 64.07 },
+      { label: 'Dec 25', value: 61.35 },
+      { label: 'Jan 26', value: 72.25 },
+      { label: 'Feb 26', value: 71.32 },
+      { label: 'Mar 26', value: 101.04 },
+    ],
+    id: 'brent-crude',
+    label: 'Brent crude',
+    sourceDate: 'Mar 16, 2026',
+    sourceLabel: 'FRED DCOILBRENTEU series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/DCOILBRENTEU',
+    tone: 'warm',
+    value: '$101.04/bbl',
+  },
+  {
+    category: 'Energy',
+    detail: 'U.S. regular retail gasoline price, latest weekly reading in the public FRED series.',
+    history: [
+      { label: 'Apr 25', value: 3.133 },
+      { label: 'May 25', value: 3.16 },
+      { label: 'Jun 25', value: 3.164 },
+      { label: 'Jul 25', value: 3.123 },
+      { label: 'Aug 25', value: 3.147 },
+      { label: 'Sep 25', value: 3.118 },
+      { label: 'Oct 25', value: 3.035 },
+      { label: 'Nov 25', value: 3.061 },
+      { label: 'Dec 25', value: 2.811 },
+      { label: 'Jan 26', value: 2.853 },
+      { label: 'Feb 26', value: 2.937 },
+      { label: 'Mar 26', value: 3.961 },
+    ],
+    id: 'gasoline-price',
+    label: 'U.S. gasoline',
+    sourceDate: 'Mar 23, 2026',
+    sourceLabel: 'FRED GASREGW series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/GASREGW',
+    tone: 'warm',
+    value: '$3.961/gal',
+  },
+  {
+    category: 'Trade',
+    detail: 'Goods and services trade balance in January 2026. Negative values mean a trade deficit.',
+    history: [
+      { label: 'Jun 25', value: -57.637 },
+      { label: 'Jul 25', value: -74.233 },
+      { label: 'Aug 25', value: -56.011 },
+      { label: 'Sep 25', value: -49.168 },
+      { label: 'Oct 25', value: -31.102 },
+      { label: 'Nov 25', value: -56.026 },
+      { label: 'Dec 25', value: -72.9 },
+      { label: 'Jan 26', value: -54.455 },
+    ],
+    id: 'trade-balance',
+    label: 'Trade balance',
+    sourceDate: 'Mar 12, 2026',
+    sourceLabel: 'FRED BOPGSTB series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/BOPGSTB',
+    tone: 'warm',
+    value: '-$54.5B',
+  },
+  {
+    category: 'Fiscal',
+    detail: 'Total federal receipts in February 2026.',
+    history: [
+      { label: 'Jul 25', value: 338.492 },
+      { label: 'Aug 25', value: 344.315 },
+      { label: 'Sep 25', value: 543.663 },
+      { label: 'Oct 25', value: 404.371 },
+      { label: 'Nov 25', value: 336.001 },
+      { label: 'Dec 25', value: 484.384 },
+      { label: 'Jan 26', value: 559.935 },
+      { label: 'Feb 26', value: 313.122 },
+    ],
+    id: 'federal-receipts',
+    label: 'Federal receipts',
+    sourceDate: 'Mar 11, 2026',
+    sourceLabel: 'FRED MTSR133FMS series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/MTSR133FMS',
+    tone: 'cool',
+    value: '$313.1B',
+  },
+  {
+    category: 'Fiscal',
+    detail: 'Total federal outlays in February 2026.',
+    history: [
+      { label: 'Jul 25', value: 629.635 },
+      { label: 'Aug 25', value: 689.107 },
+      { label: 'Sep 25', value: 345.713 },
+      { label: 'Oct 25', value: 688.721 },
+      { label: 'Nov 25', value: 509.278 },
+      { label: 'Dec 25', value: 629.133 },
+      { label: 'Jan 26', value: 654.551 },
+      { label: 'Feb 26', value: 620.623 },
+    ],
+    id: 'federal-outlays',
+    label: 'Federal outlays',
+    sourceDate: 'Mar 11, 2026',
+    sourceLabel: 'FRED MTSO133FMS series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/MTSO133FMS',
+    tone: 'warm',
+    value: '$620.6B',
+  },
+  {
+    category: 'Fiscal',
+    detail:
+      'Monthly federal budget balance in February 2026. Negative values mean a deficit; positive values mean a surplus.',
+    history: [
+      { label: 'Jul 25', value: -291.143 },
+      { label: 'Aug 25', value: -344.792 },
+      { label: 'Sep 25', value: 197.95 },
+      { label: 'Oct 25', value: -284.35 },
+      { label: 'Nov 25', value: -173.277 },
+      { label: 'Dec 25', value: -144.749 },
+      { label: 'Jan 26', value: -94.615 },
+      { label: 'Feb 26', value: -307.501 },
+    ],
+    id: 'federal-deficit',
+    label: 'Federal deficit',
+    sourceDate: 'Mar 11, 2026',
+    sourceLabel: 'FRED MTSDS133FMS series',
+    sourceUrl: 'https://fred.stlouisfed.org/series/MTSDS133FMS',
+    tone: 'warm',
+    value: '-$307.5B',
+  },
+  {
+    category: 'Public finance',
+    detail: 'Total public debt outstanding from the latest Debt to the Penny record.',
+    history: [
+      { label: 'Apr 25', value: 36.209 },
+      { label: 'May 25', value: 36.214 },
+      { label: 'Jun 25', value: 36.565 },
+      { label: 'Jul 25', value: 36.729 },
+      { label: 'Aug 25', value: 36.687 },
+      { label: 'Sep 25', value: 36.789 },
+      { label: 'Oct 25', value: 37.027 },
+      { label: 'Nov 25', value: 37.672 },
+      { label: 'Dec 25', value: 38.197 },
+      { label: 'Jan 26', value: 38.533 },
+      { label: 'Feb 26', value: 38.922 },
+      { label: 'Mar 26', value: 39.002 },
+    ],
+    id: 'public-debt',
+    label: 'Public debt',
+    sourceDate: 'Mar 20, 2026',
+    sourceLabel: 'Treasury Debt to the Penny',
+    sourceUrl: 'https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/debt-to-the-penny',
+    tone: 'neutral',
+    value: '$39.00T',
+  },
+]
+
+function mergeEconomySnapshot(previousSnapshot, defaultSnapshot) {
+  if (!Array.isArray(previousSnapshot) || previousSnapshot.length === 0) {
+    return defaultSnapshot
+  }
+
+  const previousById = new Map(previousSnapshot.map((metric) => [metric.id, metric]))
+  const defaultIds = new Set(defaultSnapshot.map((metric) => metric.id))
+  const merged = defaultSnapshot.map((metric) => previousById.get(metric.id) ?? metric)
+  const extraPreviousMetrics = previousSnapshot.filter((metric) => !defaultIds.has(metric.id))
+
+  return [...merged, ...extraPreviousMetrics]
+}
+
+const ECONOMY_SNAPSHOT = mergeEconomySnapshot(
+  previousDataset?.economySnapshot,
+  DEFAULT_ECONOMY_SNAPSHOT,
+)
 
 const STATE_NAMES = {
   AK: 'Alaska',
@@ -1814,19 +2256,15 @@ const executiveRoleMap = new Map([
 ])
 
 const supremeCourtImageMap = {
-  'Amy Coney Barrett': 'https://www.supremecourt.gov/about/justice_pictures/Barrett_102535_w151.jpg',
-  'Brett M. Kavanaugh':
-    'https://www.supremecourt.gov/about/justice_pictures/Kavanaugh%2012221_005_crop.jpg',
-  'Clarence Thomas': 'https://www.supremecourt.gov/about/justice_pictures/Thomas_9366-024_Crop.jpg',
-  'Elena Kagan': 'https://www.supremecourt.gov/about/justice_pictures/Kagan_10713-017-Crop.jpg',
-  'John G. Roberts, Jr.':
-    'https://www.supremecourt.gov/about/justice_pictures/Roberts_8807-16_Crop.jpg',
-  'Ketanji Brown Jackson': 'https://www.supremecourt.gov/about/justice_pictures/KBJackson3.jpg',
-  'Neil M. Gorsuch': 'https://www.supremecourt.gov/about/justice_pictures/Gorsuch2.jpg',
-  'Samuel A. Alito, Jr.':
-    'https://www.supremecourt.gov/about/justice_pictures/Alito_9264-001-Crop.jpg',
-  'Sonia Sotomayor':
-    'https://www.supremecourt.gov/about/justice_pictures/Sotomayor_Official_2025.jpg',
+  'Amy Coney Barrett': '/portraits/judicial/amy-coney-barrett.jpg',
+  'Brett M. Kavanaugh': '/portraits/judicial/brett-m-kavanaugh.jpg',
+  'Clarence Thomas': '/portraits/judicial/clarence-thomas.jpg',
+  'Elena Kagan': '/portraits/judicial/elena-kagan.jpg',
+  'John G. Roberts, Jr.': '/portraits/judicial/john-g-roberts-jr.jpg',
+  'Ketanji Brown Jackson': '/portraits/judicial/ketanji-brown-jackson.jpg',
+  'Neil M. Gorsuch': '/portraits/judicial/neil-m-gorsuch.jpg',
+  'Samuel A. Alito, Jr.': '/portraits/judicial/samuel-a-alito-jr.jpg',
+  'Sonia Sotomayor': '/portraits/judicial/sonia-sotomayor.jpg',
 }
 
 const justices = [
@@ -3022,13 +3460,13 @@ function congressPhotoUrl(bioguideId) {
     return undefined
   }
 
-  const trimmed = bioguideId.trim()
+  const trimmed = bioguideId.trim().toUpperCase()
 
   if (!trimmed) {
     return undefined
   }
 
-  return `https://bioguide.congress.gov/bioguide/photo/${trimmed[0]}/${trimmed}.jpg`
+  return `https://unitedstates.github.io/images/congress/225x275/${trimmed}.jpg`
 }
 
 const HOUSE_SECOND_IMPEACHMENT_VOTE_URL = 'https://clerk.house.gov/Votes/202117'
@@ -5944,7 +6382,9 @@ async function main() {
     const executiveWithBackground = await enrichPeopleWithBackground(executiveWithFinancials)
     const executiveWithManualCareerHistory =
       applyManualCareerHistoryOverrides(executiveWithBackground)
-    const executiveWithCongressHistory = executiveWithManualCareerHistory.map((person) =>
+    const executiveWithManualPublicControversies =
+      applyManualPublicControversyOverrides(executiveWithManualCareerHistory)
+    const executiveWithCongressHistory = executiveWithManualPublicControversies.map((person) =>
       annotateExecutiveCongressHistory(person, trumpRelationshipContext),
     )
     const executiveWithDerivedEstimates =
@@ -5953,6 +6393,7 @@ async function main() {
     const dataset = {
       ...previousDataset,
       branches: buildBranches(refreshedExecutivePeople, senators, representatives),
+      economySnapshot: ECONOMY_SNAPSHOT,
       generatedAt: new Date().toISOString(),
       people: [...refreshedExecutivePeople, ...preservedPeople],
     }
@@ -5989,7 +6430,9 @@ async function main() {
   )
   const peopleWithBackground = await enrichPeopleWithBackground(legislativelyEnrichedPeople)
   const peopleWithManualCareerHistory = applyManualCareerHistoryOverrides(peopleWithBackground)
-  const peopleWithExecutiveCongressHistory = peopleWithManualCareerHistory.map((person) =>
+  const peopleWithManualPublicControversies =
+    applyManualPublicControversyOverrides(peopleWithManualCareerHistory)
+  const peopleWithExecutiveCongressHistory = peopleWithManualPublicControversies.map((person) =>
     annotateExecutiveCongressHistory(person, trumpRelationshipContext),
   )
   const peopleWithDerivedEstimates =
@@ -6000,6 +6443,7 @@ async function main() {
 
   const dataset = {
     branches,
+    economySnapshot: ECONOMY_SNAPSHOT,
     generatedAt: new Date().toISOString(),
     legislativeTrumpRollCalls: trumpRelationshipContext.legislativeRollCallSummary,
     people,

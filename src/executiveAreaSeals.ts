@@ -1,0 +1,32 @@
+export const EXECUTIVE_AREA_SEAL_URLS: Record<string, string> = {
+  'dept-agriculture':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Agriculture.svg',
+  'dept-commerce':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Commerce.svg',
+  'dept-defense':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Defense.svg',
+  'dept-education':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Education.svg',
+  'dept-energy':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Energy.svg',
+  'dept-hhs':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Health%20and%20Human%20Services.svg',
+  'dept-dhs':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Homeland%20Security.svg',
+  'dept-hud':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Housing%20and%20Urban%20Development.svg',
+  'dept-interior':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20the%20Interior.svg',
+  'dept-justice':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Justice.svg',
+  'dept-labor':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Labor.svg',
+  'dept-state':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20State.svg',
+  'dept-transportation':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Transportation.svg',
+  'dept-treasury':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20the%20Treasury.svg',
+  'dept-va':
+    'https://commons.wikimedia.org/wiki/Special:FilePath/Seal%20of%20the%20United%20States%20Department%20of%20Veterans%20Affairs.svg',
+}
