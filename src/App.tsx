@@ -99,6 +99,10 @@ const shutdownChipMonthDayYearFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
 })
 const MS_PER_DAY = 24 * 60 * 60 * 1000
+const ECONOMY_SHORT_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const ECONOMY_MONTH_INDEX_BY_NAME = new Map(
+  ECONOMY_SHORT_MONTH_NAMES.map((monthName, monthIndex) => [monthName, monthIndex]),
+)
 
 type ExecutivePageId = 'profiles' | 'systems'
 
@@ -117,6 +121,21 @@ type ExecutiveOverviewCard = {
   id: string
   countLabel: string
   title: string
+}
+
+type EconomyTimelineTick = {
+  label: string
+  time: number
+}
+
+type EconomyTimeline = {
+  endTime: number
+  startTime: number
+  ticks: EconomyTimelineTick[]
+}
+
+type TimedEconomyHistoryPoint = EconomyHistoryPoint & {
+  time: number
 }
 
 type ExecutivePageCard = {
@@ -2652,6 +2671,7 @@ function SupremeCourtCaseMatrix({
 
 function EconomySnapshotSection({ metrics }: { metrics: EconomyMetric[] }) {
   const [historyRange, setHistoryRange] = useState<EconomyHistoryRange>('1y')
+  const timeline = getEconomyTimeline(metrics, historyRange)
 
   if (metrics.length === 0) {
     return null
@@ -2715,8 +2735,13 @@ function EconomySnapshotSection({ metrics }: { metrics: EconomyMetric[] }) {
                 </a>
               </div>
               <div className="economy-history-row__plot-shell">
-                {visibleHistory.length >= 2 ? (
-                  <EconomyHistoryLine metric={metric} points={visibleHistory} range={historyRange} />
+                {visibleHistory.length >= 2 && timeline != null ? (
+                  <EconomyHistoryLine
+                    metric={metric}
+                    points={visibleHistory}
+                    range={historyRange}
+                    timeline={timeline}
+                  />
                 ) : null}
               </div>
             </article>
@@ -2758,6 +2783,103 @@ function getEconomyHistoryRangeLabel(points: EconomyHistoryPoint[]) {
   return `${points[0].label} to ${points[points.length - 1].label}`
 }
 
+function parseEconomyHistoryPointTime(point: EconomyHistoryPoint) {
+  const quarterMatch = point.label.match(/^Q([1-4]) (\d{2})$/)
+  if (quarterMatch) {
+    const quarterIndex = Number(quarterMatch[1]) - 1
+    const year = 2000 + Number(quarterMatch[2])
+    return Date.UTC(year, quarterIndex * 3, 1)
+  }
+
+  const monthMatch = point.label.match(/^([A-Z][a-z]{2}) (\d{2})$/)
+  if (monthMatch) {
+    const monthIndex = ECONOMY_MONTH_INDEX_BY_NAME.get(monthMatch[1])
+    if (monthIndex == null) {
+      return null
+    }
+
+    const year = 2000 + Number(monthMatch[2])
+    return Date.UTC(year, monthIndex, 1)
+  }
+
+  return null
+}
+
+function addUtcMonths(time: number, monthOffset: number) {
+  const date = new Date(time)
+  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + monthOffset, 1)
+}
+
+function formatEconomyTickTime(time: number, range: EconomyHistoryRange) {
+  const date = new Date(time)
+  const year = date.getUTCFullYear()
+
+  if (range === '5y' || range === '10y') {
+    return String(year)
+  }
+
+  return `${ECONOMY_SHORT_MONTH_NAMES[date.getUTCMonth()]} ${String(year).slice(-2)}`
+}
+
+function getEconomyAxisStepMonths(range: EconomyHistoryRange) {
+  switch (range) {
+    case '1y':
+      return 3
+    case '2y':
+      return 6
+    case '5y':
+      return 12
+    case '10y':
+      return 24
+  }
+}
+
+function getEconomyAxisTickCount(range: EconomyHistoryRange) {
+  switch (range) {
+    case '1y':
+    case '2y':
+      return 5
+    case '5y':
+    case '10y':
+      return 6
+  }
+}
+
+function getEconomyTimeline(metrics: EconomyMetric[], range: EconomyHistoryRange): EconomyTimeline | null {
+  const timedPoints = metrics.flatMap((metric) =>
+    getEconomyHistoryWindow(metric, range)
+      .map((point) => {
+        const time = parseEconomyHistoryPointTime(point)
+        return time == null ? null : { ...point, time }
+      })
+      .filter((point): point is TimedEconomyHistoryPoint => point != null),
+  )
+
+  if (timedPoints.length === 0) {
+    return null
+  }
+
+  const startTime = Math.min(...timedPoints.map((point) => point.time))
+  const endTime = Math.max(...timedPoints.map((point) => point.time))
+  const tickCount = getEconomyAxisTickCount(range)
+  const stepMonths = getEconomyAxisStepMonths(range)
+  const ticks = Array.from({ length: tickCount }, (_, tickIndex) => {
+    const offset = stepMonths * (tickCount - tickIndex - 1)
+    const time = addUtcMonths(endTime, -offset)
+
+    return {
+      label: formatEconomyTickTime(time, range),
+      time,
+    }
+  })
+
+  return {
+    endTime,
+    startTime,
+    ticks,
+  }
+}
+
 function getEconomyChartWidth(range: EconomyHistoryRange) {
   switch (range) {
     case '1y':
@@ -2773,37 +2895,6 @@ function getEconomyChartWidth(range: EconomyHistoryRange) {
 
 function formatEconomyAxisLabel(label: string) {
   return label
-}
-
-function getEconomyAxisTickTargetCount() {
-  return 6
-}
-
-function getEconomyAxisTicks(points: EconomyHistoryPoint[]) {
-  if (points.length === 0) {
-    return []
-  }
-
-  const targetCount = Math.min(getEconomyAxisTickTargetCount(), points.length)
-  const seenIndices = new Set<number>()
-  const ticks: Array<{ index: number; label: string }> = []
-
-  for (let tickIndex = 0; tickIndex < targetCount; tickIndex += 1) {
-    const pointIndex =
-      targetCount === 1 ? 0 : Math.round(((points.length - 1) * tickIndex) / (targetCount - 1))
-
-    if (seenIndices.has(pointIndex)) {
-      continue
-    }
-
-    seenIndices.add(pointIndex)
-    ticks.push({
-      index: pointIndex,
-      label: formatEconomyAxisLabel(points[pointIndex].label),
-    })
-  }
-
-  return ticks
 }
 
 function formatEconomyDollarHistoryValue(value: number) {
@@ -2859,7 +2950,12 @@ function formatEconomyHistoryValue(metricId: EconomyMetric['id'], value: number)
   }
 }
 
-function buildEconomyLineGeometry(points: EconomyHistoryPoint[], width: number, height: number) {
+function buildEconomyLineGeometry(
+  points: TimedEconomyHistoryPoint[],
+  width: number,
+  height: number,
+  timeline: EconomyTimeline,
+) {
   if (points.length === 0) {
     return null
   }
@@ -2878,20 +2974,27 @@ function buildEconomyLineGeometry(points: EconomyHistoryPoint[], width: number, 
   }
 
   const span = maxValue - minValue
+  const timeSpan = Math.max(timeline.endTime - timeline.startTime, 1)
   const usableWidth = width - paddingLeft - paddingRight
   const usableHeight = height - paddingTop - paddingBottom
-  const scaleX = points.length > 1 ? usableWidth / (points.length - 1) : 0
+  const mapX = (time: number) => paddingLeft + ((time - timeline.startTime) / timeSpan) * usableWidth
   const mapY = (value: number) =>
     height - paddingBottom - ((value - minValue) / span) * usableHeight
   const chartPoints = points.map((point, index) => ({
     ...point,
-    x: paddingLeft + index * scaleX,
+    index,
+    x: mapX(point.time),
     y: mapY(point.value),
   }))
   const polyline = chartPoints.map((point) => `${point.x},${point.y}`).join(' ')
   const lastPoint = points[points.length - 1]
-  const lastX = paddingLeft + (points.length - 1) * scaleX
+  const lastX = mapX(lastPoint.time)
   const lastY = mapY(lastPoint.value)
+  const tickPoints = timeline.ticks.map((tick) => ({
+    ...tick,
+    label: formatEconomyAxisLabel(tick.label),
+    x: mapX(tick.time),
+  }))
 
   return {
     areaPath: `M ${paddingLeft},${height - paddingBottom} L ${polyline
@@ -2905,6 +3008,7 @@ function buildEconomyLineGeometry(points: EconomyHistoryPoint[], width: number, 
     lastY,
     labelY: height - 8,
     polyline,
+    tickPoints,
   }
 }
 
@@ -2940,14 +3044,22 @@ function EconomyHistoryLine({
   metric,
   points,
   range,
+  timeline,
 }: {
   metric: EconomyMetric
   points: EconomyHistoryPoint[]
   range: EconomyHistoryRange
+  timeline: EconomyTimeline
 }) {
   const width = Math.max(760, getEconomyChartWidth(range))
   const height = 164
-  const geometry = buildEconomyLineGeometry(points, width, height)
+  const timedPoints = points
+    .map((point) => {
+      const time = parseEconomyHistoryPointTime(point)
+      return time == null ? null : { ...point, time }
+    })
+    .filter((point): point is TimedEconomyHistoryPoint => point != null)
+  const geometry = buildEconomyLineGeometry(timedPoints, width, height, timeline)
 
   if (geometry == null) {
     return null
@@ -2955,11 +3067,8 @@ function EconomyHistoryLine({
 
   const valueEvery = getEconomyChartValueEvery(metric.id, points.length)
   const pointRadius = points.length > 60 ? 3.5 : 4.75
-  const axisTicks = getEconomyAxisTicks(points)
-  const axisTickByIndex = new Map(axisTicks.map((tick) => [tick.index, tick]))
-
-  const firstPoint = points[0]
-  const lastPoint = points[points.length - 1]
+  const firstPoint = timedPoints[0]
+  const lastPoint = timedPoints[timedPoints.length - 1]
   const ariaLabel = `${metric.label} history from ${firstPoint.label} ${formatEconomyHistoryValue(
     metric.id,
     firstPoint.value,
@@ -2982,25 +3091,20 @@ function EconomyHistoryLine({
             y2={String(geometry.baselineY)}
           />
         ) : null}
-        {axisTicks.map((tick) => {
-          const tickPoint = geometry.chartPoints[tick.index]
-
-          return (
-            <line
-              className="economy-history-line__gridline"
-              key={`${metric.id}-grid-${tick.index}`}
-              x1={String(tickPoint.x)}
-              x2={String(tickPoint.x)}
-              y1={String(geometry.gridTopY)}
-              y2={String(geometry.gridBottomY)}
-            />
-          )
-        })}
+        {geometry.tickPoints.map((tick) => (
+          <line
+            className="economy-history-line__gridline"
+            key={`${metric.id}-grid-${tick.time}`}
+            x1={String(tick.x)}
+            x2={String(tick.x)}
+            y1={String(geometry.gridTopY)}
+            y2={String(geometry.gridBottomY)}
+          />
+        ))}
         <path className="economy-history-line__area" d={geometry.areaPath} />
         <polyline className="economy-history-line__stroke" points={geometry.polyline} />
         {geometry.chartPoints.map((point, pointIndex) => {
           const isLastPoint = pointIndex === geometry.chartPoints.length - 1
-          const axisTick = axisTickByIndex.get(pointIndex)
           const showValue = pointIndex % valueEvery === 0 || isLastPoint
           const valueOffset = point.y < 42 ? 18 : -12
           const valueClass = isLastPoint ? ' economy-history-line__value-text--current' : ''
@@ -3028,19 +3132,20 @@ function EconomyHistoryLine({
                   {formatEconomyHistoryValue(metric.id, point.value)}
                 </text>
               ) : null}
-              {axisTick ? (
-                <text
-                  className="economy-history-line__tick-text"
-                  textAnchor="middle"
-                  x={String(point.x)}
-                  y={String(geometry.labelY)}
-                >
-                  {axisTick.label}
-                </text>
-              ) : null}
             </Fragment>
           )
         })}
+        {geometry.tickPoints.map((tick) => (
+          <text
+            className="economy-history-line__tick-text"
+            key={`${metric.id}-tick-${tick.time}`}
+            textAnchor="middle"
+            x={String(tick.x)}
+            y={String(geometry.labelY)}
+          >
+            {tick.label}
+          </text>
+        ))}
       </svg>
     </div>
   )
