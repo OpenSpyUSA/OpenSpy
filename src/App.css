@@ -2311,6 +2311,15 @@
   line-height: 1.2;
 }
 
+.source-evidence-link__date {
+  color: rgba(29, 29, 31, 0.48);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
 .source-evidence-link__locator {
   color: var(--ink-soft);
   font-size: 0.72rem;

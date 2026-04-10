@@ -3,6 +3,7 @@ export type Alignment = 'democratic' | 'independent' | 'nonpartisan' | 'republic
 export type BranchId = 'executive' | 'judicial' | 'legislative'
 
 export interface SourceLink {
+  dateLabel?: string
   label: string
   locationLabel?: string
   page?: number

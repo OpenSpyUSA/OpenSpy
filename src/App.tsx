@@ -112,6 +112,141 @@ const ECONOMY_SHORT_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Ju
 const ECONOMY_MONTH_INDEX_BY_NAME = new Map(
   ECONOMY_SHORT_MONTH_NAMES.map((monthName, monthIndex) => [monthName, monthIndex]),
 )
+const SOURCE_SHORT_MONTH_INDEX_BY_NAME = new Map([
+  ['jan', 0],
+  ['january', 0],
+  ['feb', 1],
+  ['february', 1],
+  ['mar', 2],
+  ['march', 2],
+  ['apr', 3],
+  ['april', 3],
+  ['may', 4],
+  ['jun', 5],
+  ['june', 5],
+  ['jul', 6],
+  ['july', 6],
+  ['aug', 7],
+  ['august', 7],
+  ['sep', 8],
+  ['sept', 8],
+  ['september', 8],
+  ['oct', 9],
+  ['october', 9],
+  ['nov', 10],
+  ['november', 10],
+  ['dec', 11],
+  ['december', 11],
+])
+const sourceDateFormatter = new Intl.DateTimeFormat('en-US', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
+  year: 'numeric',
+})
+const sourceMonthYearFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  timeZone: 'UTC',
+  year: 'numeric',
+})
+
+function createUtcDate(year: number, monthIndex: number, day: number) {
+  return new Date(Date.UTC(year, monthIndex, day))
+}
+
+function normalizeSourceMonthName(monthName: string) {
+  return monthName.toLowerCase().replace(/\.$/, '')
+}
+
+function formatParsedSourceDate(year: number, monthIndex: number, day?: number) {
+  const safeDate = createUtcDate(year, monthIndex, day ?? 1)
+  return day ? sourceDateFormatter.format(safeDate) : sourceMonthYearFormatter.format(safeDate)
+}
+
+function inferSourceDateFromText(text: string) {
+  const monthDayYearMatch = text.match(
+    /\b(Jan\.?|January|Feb\.?|February|Mar\.?|March|Apr\.?|April|May|Jun\.?|June|Jul\.?|July|Aug\.?|August|Sep\.?|Sept\.?|September|Oct\.?|October|Nov\.?|November|Dec\.?|December)\s+(\d{1,2}),\s*(\d{4})\b/i,
+  )
+  if (monthDayYearMatch) {
+    const monthIndex = SOURCE_SHORT_MONTH_INDEX_BY_NAME.get(
+      normalizeSourceMonthName(monthDayYearMatch[1]),
+    )
+    if (monthIndex != null) {
+      return formatParsedSourceDate(
+        Number(monthDayYearMatch[3]),
+        monthIndex,
+        Number(monthDayYearMatch[2]),
+      )
+    }
+  }
+
+  const monthYearMatch = text.match(
+    /\b(Jan\.?|January|Feb\.?|February|Mar\.?|March|Apr\.?|April|May|Jun\.?|June|Jul\.?|July|Aug\.?|August|Sep\.?|Sept\.?|September|Oct\.?|October|Nov\.?|November|Dec\.?|December)\s+(\d{4})\b/i,
+  )
+  if (monthYearMatch) {
+    const monthIndex = SOURCE_SHORT_MONTH_INDEX_BY_NAME.get(
+      normalizeSourceMonthName(monthYearMatch[1]),
+    )
+    if (monthIndex != null) {
+      return formatParsedSourceDate(Number(monthYearMatch[2]), monthIndex)
+    }
+  }
+
+  const isoDateMatch = text.match(/\b(20\d{2})-(\d{2})-(\d{2})\b/)
+  if (isoDateMatch) {
+    return formatParsedSourceDate(
+      Number(isoDateMatch[1]),
+      Number(isoDateMatch[2]) - 1,
+      Number(isoDateMatch[3]),
+    )
+  }
+
+  return null
+}
+
+function inferSourceDateFromUrl(url: string) {
+  const slugDateMatch = url.match(/\/(20\d{2})(\d{2})(\d{2})(?:\/|$)/)
+  if (slugDateMatch) {
+    return formatParsedSourceDate(
+      Number(slugDateMatch[1]),
+      Number(slugDateMatch[2]) - 1,
+      Number(slugDateMatch[3]),
+    )
+  }
+
+  const pathDateMatch = url.match(/\/(20\d{2})\/(\d{2})\/(\d{2})(?:\/|$)/)
+  if (pathDateMatch) {
+    return formatParsedSourceDate(
+      Number(pathDateMatch[1]),
+      Number(pathDateMatch[2]) - 1,
+      Number(pathDateMatch[3]),
+    )
+  }
+
+  const packageDateMatch = url.match(/\b(?:CREC|cr?ec)-?(20\d{2})-(\d{2})-(\d{2})\b/i)
+  if (packageDateMatch) {
+    return formatParsedSourceDate(
+      Number(packageDateMatch[1]),
+      Number(packageDateMatch[2]) - 1,
+      Number(packageDateMatch[3]),
+    )
+  }
+
+  const yearMonthPathMatch = url.match(/\/(20\d{2})\/(\d{2})(?:\/|$)/)
+  if (yearMonthPathMatch) {
+    return formatParsedSourceDate(Number(yearMonthPathMatch[1]), Number(yearMonthPathMatch[2]) - 1)
+  }
+
+  return null
+}
+
+function getSourceDateLabel(source: SourceLink) {
+  if (source.dateLabel) {
+    return source.dateLabel
+  }
+
+  return inferSourceDateFromText(source.label) ?? inferSourceDateFromUrl(source.url)
+}
 
 function looksLikePdfUrl(url: string) {
   return /\.pdf($|[?#])/i.test(url)
@@ -207,7 +342,12 @@ function getDeepLinkedSourceUrl(source: SourceLink, fallbackExactMatches?: strin
 
 function getSourceLocationTitle(source: SourceLink, fallbackExactMatches?: string[]) {
   const titleParts = [source.label]
+  const sourceDateLabel = getSourceDateLabel(source)
   const locationNote = getSourceLocationNote(source, fallbackExactMatches)
+
+  if (sourceDateLabel) {
+    titleParts.push(sourceDateLabel)
+  }
 
   if (locationNote) {
     titleParts.push(locationNote)
@@ -223,6 +363,7 @@ function SourceEvidenceLink({
   fallbackExactMatches?: string[]
   source: SourceLink
 }) {
+  const sourceDateLabel = getSourceDateLabel(source)
   const locationNote = getSourceLocationNote(source, fallbackExactMatches)
 
   return (
@@ -232,6 +373,7 @@ function SourceEvidenceLink({
       target="_blank"
       title={getSourceLocationTitle(source, fallbackExactMatches)}
     >
+      {sourceDateLabel ? <span className="source-evidence-link__date">{sourceDateLabel}</span> : null}
       <span className="source-evidence-link__label">{source.label}</span>
       {locationNote ? <span className="source-evidence-link__locator">{locationNote}</span> : null}
     </a>
