@@ -1030,6 +1030,66 @@
   gap: 22px;
 }
 
+.home-topic-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: 24px;
+  align-items: end;
+}
+
+.home-topic-card__copy,
+.home-topic-card__meta {
+  display: grid;
+  gap: 14px;
+}
+
+.home-topic-card__copy p,
+.home-topic-card__meta p {
+  margin: 0;
+}
+
+.home-topic-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.home-topic-card__button,
+.biotech-card__profile-button,
+.biotech-card__toggle-button {
+  appearance: none;
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(246, 249, 255, 0.78)),
+    rgba(255, 255, 255, 0.74);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 12px 24px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.home-topic-card__button:hover,
+.home-topic-card__button:focus-visible,
+.biotech-card__profile-button:hover,
+.biotech-card__profile-button:focus-visible,
+.biotech-card__toggle-button:hover,
+.biotech-card__toggle-button:focus-visible {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 16px 28px rgba(15, 23, 42, 0.08);
+}
+
 .branch-orb {
   width: min(100%, 340px);
   position: relative;
@@ -1115,12 +1175,14 @@
 .economy-range-button:focus-visible,
 .economy-history-row__source:focus-visible,
 .entry-choice:focus-visible,
+.home-topic-card__button:focus-visible,
 .mini-member:focus-visible,
 .person-card:focus-visible,
 .state-focus__clear:focus-visible,
 .toolbar-state__button:focus-visible,
 .toolbar input:focus-visible,
 .toolbar select:focus-visible,
+.biotech-card__profile-button:focus-visible,
 .detail-close:focus-visible,
 .vote-matrix__event-link:focus-visible,
 .source-links a:focus-visible,
@@ -1665,6 +1727,52 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 250, 241, 0.82));
 }
 
+.branch-banner--topic {
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'top'
+    'copy'
+    'stats';
+  gap: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(52, 120, 246, 0.14), transparent 26%),
+    radial-gradient(circle at 82% 18%, rgba(39, 174, 96, 0.12), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(243, 248, 246, 0.82));
+}
+
+.branch-banner--topic .branch-banner__top {
+  display: grid;
+  gap: 18px;
+  align-items: start;
+}
+
+.branch-banner--topic .branch-banner__title-row {
+  gap: 10px;
+  max-width: min(100%, 960px);
+}
+
+.branch-banner--topic h1 {
+  max-width: 8.5ch;
+  font-size: clamp(3.8rem, 7vw, 6.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.07em;
+  text-wrap: balance;
+}
+
+.branch-banner--topic .branch-state-heading {
+  max-width: 20ch;
+  font-family: inherit;
+  font-size: clamp(1.22rem, 2vw, 1.8rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  color: rgba(29, 29, 31, 0.5);
+}
+
+.branch-banner--topic .back-link {
+  white-space: nowrap;
+}
+
 .branch-banner--executive .branch-banner__top h1,
 .branch-banner--executive .branch-title-button,
 .branch-banner--executive .branch-state-heading {
@@ -1792,6 +1900,11 @@
   max-width: 860px;
 }
 
+.branch-banner__copy--topic {
+  gap: 12px;
+  max-width: 62rem;
+}
+
 .branch-banner__copy--executive .branch-banner__lede {
   max-width: 44ch;
 }
@@ -1865,6 +1978,30 @@
   grid-template-columns: 1fr;
   gap: 16px;
   min-width: min(100%, 540px);
+}
+
+.branch-stats--topic {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-width: 0;
+  gap: 12px;
+}
+
+.branch-banner--topic .stat-card {
+  min-height: 0;
+  padding: 14px 16px;
+  border-radius: 22px;
+}
+
+.branch-banner--topic .stat-card strong {
+  margin-bottom: 6px;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.branch-banner--topic .stat-card span {
+  font-size: 0.98rem;
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 .branch-banner--legislative .branch-stats {
@@ -1967,6 +2104,31 @@
   background: color-mix(in srgb, var(--independent) 5%, rgba(255, 255, 255, 0.82));
 }
 
+.stat-card--topic-biotech-policy {
+  border-color: rgba(39, 174, 96, 0.16);
+  background: rgba(234, 246, 241, 0.88);
+}
+
+.stat-card--topic-biomedical-regulator {
+  border-color: rgba(219, 143, 24, 0.16);
+  background: rgba(255, 245, 235, 0.88);
+}
+
+.stat-card--topic-biosecurity {
+  border-color: rgba(63, 81, 181, 0.14);
+  background: rgba(239, 244, 249, 0.88);
+}
+
+.stat-card--topic-pharma-background {
+  border-color: rgba(147, 112, 219, 0.16);
+  background: rgba(246, 241, 255, 0.88);
+}
+
+.stat-card--topic-lab-leak-and-gof-politics {
+  border-color: rgba(198, 48, 45, 0.16);
+  background: rgba(255, 238, 237, 0.88);
+}
+
 .toolbar {
   display: grid;
   grid-template-columns: minmax(260px, 2fr) repeat(2, minmax(170px, 1fr)) minmax(180px, 0.9fr);
@@ -2033,6 +2195,262 @@
   grid-template-columns: minmax(0, 1.45fr) 360px;
   gap: 22px;
   align-items: start;
+}
+
+.biotech-sections {
+  display: grid;
+  gap: 24px;
+}
+
+.biotech-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.biotech-card {
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 26px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(252, 252, 253, 0.68)),
+    rgba(255, 255, 255, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 14px 28px rgba(15, 23, 42, 0.05);
+}
+
+.biotech-card__intro,
+.biotech-card__title-group {
+  display: grid;
+  gap: 12px;
+}
+
+.biotech-card__intro {
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--line) 90%, white 10%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(246, 249, 255, 0.68)),
+    rgba(255, 255, 255, 0.6);
+}
+
+.biotech-card__intro-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+
+.biotech-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 10px;
+}
+
+.biotech-card__toggle-button--active {
+  border-color: rgba(40, 103, 219, 0.18);
+  background:
+    linear-gradient(180deg, rgba(231, 241, 255, 0.96), rgba(214, 231, 255, 0.8)),
+    rgba(227, 239, 255, 0.78);
+  color: #1849b5;
+}
+
+.biotech-card__pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.biotech-card__role,
+.biotech-card__story {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.biotech-card__role {
+  margin-top: 6px;
+  font-size: 0.94rem;
+}
+
+.biotech-card__story {
+  font-size: 0.98rem;
+  line-height: 1.58;
+}
+
+.biotech-card__sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.biotech-card__sources a {
+  display: grid;
+  align-items: start;
+  gap: 3px;
+  min-height: 38px;
+  padding: 9px 13px;
+  border-radius: 16px;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--ink);
+  font-size: 0.9rem;
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.biotech-card__sources a:hover {
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.source-evidence-link__label {
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.source-evidence-link__locator {
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.biotech-mention-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.biotech-mention-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(250, 251, 252, 0.72)),
+    rgba(255, 255, 255, 0.62);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 12px 24px rgba(15, 23, 42, 0.04);
+}
+
+.biotech-mention-card__top,
+.biotech-mention-card__title-group {
+  display: grid;
+  gap: 10px;
+}
+
+.biotech-mention-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.biotech-mention-card__meta .eyebrow {
+  margin: 0;
+}
+
+.biotech-mention-card__title-group h3,
+.biotech-evidence-intro h2 {
+  margin: 0;
+}
+
+.biotech-mention-card__title {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.biotech-mention-card__story {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.58;
+}
+
+.biotech-mention-card__matches {
+  margin: 0;
+  color: rgba(29, 29, 31, 0.74);
+  font-size: 0.9rem;
+  line-height: 1.48;
+}
+
+.biotech-mention-card__matches strong {
+  color: var(--ink);
+}
+
+.biotech-mention-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.biotech-mention-card__profile-button {
+  min-height: 42px;
+  padding: 0 14px;
+}
+
+.biotech-evidence-intro__note {
+  margin: 4px 0 0;
+  color: rgba(29, 29, 31, 0.6);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.biotech-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.biotech-pill--biotech-policy {
+  background: rgba(234, 246, 241, 0.92);
+  color: #16754c;
+}
+
+.biotech-pill--biomedical-regulator {
+  background: rgba(255, 245, 235, 0.92);
+  color: #b36b00;
+}
+
+.biotech-pill--biosecurity {
+  background: rgba(239, 244, 249, 0.92);
+  color: #30506e;
+}
+
+.biotech-pill--pharma-background {
+  background: rgba(246, 241, 255, 0.92);
+  color: #6b4fb5;
+}
+
+.biotech-pill--lab-leak-and-gof-politics {
+  background: rgba(255, 238, 237, 0.92);
+  color: #b23b39;
+}
+
+.biotech-evidence-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .branch-layout--single {
@@ -4285,6 +4703,22 @@
   gap: 10px 14px;
 }
 
+.executive-shutdown-event__links a {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.executive-shutdown-event__links a:hover {
+  background: rgba(255, 255, 255, 0.92);
+}
+
 .shutdown-status-chip,
 .shutdown-event-chip {
   display: inline-flex;
@@ -6102,6 +6536,18 @@
     grid-template-columns: 1fr;
   }
 
+  .home-topic-card {
+    grid-template-columns: 1fr;
+  }
+
+  .biotech-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .biotech-mention-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .case-grid {
     grid-template-columns: 1fr;
   }
@@ -6116,6 +6562,11 @@
 
   .branch-orbit {
     justify-items: center;
+  }
+
+  .branch-stats--topic {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-width: 0;
   }
 
   .branch-orb {
@@ -6210,9 +6661,29 @@
       'copy';
   }
 
+  .biotech-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .biotech-mention-grid {
+    grid-template-columns: 1fr;
+  }
+
   .branch-stats {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     margin-top: 0;
+  }
+
+  .home-topic-card__stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .biotech-card__intro-top {
+    display: grid;
+  }
+
+  .biotech-card__actions {
+    justify-content: start;
   }
 
   .agency-directory__stats {
@@ -6704,6 +7175,11 @@
   }
 
   .branch-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .branch-stats--topic,
+  .home-topic-card__stats {
     grid-template-columns: 1fr;
   }
 

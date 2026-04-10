@@ -4,6 +4,10 @@ export type BranchId = 'executive' | 'judicial' | 'legislative'
 
 export interface SourceLink {
   label: string
+  locationLabel?: string
+  page?: number
+  searchText?: string
+  textFragment?: string
   url: string
 }
 

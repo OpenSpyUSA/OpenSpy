@@ -44,6 +44,14 @@ import {
   STATE_PROFILE_DEBT_OUTSTANDING_THOUSANDS,
   STATE_PROFILE_DEBT_SOURCE_URL,
 } from './stateProfileMeta'
+import {
+  BIOTECH_CONNECTIONS,
+  type BiotechConnectionCategory,
+} from './biotechConnections'
+import {
+  BIOTECH_MENTIONS,
+  type BiotechMentionTier,
+} from './biotechMentionEvidence'
 import { TRUMP_TRUTH_SNAPSHOT, type TrumpTruthPost } from './trumpTruthSnapshot'
 import { formatTrumpScore, getTrumpBand } from './trumpScore'
 import { formatXHandle } from './xProfile'
@@ -61,6 +69,7 @@ import type {
   GovernmentPerson,
   DisclosureTrade,
   LegislativeTrumpRollCall,
+  SourceLink,
   StateDelegationSummary,
   SupremeCourtCase,
   TrumpCaseSide,
@@ -104,12 +113,139 @@ const ECONOMY_MONTH_INDEX_BY_NAME = new Map(
   ECONOMY_SHORT_MONTH_NAMES.map((monthName, monthIndex) => [monthName, monthIndex]),
 )
 
+function looksLikePdfUrl(url: string) {
+  return /\.pdf($|[?#])/i.test(url)
+}
+
+function appendPdfViewerParams(
+  url: string,
+  options: {
+    page?: number
+    searchText?: string
+  },
+) {
+  const hashParts: string[] = []
+  if (options.page && Number.isFinite(options.page)) {
+    hashParts.push(`page=${options.page}`)
+  }
+  if (options.searchText) {
+    hashParts.push(`search=${encodeURIComponent(options.searchText)}`)
+  }
+  if (!hashParts.length) {
+    return url
+  }
+
+  const [baseUrl, existingHash] = url.split('#', 2)
+  if (existingHash) {
+    return `${baseUrl}#${existingHash}&${hashParts.join('&')}`
+  }
+  return `${baseUrl}#${hashParts.join('&')}`
+}
+
+function appendTextFragment(url: string, text: string) {
+  if (!text) {
+    return url
+  }
+
+  const [baseUrl, existingHash] = url.split('#', 2)
+  const encodedText = encodeURIComponent(text)
+
+  if (!existingHash) {
+    return `${baseUrl}#:~:text=${encodedText}`
+  }
+
+  if (existingHash.includes(':~:text=')) {
+    return url
+  }
+
+  return `${baseUrl}#${existingHash}:~:text=${encodedText}`
+}
+
+function getSourceLocatorText(source: SourceLink, fallbackExactMatches?: string[]) {
+  if (source.textFragment) {
+    return source.textFragment
+  }
+  if (source.searchText) {
+    return source.searchText
+  }
+  return fallbackExactMatches?.[0] ?? ''
+}
+
+function getSourceLocationNote(source: SourceLink, fallbackExactMatches?: string[]) {
+  if (source.locationLabel) {
+    return source.locationLabel
+  }
+
+  const locationParts: string[] = []
+  if (source.page) {
+    locationParts.push(`page ${source.page}`)
+  }
+
+  const locatorText = getSourceLocatorText(source, fallbackExactMatches)
+  if (locatorText) {
+    locationParts.push(
+      looksLikePdfUrl(source.url) ? `search "${locatorText}"` : `opens near "${locatorText}"`,
+    )
+  }
+
+  return locationParts.join(' • ')
+}
+
+function getDeepLinkedSourceUrl(source: SourceLink, fallbackExactMatches?: string[]) {
+  const locatorText = getSourceLocatorText(source, fallbackExactMatches)
+  if (looksLikePdfUrl(source.url)) {
+    return appendPdfViewerParams(source.url, {
+      page: source.page,
+      searchText: locatorText || undefined,
+    })
+  }
+  if (locatorText) {
+    return appendTextFragment(source.url, locatorText)
+  }
+  return source.url
+}
+
+function getSourceLocationTitle(source: SourceLink, fallbackExactMatches?: string[]) {
+  const titleParts = [source.label]
+  const locationNote = getSourceLocationNote(source, fallbackExactMatches)
+
+  if (locationNote) {
+    titleParts.push(locationNote)
+  }
+
+  return titleParts.join(' — ')
+}
+
+function SourceEvidenceLink({
+  fallbackExactMatches,
+  source,
+}: {
+  fallbackExactMatches?: string[]
+  source: SourceLink
+}) {
+  const locationNote = getSourceLocationNote(source, fallbackExactMatches)
+
+  return (
+    <a
+      href={getDeepLinkedSourceUrl(source, fallbackExactMatches)}
+      rel="noreferrer"
+      target="_blank"
+      title={getSourceLocationTitle(source, fallbackExactMatches)}
+    >
+      <span className="source-evidence-link__label">{source.label}</span>
+      {locationNote ? <span className="source-evidence-link__locator">{locationNote}</span> : null}
+    </a>
+  )
+}
+
 type ExecutivePageId = 'profiles' | 'systems'
+type SpecialPageId = 'biotech'
 
 type RouteState = {
   branchId: BranchId | null
   executivePage: ExecutivePageId | null
   personId: string | null
+  specialPage: SpecialPageId | null
 }
 
 type SupremeCourtCaseSelection = {
@@ -154,6 +290,69 @@ const JUDICIAL_INFERENCE_NOTE =
   "A \"?\" means this justice's stance is inferred from the Court's result or a partial public statement, rather than fully listed justice-by-justice in the official text."
 const AUDIENCE_MODE_STORAGE_KEY = 'open-spy-audience-mode'
 const executivePageIdSet = new Set<ExecutivePageId>(['profiles', 'systems'])
+const specialPageIdSet = new Set<SpecialPageId>(['biotech'])
+const BIOTECH_CATEGORY_ORDER = [
+  'biotech policy',
+  'biomedical regulator',
+  'biosecurity',
+  'pharma background',
+  'lab-leak and gof politics',
+] as const satisfies readonly BiotechConnectionCategory[]
+const BIOTECH_MENTION_TIER_ORDER = [
+  'direct self-use',
+  'signed or office-owned document',
+  'official contextual mention',
+] as const satisfies readonly BiotechMentionTier[]
+const BIOTECH_CATEGORY_META: Record<
+  BiotechConnectionCategory,
+  { heading: string; pillLabel: string; summary: string }
+> = {
+  'biotech policy': {
+    heading: 'Biotech Policy',
+    pillLabel: 'Biotech Policy',
+    summary: 'Formal biotechnology strategy, industrial policy, and commission-level roles.',
+  },
+  'biomedical regulator': {
+    heading: 'Biomedical Regulators',
+    pillLabel: 'Biomedical Power',
+    summary: 'People who hold real institutional power over federal health, research, and drug policy.',
+  },
+  biosecurity: {
+    heading: 'Biosecurity',
+    pillLabel: 'Biosecurity',
+    summary: 'Threat prevention, lab security, and national-security oversight.',
+  },
+  'pharma background': {
+    heading: 'Pharma Background',
+    pillLabel: 'Pharma Background',
+    summary: 'Private-sector pharmaceutical or related business backgrounds, kept separate from government biosecurity claims.',
+  },
+  'lab-leak and gof politics': {
+    heading: 'Lab-Leak and GOF Politics',
+    pillLabel: 'Lab-Leak / GOF',
+    summary: 'Public fights over Wuhan, gain-of-function research, risky pathogen oversight, and lab-origin claims.',
+  },
+}
+const BIOTECH_MENTION_TIER_META: Record<
+  BiotechMentionTier,
+  { heading: string; summary: string }
+> = {
+  'direct self-use': {
+    heading: 'Direct Self-Use',
+    summary:
+      'Separate from the role-based biotech buckets above. This tier covers direct wording in official hearings, floor remarks, releases, presidential actions, and attributed quotes.',
+  },
+  'signed or office-owned document': {
+    heading: 'Signed / Office-Owned Document',
+    summary:
+      'Signed letters, hosted PDFs, issue pages, committee releases, office releases, and other office-owned material that carry the target language without being treated here as direct self-use.',
+  },
+  'official contextual mention': {
+    heading: 'Official Contextual Mention',
+    summary:
+      "The official source contains the target language on material tied to the person, but not as that person's own direct self-use in this pass.",
+  },
+}
 const EXECUTIVE_PAGE_META: Record<
   ExecutivePageId,
   { chooserDescription: string; chooserEyebrow: string; chooserTitle: string; heading: string }
@@ -1039,20 +1238,29 @@ function isExecutivePageId(value: string | null | undefined): value is Executive
   return executivePageIdSet.has(value as ExecutivePageId)
 }
 
+function isSpecialPageId(value: string | null | undefined): value is SpecialPageId {
+  return specialPageIdSet.has(value as SpecialPageId)
+}
+
 function parseHash(hash: string, peopleById?: Map<string, GovernmentPerson>): RouteState {
   const clean = hash.replace(/^#\/?/, '').trim()
 
   if (!clean) {
-    return { branchId: null, executivePage: null, personId: null }
+    return { branchId: null, executivePage: null, personId: null, specialPage: null }
   }
 
   const [branchCandidate, secondSegment, thirdSegment] = clean.split('/')
+
+  if (isSpecialPageId(branchCandidate)) {
+    return { branchId: null, executivePage: null, personId: null, specialPage: branchCandidate }
+  }
+
   const branchId = branchIdSet.has(branchCandidate as BranchId)
     ? (branchCandidate as BranchId)
     : null
 
   if (!branchId) {
-    return { branchId: null, executivePage: null, personId: null }
+    return { branchId: null, executivePage: null, personId: null, specialPage: null }
   }
 
   const executivePage =
@@ -1070,7 +1278,7 @@ function parseHash(hash: string, peopleById?: Map<string, GovernmentPerson>): Ro
   const selectedPerson = personId && peopleById ? peopleById.get(personId) : null
 
   if (selectedPerson && selectedPerson.branchId !== branchId) {
-    return { branchId, executivePage, personId: null }
+    return { branchId, executivePage, personId: null, specialPage: null }
   }
 
   return {
@@ -1080,6 +1288,7 @@ function parseHash(hash: string, peopleById?: Map<string, GovernmentPerson>): Ro
         ? executivePage ?? (selectedPerson ? 'profiles' : null)
         : null,
     personId: peopleById ? (selectedPerson ? personId : null) : personId ?? null,
+    specialPage: null,
   }
 }
 
@@ -1097,6 +1306,10 @@ function toHash(branchId: BranchId | null, personId?: string | null, executivePa
   }
 
   return personId ? `#/${branchId}/${personId}` : `#/${branchId}`
+}
+
+function toSpecialHash(specialPage: SpecialPageId | null) {
+  return specialPage ? `#/${specialPage}` : '#/'
 }
 
 function formatSectionMeta(person: GovernmentPerson) {
@@ -2090,9 +2303,7 @@ function ExecutiveShutdownSection() {
             <p>{event.summary}</p>
             <div className="executive-shutdown-event__links">
               {event.sourceLinks.map((link) => (
-                <a href={link.url} key={`${event.id}-${link.label}`} rel="noreferrer" target="_blank">
-                  {link.label}
-                </a>
+                <SourceEvidenceLink key={`${event.id}-${link.label}-${link.url}`} source={link} />
               ))}
             </div>
           </article>
@@ -3155,12 +3366,18 @@ function HomeView({
   audienceMode,
   data,
   onBranchSelect,
+  onOpenBiotechPage,
 }: {
   audienceMode: AudienceMode
   data: GovernmentDataset
   onBranchSelect: (branchId: BranchId) => void
+  onOpenBiotechPage: () => void
 }) {
   const homeCopy = HOME_AUDIENCE_COPY[audienceMode]
+  const biotechSourceCount = BIOTECH_CONNECTIONS.reduce(
+    (total, connection) => total + connection.sources.length,
+    0,
+  )
 
   return (
     <main className="screen screen--home">
@@ -3234,7 +3451,288 @@ function HomeView({
           )
         })}
       </section>
+      <section className="section-card home-topic-card">
+        <div className="home-topic-card__copy">
+          <div>
+            <p className="eyebrow">Special topic</p>
+            <h2>Biotech, Biosecurity, and Lab-Leak Politics</h2>
+          </div>
+          <p>
+            A source-linked shortlist of people already profiled on this site who have direct ties
+            to biotechnology policy, biomedical-regulation power, biosecurity oversight, or public
+            lab-leak and gain-of-function politics.
+          </p>
+        </div>
+        <div className="home-topic-card__meta">
+          <div className="home-topic-card__stats">
+            <div className="stat-card">
+              <strong>{BIOTECH_CONNECTIONS.length}</strong>
+              <span>matched people</span>
+            </div>
+            <div className="stat-card">
+              <strong>{BIOTECH_CATEGORY_ORDER.length}</strong>
+              <span>categories</span>
+            </div>
+            <div className="stat-card">
+              <strong>{biotechSourceCount}</strong>
+              <span>source links</span>
+            </div>
+          </div>
+          <button className="home-topic-card__button" onClick={onOpenBiotechPage} type="button">
+            Open dedicated section
+          </button>
+        </div>
+      </section>
       <EconomySnapshotSection metrics={data.economySnapshot ?? []} />
+    </main>
+  )
+}
+
+function BiotechConnectionsView({
+  branchesById,
+  onBack,
+  onOpenPerson,
+  peopleById,
+}: {
+  branchesById: Map<BranchId, GovernmentBranch>
+  onBack: () => void
+  onOpenPerson: (personId: string) => void
+  peopleById: Map<string, GovernmentPerson>
+}) {
+  const [expandedPersonId, setExpandedPersonId] = useState<string | null>(null)
+  const groupedConnections = BIOTECH_CATEGORY_ORDER.map((category) => ({
+    category,
+    items: BIOTECH_CONNECTIONS.filter((connection) => connection.category === category),
+    meta: BIOTECH_CATEGORY_META[category],
+  })).filter((group) => group.items.length > 0)
+  const mentionGroups = BIOTECH_MENTION_TIER_ORDER.map((tier) => ({
+    items: BIOTECH_MENTIONS.filter((entry) => entry.tier === tier),
+    meta: BIOTECH_MENTION_TIER_META[tier],
+    tier,
+  })).filter((group) => group.items.length > 0)
+
+  return (
+    <main className="screen screen--topic">
+      <header className="branch-banner branch-banner--topic">
+        <div className="branch-banner__top">
+          <button className="back-link" onClick={onBack} type="button">
+            Back to home
+          </button>
+          <div className="branch-banner__title-row">
+            <h1>Biotech, Biosecurity, and Lab Politics</h1>
+            <h2 className="branch-state-heading">Existing profiles on this site</h2>
+          </div>
+        </div>
+        <div className="branch-banner__copy branch-banner__copy--topic">
+          <p className="branch-banner__lede">
+            This section uses a broader standard: formal biotech and biomedical power, plus public
+            gain-of-function, biolab, and lab-leak involvement among people already profiled on
+            your site.
+          </p>
+          <p className="branch-summary">
+            Public mention of a lab, pathogen, or alleged bioweapon is not treated here as proof
+            of an actual biological-weapons program. The point is to track who has real biotech or
+            biosecurity power, and who has publicly pushed these themes in politics.
+          </p>
+        </div>
+        <div className="branch-stats branch-stats--topic">
+          {groupedConnections.map((group) => (
+            <div className={`stat-card stat-card--topic stat-card--topic-${group.category.replace(/[^a-z]+/g, '-')}`} key={group.category}>
+              <strong>{group.items.length}</strong>
+              <span>{group.meta.heading}</span>
+            </div>
+          ))}
+        </div>
+      </header>
+
+      <section className="biotech-sections">
+        {groupedConnections.map((group) => (
+          <section className="section-card" key={group.category}>
+            <div className="section-card__header">
+              <div>
+                <p className="eyebrow">{group.items.length} profiles</p>
+                <h2>{group.meta.heading}</h2>
+              </div>
+              <p>{group.meta.summary}</p>
+            </div>
+
+            <div className="biotech-grid">
+              {group.items.map((connection) => (
+                (() => {
+                  const person = peopleById.get(connection.personId)
+                  const branch = person ? branchesById.get(person.branchId) ?? null : null
+                  const section =
+                    person && branch
+                      ? branch.sections.find((candidate) => candidate.id === person.sectionId) ?? null
+                      : null
+
+                  if (!person || !branch || !section) {
+                    return null
+                  }
+
+                  const isExpanded = expandedPersonId === connection.personId
+
+                  return (
+                    <article className="biotech-card" key={connection.personId}>
+                      <section className="biotech-card__intro">
+                        <div className="biotech-card__intro-top">
+                          <div className="biotech-card__pill-row">
+                            <span
+                              className={`biotech-pill biotech-pill--${connection.category.replace(/[^a-z]+/g, '-')}`}
+                            >
+                              {group.meta.pillLabel}
+                            </span>
+                            <span className="biotech-evidence-pill">{connection.evidenceLabel}</span>
+                          </div>
+                          <div className="biotech-card__actions">
+                            <button
+                              className={`biotech-card__toggle-button${
+                                isExpanded ? ' biotech-card__toggle-button--active' : ''
+                              }`}
+                              onClick={() =>
+                                setExpandedPersonId((currentId) =>
+                                  currentId === connection.personId ? null : connection.personId,
+                                )
+                              }
+                              type="button"
+                            >
+                              {isExpanded ? 'Hide full here' : 'Show full here'}
+                            </button>
+                            <button
+                              className="biotech-card__profile-button"
+                              onClick={() => onOpenPerson(connection.personId)}
+                              type="button"
+                            >
+                              Open profile
+                            </button>
+                          </div>
+                        </div>
+                        <p className="biotech-card__story">{connection.story}</p>
+                        <div className="biotech-card__sources">
+                          {connection.sources.map((source) => (
+                            <SourceEvidenceLink
+                              key={`${connection.personId}-${source.label}-${source.url}`}
+                              source={source}
+                            />
+                          ))}
+                        </div>
+                      </section>
+
+                      <PersonDetailContent
+                        branch={branch}
+                        person={person}
+                        section={section}
+                        variant={isExpanded ? 'default' : 'biotech-compact'}
+                      />
+                    </article>
+                  )
+                })()
+              ))}
+            </div>
+          </section>
+        ))}
+
+        {mentionGroups.length > 0 ? (
+          <section className="section-card biotech-evidence-intro">
+            <div className="section-card__header">
+              <div>
+                <p className="eyebrow">{BIOTECH_MENTIONS.length} official-source entries</p>
+                <h2>Official Biosecurity / Bioweapon Language</h2>
+              </div>
+              <p>
+                Kept separate from the role-based biotech buckets above. This layer tracks where
+                official material tied to profiles already on this site uses target terms such as
+                biosecurity, biological threats, bioweapon, bioweapons, biological weapons,
+                biodefense, bioterrorism, or gain-of-function.
+              </p>
+            </div>
+            <p className="biotech-evidence-intro__note">
+              Current-roster Supreme Court justices: no primary-verified target phrase in this
+              pass.
+            </p>
+          </section>
+        ) : null}
+
+        {mentionGroups.map((group) => (
+          <section className="section-card" key={group.tier}>
+            <div className="section-card__header">
+              <div>
+                <p className="eyebrow">{group.items.length} entries</p>
+                <h2>{group.meta.heading}</h2>
+              </div>
+              <p>{group.meta.summary}</p>
+            </div>
+
+            <div className="biotech-mention-grid">
+              {group.items.map((entry) => {
+                const profiles = entry.personIds
+                  .map((personId) => peopleById.get(personId))
+                  .filter(Boolean) as GovernmentPerson[]
+
+                if (!profiles.length) {
+                  return null
+                }
+
+                const primaryProfile = profiles[0]
+                const hasMultipleProfiles = profiles.length > 1
+
+                return (
+                  <article className="biotech-mention-card" key={entry.id}>
+                    <div className="biotech-mention-card__top">
+                      <div className="biotech-mention-card__meta">
+                        <p className="eyebrow">
+                          {hasMultipleProfiles
+                            ? `${profiles.length} current profiles on this site`
+                            : primaryProfile.subtitle ?? primaryProfile.title}
+                        </p>
+                        <span className="biotech-evidence-pill">{entry.evidenceLabel}</span>
+                      </div>
+                      <div className="biotech-mention-card__title-group">
+                        <h3>{primaryProfile.name}</h3>
+                        <p className="biotech-mention-card__title">
+                          {hasMultipleProfiles
+                            ? 'Evidence applies to multiple current profiles here'
+                            : primaryProfile.title}
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="biotech-mention-card__story">{entry.story}</p>
+                    {entry.exactMatches && entry.exactMatches.length > 0 ? (
+                      <p className="biotech-mention-card__matches">
+                        <strong>Exact matches:</strong> {entry.exactMatches.join(', ')}
+                      </p>
+                    ) : null}
+
+                    <div className="biotech-mention-card__actions">
+                      {profiles.map((profile) => (
+                        <button
+                          className="biotech-card__profile-button biotech-mention-card__profile-button"
+                          key={`${entry.id}-${profile.id}`}
+                          onClick={() => onOpenPerson(profile.id)}
+                          type="button"
+                        >
+                          {hasMultipleProfiles ? profile.subtitle ?? profile.title : 'Open profile'}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="biotech-card__sources">
+                      {entry.sources.map((source) => (
+                        <SourceEvidenceLink
+                          fallbackExactMatches={entry.exactMatches}
+                          key={`${entry.id}-${source.label}-${source.url}`}
+                          source={source}
+                        />
+                      ))}
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+        ))}
+      </section>
     </main>
   )
 }
@@ -3331,6 +3829,477 @@ function PersonCard({
         </span>
       </span>
     </button>
+  )
+}
+
+function PersonDetailContent({
+  branch,
+  person,
+  section,
+  variant = 'default',
+}: {
+  branch: GovernmentBranch
+  person: GovernmentPerson
+  section: BranchSection
+  variant?: 'default' | 'biotech-compact'
+}) {
+  const isBiotechCompact = variant === 'biotech-compact'
+  const facts = buildDetailFacts(person).filter((fact) => {
+    if (!isBiotechCompact) {
+      return true
+    }
+
+    return ['Appointed by', 'Budget', 'Funding model'].includes(fact.label)
+  })
+  const xHandle = formatXHandle(person.xUrl)
+  const ageLabel = formatAgeLabel(person.birthDate, person.birthYear)
+  const legislativeServiceLabel = getLegislativeServiceLabel(person)
+  const independentAgencyServiceLabel = getIndependentAgencyServiceLabel(person)
+  const independentAgencyAppointerLabel = getIndependentAgencyAppointerLabel(person)
+  const showTrumpRelationship = shouldShowTrumpRelationship(person)
+  const executiveCongressHistory =
+    person.branchId === 'executive' ? person.executiveCongressServiceHistory ?? [] : []
+
+  return (
+    <>
+      <div className="detail-header">
+        <Avatar
+          className={`detail-avatar detail-avatar--${person.alignment}`}
+          imageUrl={person.imageUrl}
+          name={person.name}
+        />
+        <div className="detail-header__copy">
+          <p className="eyebrow">{section.label}</p>
+          <div className="detail-header__name-row">
+            <h2>{person.name}</h2>
+            {ageLabel ? <span className="age-badge age-badge--detail">{ageLabel}</span> : null}
+          </div>
+          <p className="detail-title">{person.title}</p>
+        </div>
+      </div>
+
+      <div className="detail-tags">
+        <span className={`alignment-chip alignment-chip--${person.alignment}`}>
+          {person.alignmentLabel}
+        </span>
+        <span className="detail-tag">{branch.name} Branch</span>
+        {legislativeServiceLabel ? (
+          <span className="service-chip">{legislativeServiceLabel}</span>
+        ) : null}
+        {independentAgencyServiceLabel ? (
+          <span className="service-chip">{independentAgencyServiceLabel}</span>
+        ) : null}
+        {independentAgencyAppointerLabel ? (
+          <span
+            className={`service-chip${
+              getPresidentPartyTone(person.appointedBy)
+                ? ` service-chip--${getPresidentPartyTone(person.appointedBy)}`
+                : ''
+            }`}
+          >
+            {independentAgencyAppointerLabel}
+          </span>
+        ) : null}
+        {showTrumpRelationship && !isBiotechCompact ? (
+          <span className={`trump-chip trump-chip--${getTrumpBand(person.trumpScore)}`}>
+            {formatDisplayedTrumpScore(person)}
+          </span>
+        ) : null}
+      </div>
+
+      <p className="detail-description">{person.description}</p>
+
+      {facts.length > 0 ? (
+        <div className="detail-facts">
+          {facts.map((fact) => (
+            <div className="fact-row" key={`${person.id}-${fact.label}`}>
+              <span>{fact.label}</span>
+              <strong className={fact.tone ? `fact-row__value--${fact.tone}` : undefined}>
+                {fact.value}
+              </strong>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      {person.appointmentNote && !isBiotechCompact ? (
+        <section className="detail-block">
+          <h3>Appointment</h3>
+          <p>{person.appointmentNote}</p>
+        </section>
+      ) : null}
+
+      {person.committees && person.committees.length > 0 && !isBiotechCompact ? (
+        <section className="detail-block">
+          <h3>Committees</h3>
+          <ul className="detail-list">
+            {person.committees.map((committee) => (
+              <li key={committee}>{committee}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {person.careerHistory && person.careerHistory.length > 0 && !isBiotechCompact ? (
+        <section className="detail-block">
+          <h3>Career history</h3>
+          <ul className="detail-list">
+            {person.careerHistory.map((record) => (
+              <li key={`${person.id}-${record.category}-${record.summary}`}>{record.summary}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {executiveCongressHistory.length > 0 && !isBiotechCompact ? (
+        <section className="detail-block">
+          <h3>Past Trump-linked votes in Congress</h3>
+          <p className="detail-note">
+            Selected House or Senate roll calls from this site during this official&apos;s time in
+            Congress.
+          </p>
+          <div className="executive-congress-history">
+            {executiveCongressHistory.map((service) => {
+              const sortedVotes = service.votes
+                .map((vote, index) => ({ index, vote }))
+                .sort((left, right) =>
+                  compareExecutiveCongressVotesByRecency(
+                    left.vote,
+                    right.vote,
+                    left.index,
+                    right.index,
+                  ),
+                )
+                .map(({ vote }) => vote)
+
+              return (
+                <article className="executive-congress-service" key={`${person.id}-${service.label}`}>
+                  <div className="executive-congress-service__header">
+                    <div>
+                      <h4>{service.label}</h4>
+                      <p>{buildExecutiveCongressHistorySummary(service)}</p>
+                    </div>
+                  </div>
+
+                  <ul className="executive-congress-vote-list">
+                    {sortedVotes.map((vote) => {
+                      const referenceLine = formatRollCallReferenceLine(
+                        vote as LegislativeTrumpRollCall,
+                      )
+                      const recordedLine = formatRollCallRecordedLine(vote as LegislativeTrumpRollCall)
+                      const voteVideoLink = getRollCallVideoLink(vote)
+
+                      return (
+                        <li
+                          className="executive-congress-vote-item"
+                          key={`${person.id}-${service.label}-${vote.id}`}
+                        >
+                          <div className="executive-congress-vote-item__header">
+                            <div>
+                              <strong>{vote.label}</strong>
+                              <p>
+                                {[
+                                  recordedLine,
+                                  `Vote: ${vote.voteCast}`,
+                                  vote.scoreIncluded ? 'Direct' : 'Broader',
+                                ]
+                                  .filter(Boolean)
+                                  .join(' • ')}
+                              </p>
+                            </div>
+                            <span className={`case-stance-chip case-stance-chip--${vote.position}`}>
+                              {formatExecutiveCongressVotePosition(vote.position)}
+                            </span>
+                          </div>
+                          {referenceLine ? (
+                            <p className="executive-congress-vote-item__meta">{referenceLine}</p>
+                          ) : null}
+                          <div className="executive-congress-vote-item__links">
+                            <a href={vote.sourceUrl} rel="noreferrer" target="_blank">
+                              Official Vote
+                            </a>
+                            {voteVideoLink ? (
+                              <a href={voteVideoLink.url} rel="noreferrer" target="_blank">
+                                {voteVideoLink.label}
+                              </a>
+                            ) : null}
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {(person.highestEducationSchool || person.highestDegree || person.highestEducationField) &&
+      !isBiotechCompact ? (
+        <section className="detail-block">
+          <h3>Education</h3>
+          {person.highestDegree ? (
+            <p>
+              <strong>Highest degree:</strong> {person.highestDegree}
+            </p>
+          ) : null}
+          {person.highestEducationField ? (
+            <p>
+              <strong>Field:</strong> {person.highestEducationField}
+            </p>
+          ) : null}
+          {person.highestEducationSchool ? (
+            <p>
+              <strong>School:</strong> {person.highestEducationSchool}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {(person.departmentBudgetTotalAmount || person.departmentBudgetDiscretionaryAmount) &&
+      !isBiotechCompact ? (
+        <section className="detail-block">
+          <h3>Department Budget</h3>
+          {person.departmentBudgetTotalAmount ? (
+            <p>
+              <strong>{person.departmentBudgetTotalLabel ?? 'Total budget'}:</strong>{' '}
+              {person.departmentBudgetTotalAmount}
+            </p>
+          ) : null}
+          {person.departmentBudgetDiscretionaryAmount ? (
+            <p>
+              <strong>
+                {person.departmentBudgetDiscretionaryLabel ?? 'Discretionary budget'}:
+              </strong>{' '}
+              {person.departmentBudgetDiscretionaryAmount}
+            </p>
+          ) : null}
+          {person.departmentBudgetNote ? <p>{person.departmentBudgetNote}</p> : null}
+          {person.departmentBudgetSourceUrl && person.departmentBudgetSourceLabel ? (
+            <p>
+              <a href={person.departmentBudgetSourceUrl} rel="noreferrer" target="_blank">
+                {person.departmentBudgetSourceLabel}
+              </a>
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {(person.agencyBudgetAmount || person.agencyFundingModel) && !isBiotechCompact ? (
+        <section className="detail-block">
+          <h3>Agency Budget</h3>
+          {person.agencyBudgetAmount ? (
+            <p>
+              <strong>{person.agencyBudgetLabel ?? 'Public budget'}:</strong>{' '}
+              {person.agencyBudgetAmount}
+            </p>
+          ) : null}
+          {person.agencyFundingModel ? (
+            <p>
+              <strong>Funding model:</strong> {person.agencyFundingModel}
+            </p>
+          ) : null}
+          {person.agencyBudgetNote ? <p>{person.agencyBudgetNote}</p> : null}
+          {person.agencyBudgetSourceUrl && person.agencyBudgetSourceLabel ? (
+            <p>
+              <a href={person.agencyBudgetSourceUrl} rel="noreferrer" target="_blank">
+                {person.agencyBudgetSourceLabel}
+              </a>
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {showTrumpRelationship && !isBiotechCompact ? (
+        <section className="detail-block">
+          <h3>Trump Relationship Estimate</h3>
+          {person.trumpSampleSize != null ? (
+            <p>
+              <strong>Sample size:</strong> {person.trumpSampleSize}
+              {person.trumpAvailableEvents ? ` of ${person.trumpAvailableEvents}` : ''} selected votes
+            </p>
+          ) : null}
+          <p>{getDisplayedTrumpNote(person)}</p>
+          {person.branchId !== 'legislative' && person.trumpEvidence && person.trumpEvidence.length > 0 ? (
+            <>
+              <p>
+                <strong>Evidence used:</strong>
+              </p>
+              <ul className="detail-list">
+                {person.trumpEvidence.map((item) => (
+                  <li key={`${person.id}-trump-${item}`}>{item}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+        </section>
+      ) : null}
+
+      {!isBiotechCompact ? (
+        <section className="detail-block">
+          <h3>Pay & Financial Disclosure</h3>
+          {person.salaryAmount ? (
+            <p>
+              <strong>Current annual salary:</strong> {person.salaryAmount}
+            </p>
+          ) : null}
+          {person.financialFilingDate ? (
+            <p>
+              <strong>Disclosure filing date:</strong> {person.financialFilingDate}
+            </p>
+          ) : null}
+          <p>{person.salaryNote}</p>
+          {person.salarySourceUrl && person.salarySourceLabel ? (
+            <p>
+              <a href={person.salarySourceUrl} rel="noreferrer" target="_blank">
+                {person.salarySourceLabel}
+              </a>
+            </p>
+          ) : null}
+          {person.branchId !== 'legislative' && person.wealthNote ? <p>{person.wealthNote}</p> : null}
+        </section>
+      ) : null}
+
+      {!isBiotechCompact && person.topHoldings && person.topHoldings.length > 0 ? (
+        <section className="detail-block">
+          <h3>Top Holdings</h3>
+          <ul className="detail-list">
+            {person.topHoldings.map((holding) => (
+              <li className="holding-item" key={`${person.id}-${holding.label}`}>
+                <div className="holding-heading">
+                  <span className="holding-name">{holding.label}</span>
+                  <DisclosureOwnerBadge owner={holding.owner} />
+                </div>
+                <span className="holding-value">{holding.value}</span>
+                {holding.derivedEstimate ? (
+                  <span className="holding-derived">
+                    <strong>Derived estimate:</strong> {holding.derivedEstimate}
+                  </span>
+                ) : null}
+                {holding.derivedSourceUrl && holding.derivedSourceLabel ? (
+                  <a
+                    className="holding-source"
+                    href={holding.derivedSourceUrl}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {holding.derivedSourceLabel}
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {!isBiotechCompact && person.liabilities && person.liabilities.length > 0 ? (
+        <section className="detail-block">
+          <h3>Liabilities</h3>
+          <ul className="detail-list">
+            {person.liabilities.map((liability) => (
+              <li
+                className="disclosure-line-item"
+                key={`${person.id}-${liability.creditor}-${liability.type}`}
+              >
+                <DisclosureOwnerBadge owner={liability.owner} />
+                <span>
+                  {liability.creditor}: {liability.type} ({liability.amount})
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {(() => {
+        if (isBiotechCompact) {
+          return null
+        }
+
+        const displayedTrades =
+          person.recentTrades?.filter((trade) =>
+            shouldDisplayTradeAfterLatestAnnualReport(person, trade),
+          ) ?? []
+
+        if (displayedTrades.length === 0) {
+          return null
+        }
+
+        const tradesHeading =
+          person.branchId === 'legislative'
+            ? `PTR Trades Since ${person.financialFilingDate}`
+            : `Recent Trades Since ${person.financialFilingDate}`
+
+        return (
+          <section className="detail-block">
+            <h3>{tradesHeading}</h3>
+            <ul className="detail-list">
+              {displayedTrades.map((trade) => (
+                <li
+                  className="disclosure-line-item"
+                  key={`${person.id}-${trade.assetName}-${trade.date}-${trade.amount}`}
+                >
+                  <DisclosureOwnerBadge owner={trade.owner} />
+                  <span>
+                    {trade.date}: {trade.type} {trade.assetName} ({trade.amount})
+                  </span>
+                  {shouldShowTradeSourceLink(person, trade) ? (
+                    <a
+                      className="holding-source"
+                      href={resolvePersonLink(trade.sourceUrl ?? '')}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      source
+                    </a>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      })()}
+
+      {!isBiotechCompact ? (
+        <section className="detail-links">
+          <a href={resolvePersonLink(person.sourceUrl)} rel="noreferrer" target="_blank">
+            Official source
+          </a>
+          {person.financialDisclosureUrl && person.financialDisclosureLabel ? (
+            <a
+              href={resolvePersonLink(person.financialDisclosureUrl)}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {person.financialDisclosureLabel}
+            </a>
+          ) : null}
+          {person.financialAnnualReportUrl && shouldShowAnnualDisclosureReportLink(person) ? (
+            <a
+              href={resolvePersonLink(person.financialAnnualReportUrl)}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {person.financialAnnualReportLabel ?? 'Annual disclosure report'}
+            </a>
+          ) : null}
+          {person.website && person.website !== person.sourceUrl ? (
+            <a href={resolvePersonLink(person.website)} rel="noreferrer" target="_blank">
+              Personal office site
+            </a>
+          ) : null}
+          {person.xUrl && xHandle ? (
+            <a href={resolvePersonLink(person.xUrl)} rel="noreferrer" target="_blank">
+              X {xHandle}
+            </a>
+          ) : null}
+        </section>
+      ) : null}
+      {person.branchId === 'judicial' && person.financialDisclosureNote && !isBiotechCompact ? (
+        <p className="detail-note">{person.financialDisclosureNote}</p>
+      ) : null}
+    </>
   )
 }
 
@@ -3522,438 +4491,12 @@ function DetailPanel({
     )
   }
 
-  const facts = buildDetailFacts(person)
-  const xHandle = formatXHandle(person.xUrl)
-  const ageLabel = formatAgeLabel(person.birthDate, person.birthYear)
-  const legislativeServiceLabel = getLegislativeServiceLabel(person)
-  const independentAgencyServiceLabel = getIndependentAgencyServiceLabel(person)
-  const independentAgencyAppointerLabel = getIndependentAgencyAppointerLabel(person)
-  const showTrumpRelationship = shouldShowTrumpRelationship(person)
-  const executiveCongressHistory =
-    person.branchId === 'executive' ? person.executiveCongressServiceHistory ?? [] : []
-
   return (
     <aside className="detail-panel detail-panel--filled">
       <button className="detail-close" onClick={onClose} type="button">
         Close
       </button>
-      <div className="detail-header">
-        <Avatar
-          className={`detail-avatar detail-avatar--${person.alignment}`}
-          imageUrl={person.imageUrl}
-          name={person.name}
-        />
-        <div className="detail-header__copy">
-          <p className="eyebrow">{section.label}</p>
-          <div className="detail-header__name-row">
-            <h2>{person.name}</h2>
-            {ageLabel ? <span className="age-badge age-badge--detail">{ageLabel}</span> : null}
-          </div>
-          <p className="detail-title">{person.title}</p>
-        </div>
-      </div>
-
-      <div className="detail-tags">
-        <span className={`alignment-chip alignment-chip--${person.alignment}`}>
-          {person.alignmentLabel}
-        </span>
-        <span className="detail-tag">{branch.name} Branch</span>
-        {legislativeServiceLabel ? (
-          <span className="service-chip">{legislativeServiceLabel}</span>
-        ) : null}
-        {independentAgencyServiceLabel ? (
-          <span className="service-chip">{independentAgencyServiceLabel}</span>
-        ) : null}
-        {independentAgencyAppointerLabel ? (
-          <span
-            className={`service-chip${
-              getPresidentPartyTone(person.appointedBy)
-                ? ` service-chip--${getPresidentPartyTone(person.appointedBy)}`
-                : ''
-            }`}
-          >
-            {independentAgencyAppointerLabel}
-          </span>
-        ) : null}
-        {showTrumpRelationship ? (
-          <span className={`trump-chip trump-chip--${getTrumpBand(person.trumpScore)}`}>
-            {formatDisplayedTrumpScore(person)}
-          </span>
-        ) : null}
-      </div>
-
-      <p className="detail-description">{person.description}</p>
-
-      <div className="detail-facts">
-        {facts.map((fact) => (
-          <div className="fact-row" key={`${person.id}-${fact.label}`}>
-            <span>{fact.label}</span>
-            <strong className={fact.tone ? `fact-row__value--${fact.tone}` : undefined}>
-              {fact.value}
-            </strong>
-          </div>
-        ))}
-      </div>
-
-      {person.appointmentNote ? (
-        <section className="detail-block">
-          <h3>Appointment</h3>
-          <p>{person.appointmentNote}</p>
-        </section>
-      ) : null}
-
-      {person.committees && person.committees.length > 0 ? (
-        <section className="detail-block">
-          <h3>Committees</h3>
-          <ul className="detail-list">
-            {person.committees.map((committee) => (
-              <li key={committee}>{committee}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {person.careerHistory && person.careerHistory.length > 0 ? (
-        <section className="detail-block">
-          <h3>Career history</h3>
-          <ul className="detail-list">
-            {person.careerHistory.map((record) => (
-              <li key={`${person.id}-${record.category}-${record.summary}`}>{record.summary}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {executiveCongressHistory.length > 0 ? (
-        <section className="detail-block">
-          <h3>Past Trump-linked votes in Congress</h3>
-          <p className="detail-note">
-            Selected House or Senate roll calls from this site during this official&apos;s time in
-            Congress.
-          </p>
-          <div className="executive-congress-history">
-            {executiveCongressHistory.map((service) => {
-              const sortedVotes = service.votes
-                .map((vote, index) => ({ index, vote }))
-                .sort((left, right) =>
-                  compareExecutiveCongressVotesByRecency(
-                    left.vote,
-                    right.vote,
-                    left.index,
-                    right.index,
-                  ),
-                )
-                .map(({ vote }) => vote)
-
-              return (
-                <article className="executive-congress-service" key={`${person.id}-${service.label}`}>
-                  <div className="executive-congress-service__header">
-                    <div>
-                      <h4>{service.label}</h4>
-                      <p>{buildExecutiveCongressHistorySummary(service)}</p>
-                    </div>
-                  </div>
-
-                  <ul className="executive-congress-vote-list">
-                    {sortedVotes.map((vote) => {
-                      const referenceLine = formatRollCallReferenceLine(
-                        vote as LegislativeTrumpRollCall,
-                      )
-                      const recordedLine = formatRollCallRecordedLine(vote as LegislativeTrumpRollCall)
-                      const voteVideoLink = getRollCallVideoLink(vote)
-
-                      return (
-                        <li
-                          className="executive-congress-vote-item"
-                          key={`${person.id}-${service.label}-${vote.id}`}
-                        >
-                          <div className="executive-congress-vote-item__header">
-                            <div>
-                              <strong>{vote.label}</strong>
-                              <p>
-                                {[
-                                  recordedLine,
-                                  `Vote: ${vote.voteCast}`,
-                                  vote.scoreIncluded ? 'Direct' : 'Broader',
-                                ]
-                                  .filter(Boolean)
-                                  .join(' • ')}
-                              </p>
-                            </div>
-                            <span className={`case-stance-chip case-stance-chip--${vote.position}`}>
-                              {formatExecutiveCongressVotePosition(vote.position)}
-                            </span>
-                          </div>
-                          {referenceLine ? (
-                            <p className="executive-congress-vote-item__meta">{referenceLine}</p>
-                          ) : null}
-                          <div className="executive-congress-vote-item__links">
-                            <a href={vote.sourceUrl} rel="noreferrer" target="_blank">
-                              Official Vote
-                            </a>
-                            {voteVideoLink ? (
-                              <a href={voteVideoLink.url} rel="noreferrer" target="_blank">
-                                {voteVideoLink.label}
-                              </a>
-                            ) : null}
-                          </div>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </article>
-              )
-            })}
-          </div>
-        </section>
-      ) : null}
-
-      {person.highestEducationSchool || person.highestDegree || person.highestEducationField ? (
-        <section className="detail-block">
-          <h3>Education</h3>
-          {person.highestDegree ? (
-            <p>
-              <strong>Highest degree:</strong> {person.highestDegree}
-            </p>
-          ) : null}
-          {person.highestEducationField ? (
-            <p>
-              <strong>Field:</strong> {person.highestEducationField}
-            </p>
-          ) : null}
-          {person.highestEducationSchool ? (
-            <p>
-              <strong>School:</strong> {person.highestEducationSchool}
-            </p>
-          ) : null}
-        </section>
-      ) : null}
-
-      {person.departmentBudgetTotalAmount || person.departmentBudgetDiscretionaryAmount ? (
-        <section className="detail-block">
-          <h3>Department Budget</h3>
-          {person.departmentBudgetTotalAmount ? (
-            <p>
-              <strong>{person.departmentBudgetTotalLabel ?? 'Total budget'}:</strong>{' '}
-              {person.departmentBudgetTotalAmount}
-            </p>
-          ) : null}
-          {person.departmentBudgetDiscretionaryAmount ? (
-            <p>
-              <strong>
-                {person.departmentBudgetDiscretionaryLabel ?? 'Discretionary budget'}:
-              </strong>{' '}
-              {person.departmentBudgetDiscretionaryAmount}
-            </p>
-          ) : null}
-          {person.departmentBudgetNote ? <p>{person.departmentBudgetNote}</p> : null}
-          {person.departmentBudgetSourceUrl && person.departmentBudgetSourceLabel ? (
-            <p>
-              <a href={person.departmentBudgetSourceUrl} rel="noreferrer" target="_blank">
-                {person.departmentBudgetSourceLabel}
-              </a>
-            </p>
-          ) : null}
-        </section>
-      ) : null}
-
-      {person.agencyBudgetAmount || person.agencyFundingModel ? (
-        <section className="detail-block">
-          <h3>Agency Budget</h3>
-          {person.agencyBudgetAmount ? (
-            <p>
-              <strong>{person.agencyBudgetLabel ?? 'Public budget'}:</strong>{' '}
-              {person.agencyBudgetAmount}
-            </p>
-          ) : null}
-          {person.agencyFundingModel ? (
-            <p>
-              <strong>Funding model:</strong> {person.agencyFundingModel}
-            </p>
-          ) : null}
-          {person.agencyBudgetNote ? <p>{person.agencyBudgetNote}</p> : null}
-          {person.agencyBudgetSourceUrl && person.agencyBudgetSourceLabel ? (
-            <p>
-              <a href={person.agencyBudgetSourceUrl} rel="noreferrer" target="_blank">
-                {person.agencyBudgetSourceLabel}
-              </a>
-            </p>
-          ) : null}
-        </section>
-      ) : null}
-
-      {showTrumpRelationship ? (
-        <section className="detail-block">
-          <h3>Trump Relationship Estimate</h3>
-          {person.trumpSampleSize != null ? (
-            <p>
-              <strong>Sample size:</strong> {person.trumpSampleSize}
-              {person.trumpAvailableEvents ? ` of ${person.trumpAvailableEvents}` : ''} selected votes
-            </p>
-          ) : null}
-          <p>{getDisplayedTrumpNote(person)}</p>
-          {person.branchId !== 'legislative' && person.trumpEvidence && person.trumpEvidence.length > 0 ? (
-            <>
-              <p>
-                <strong>Evidence used:</strong>
-              </p>
-              <ul className="detail-list">
-                {person.trumpEvidence.map((item) => (
-                  <li key={`${person.id}-trump-${item}`}>{item}</li>
-                ))}
-              </ul>
-            </>
-          ) : null}
-        </section>
-      ) : null}
-
-      <section className="detail-block">
-        <h3>Pay & Financial Disclosure</h3>
-        {person.salaryAmount ? (
-          <p>
-            <strong>Current annual salary:</strong> {person.salaryAmount}
-          </p>
-        ) : null}
-        {person.financialFilingDate ? (
-          <p>
-            <strong>Disclosure filing date:</strong> {person.financialFilingDate}
-          </p>
-        ) : null}
-        <p>{person.salaryNote}</p>
-        {person.salarySourceUrl && person.salarySourceLabel ? (
-          <p>
-            <a href={person.salarySourceUrl} rel="noreferrer" target="_blank">
-              {person.salarySourceLabel}
-            </a>
-          </p>
-        ) : null}
-        {person.branchId !== 'legislative' && person.wealthNote ? <p>{person.wealthNote}</p> : null}
-      </section>
-
-      {person.topHoldings && person.topHoldings.length > 0 ? (
-        <section className="detail-block">
-          <h3>Top Holdings</h3>
-          <ul className="detail-list">
-            {person.topHoldings.map((holding) => (
-              <li className="holding-item" key={`${person.id}-${holding.label}`}>
-                <div className="holding-heading">
-                  <span className="holding-name">{holding.label}</span>
-                  <DisclosureOwnerBadge owner={holding.owner} />
-                </div>
-                <span className="holding-value">{holding.value}</span>
-                {holding.derivedEstimate ? (
-                  <span className="holding-derived">
-                    <strong>Derived estimate:</strong> {holding.derivedEstimate}
-                  </span>
-                ) : null}
-                {holding.derivedSourceUrl && holding.derivedSourceLabel ? (
-                  <a
-                    className="holding-source"
-                    href={holding.derivedSourceUrl}
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    {holding.derivedSourceLabel}
-                  </a>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {person.liabilities && person.liabilities.length > 0 ? (
-        <section className="detail-block">
-          <h3>Liabilities</h3>
-          <ul className="detail-list">
-            {person.liabilities.map((liability) => (
-              <li
-                className="disclosure-line-item"
-                key={`${person.id}-${liability.creditor}-${liability.type}`}
-              >
-                <DisclosureOwnerBadge owner={liability.owner} />
-                <span>
-                  {liability.creditor}: {liability.type} ({liability.amount})
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {(() => {
-        const displayedTrades =
-          person.recentTrades?.filter((trade) =>
-            shouldDisplayTradeAfterLatestAnnualReport(person, trade),
-          ) ?? []
-
-        if (displayedTrades.length === 0) {
-          return null
-        }
-
-        const tradesHeading =
-          person.branchId === 'legislative'
-            ? `PTR Trades Since ${person.financialFilingDate}`
-            : `Recent Trades Since ${person.financialFilingDate}`
-
-        return (
-          <section className="detail-block">
-            <h3>{tradesHeading}</h3>
-            <ul className="detail-list">
-              {displayedTrades.map((trade) => (
-                <li
-                  className="disclosure-line-item"
-                  key={`${person.id}-${trade.assetName}-${trade.date}-${trade.amount}`}
-                >
-                  <DisclosureOwnerBadge owner={trade.owner} />
-                  <span>
-                    {trade.date}: {trade.type} {trade.assetName} ({trade.amount})
-                  </span>
-                  {shouldShowTradeSourceLink(person, trade) ? (
-                    <a
-                      className="holding-source"
-                      href={resolvePersonLink(trade.sourceUrl ?? '')}
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      source
-                    </a>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )
-      })()}
-
-      <section className="detail-links">
-        <a href={resolvePersonLink(person.sourceUrl)} rel="noreferrer" target="_blank">
-          Official source
-        </a>
-        {person.financialDisclosureUrl && person.financialDisclosureLabel ? (
-          <a href={resolvePersonLink(person.financialDisclosureUrl)} rel="noreferrer" target="_blank">
-            {person.financialDisclosureLabel}
-          </a>
-        ) : null}
-        {person.financialAnnualReportUrl && shouldShowAnnualDisclosureReportLink(person) ? (
-          <a href={resolvePersonLink(person.financialAnnualReportUrl)} rel="noreferrer" target="_blank">
-            {person.financialAnnualReportLabel ?? 'Annual disclosure report'}
-          </a>
-        ) : null}
-        {person.website && person.website !== person.sourceUrl ? (
-          <a href={resolvePersonLink(person.website)} rel="noreferrer" target="_blank">
-            Personal office site
-          </a>
-        ) : null}
-        {person.xUrl && xHandle ? (
-          <a href={resolvePersonLink(person.xUrl)} rel="noreferrer" target="_blank">
-            X {xHandle}
-          </a>
-        ) : null}
-      </section>
-      {person.branchId === 'judicial' && person.financialDisclosureNote ? (
-        <p className="detail-note">{person.financialDisclosureNote}</p>
-      ) : null}
+      <PersonDetailContent branch={branch} person={person} section={section} />
     </aside>
   )
 }
@@ -3982,6 +4525,7 @@ function App() {
   const peopleById = new Map(people.map((person) => [person.id, person]))
   const branchesById = new Map(branches.map((branch) => [branch.id, branch]))
   const selectedBranch = route.branchId ? branchesById.get(route.branchId) ?? null : null
+  const selectedSpecialPage = route.specialPage
   const selectedExecutivePage = selectedBranch?.id === 'executive' ? route.executivePage : null
   const legislativePeople = people
     .filter((person) => person.branchId === 'legislative')
@@ -4306,8 +4850,26 @@ function App() {
     window.location.assign(nextHash)
   }
 
+  function navigateToSpecialPage(specialPage: SpecialPageId | null) {
+    setSelectedRollCallId(null)
+    setSelectedSupremeCourtCaseId(null)
+
+    const nextHash = toSpecialHash(specialPage)
+
+    if (window.location.hash === nextHash) {
+      setRoute(parseHash(nextHash, peopleById))
+      return
+    }
+
+    window.location.assign(nextHash)
+  }
+
   function openBranch(branchId: BranchId) {
     startTransition(() => navigateTo(branchId))
+  }
+
+  function openSpecialPage(specialPage: SpecialPageId) {
+    startTransition(() => navigateToSpecialPage(specialPage))
   }
 
   function openExecutivePage(pageId: ExecutivePageId) {
@@ -4317,17 +4879,26 @@ function App() {
   }
 
   function openPerson(personId: string) {
-    if (!selectedBranch) {
+    const person = peopleById.get(personId)
+
+    if (!person) {
       return
     }
+
+    const executivePage =
+      person.branchId === 'executive'
+        ? selectedBranch?.id === 'executive'
+          ? selectedExecutivePage ?? 'profiles'
+          : 'profiles'
+        : null
 
     setSelectedRollCallId(null)
     setSelectedSupremeCourtCaseId(null)
     startTransition(() =>
       navigateTo(
-        selectedBranch.id,
+        person.branchId,
         personId,
-        selectedBranch.id === 'executive' ? selectedExecutivePage ?? 'profiles' : null,
+        executivePage,
       ),
     )
   }
@@ -4450,7 +5021,25 @@ function App() {
   }
 
   if (!selectedBranch) {
-    return <HomeView audienceMode={audienceMode} data={dataset} onBranchSelect={openBranch} />
+    if (selectedSpecialPage === 'biotech') {
+      return (
+        <BiotechConnectionsView
+          branchesById={branchesById}
+          onBack={() => navigateToSpecialPage(null)}
+          onOpenPerson={openPerson}
+          peopleById={peopleById}
+        />
+      )
+    }
+
+    return (
+      <HomeView
+        audienceMode={audienceMode}
+        data={dataset}
+        onBranchSelect={openBranch}
+        onOpenBiotechPage={() => openSpecialPage('biotech')}
+      />
+    )
   }
 
   return (
