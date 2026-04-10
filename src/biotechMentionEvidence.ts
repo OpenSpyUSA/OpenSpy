@@ -272,6 +272,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Congressional Record Senate PDF',
+        locationLabel: 'p. 36, Cantwell quote on Kennedy’s COVID-19 "bio-weapon" claim',
+        page: 36,
+        searchText: 'spared Jews and the Chinese',
         url: 'https://www.congress.gov/119/crec/2025/02/12/171/29/CREC-2025-02-12-senate.pdf',
       },
     ],
@@ -329,6 +332,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Cotton-Warner release',
+        locationLabel: 'Warner quote on countering biotechnologies and bioweapons',
+        textFragment: 'threats relating to biotechnologies and bioweapons',
         url: 'https://www.cotton.senate.gov/news/press-releases/senate-intelligence-committee-passes-intelligence-authorization-act',
       },
     ],
@@ -361,6 +366,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Senate hearing text on agroterrorism and food defense',
+        locationLabel: 'Daines question on the new biodefense facility in Kansas',
+        textFragment: 'advance of the new biodefense facility that is coming online in Kansas',
         url: 'https://www.congress.gov/event/115th-congress/senate-event/LC64938/text',
       },
     ],
@@ -376,10 +383,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Duckworth NDAA biodefense release',
+        locationLabel: 'Duckworth NDAA provision on a Department-wide biodefense strategy',
+        textFragment: 'Department-wide strategy on biodefense efforts',
         url: 'https://www.duckworth.senate.gov/news/press-releases/duckworth-provisions-to-support-troops-improve-military-readiness-reduce-reliance-on-foreign-oil-included-in-committee-passed-2023-defense-bill',
       },
       {
         label: 'Duckworth vaccine-access letter page',
+        locationLabel: 'release section on bioterrorism risks',
+        textFragment: 'bioterrorism',
         url: 'https://www.duckworth.senate.gov/news/press-releases/duckworth-warren-blunt-rochester-condemn-rfk-for-making-it-harder-for-pregnant-women-and-children-to-receive-covid-19-vaccines-putting-their-health-at-risk',
       },
     ],
@@ -395,10 +406,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Ernst release on Trump gain-of-function ban',
+        locationLabel: 'Ernst statement on banning risky gain-of-function research in China',
+        textFragment: 'ban all federal funding of risky gain-of-function research in China',
         url: 'https://www.ernst.senate.gov/news/press-releases/ernst-applauds-trumps-ban-of-wuhan-style-gain-of-function-research',
       },
       {
         label: 'Ernst column on stopping the next pandemic',
+        locationLabel: 'column section on gain-of-function research',
+        textFragment: 'gain-of-function',
         url: 'https://www.ernst.senate.gov/news/columns/ernst-this-is-how-we-stop-the-next-pandemic',
       },
     ],
@@ -414,6 +429,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Senate hearing PDF on national-security threats and gains from scientific openness',
+        locationLabel: 'p. 63, Fischer written question on Gain of Function Research',
+        page: 63,
+        searchText: 'Questions 7. Gain of Function Research.',
         url: 'https://www.congress.gov/117/chrg/CHRG-117shrg55820/CHRG-117shrg55820.pdf',
       },
     ],
@@ -429,6 +447,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Signed Senate letter PDF',
+        locationLabel: 'p. 1, DeepSeek letter on instructions for a bioweapon attack',
+        page: 1,
+        searchText: 'provide instructions for carrying out a bioweapon attack',
         url: 'https://www.young.senate.gov/wp-content/uploads/8.1.25-Letter-to-Secretary-Lutnick-on-Deepseek-Opensource-model-Final1-1.pdf',
       },
     ],
@@ -444,6 +465,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Signed Senate letter PDF',
+        locationLabel: 'p. 1, DeepSeek letter on instructions for a bioweapon attack',
+        page: 1,
+        searchText: 'provide instructions for carrying out a bioweapon attack',
         url: 'https://www.young.senate.gov/wp-content/uploads/8.1.25-Letter-to-Secretary-Lutnick-on-Deepseek-Opensource-model-Final1-1.pdf',
       },
     ],
@@ -459,6 +483,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Signed Senate letter PDF',
+        locationLabel: 'p. 1, DeepSeek letter on instructions for a bioweapon attack',
+        page: 1,
+        searchText: 'provide instructions for carrying out a bioweapon attack',
         url: 'https://www.young.senate.gov/wp-content/uploads/8.1.25-Letter-to-Secretary-Lutnick-on-Deepseek-Opensource-model-Final1-1.pdf',
       },
     ],
@@ -474,6 +501,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Signed Senate letter PDF',
+        locationLabel: 'p. 1, DeepSeek letter on instructions for a bioweapon attack',
+        page: 1,
+        searchText: 'provide instructions for carrying out a bioweapon attack',
         url: 'https://www.young.senate.gov/wp-content/uploads/8.1.25-Letter-to-Secretary-Lutnick-on-Deepseek-Opensource-model-Final1-1.pdf',
       },
     ],
@@ -489,6 +519,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Signed Senate letter PDF',
+        locationLabel: 'p. 1, DeepSeek letter on instructions for a bioweapon attack',
+        page: 1,
+        searchText: 'provide instructions for carrying out a bioweapon attack',
         url: 'https://www.young.senate.gov/wp-content/uploads/8.1.25-Letter-to-Secretary-Lutnick-on-Deepseek-Opensource-model-Final1-1.pdf',
       },
     ],
@@ -504,6 +537,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Van Hollen, Cardin, Trone on Fort Detrick biodefense lab',
+        locationLabel: 'Van Hollen quote on national biodefense capabilities',
+        textFragment: 'investing in our national biodefense capabilities is critical',
         url: 'https://www.vanhollen.senate.gov/news/press-releases/van-hollen-cardin-trone-lead-effort-to-provide-long-term-authorization-for-fort-detrick-based-biodefense-lab',
       },
     ],
@@ -519,6 +554,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Hyde-Smith biosecurity bill release',
+        locationLabel: 'headline on improving national biosecurity',
+        textFragment: 'improve national biosecurity',
         url: 'https://www.hydesmith.senate.gov/hyde-smith-co-sponsors-bill-improve-national-biosecurity-against-future-pandemics',
       },
     ],
@@ -534,6 +571,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Johnson on Fox Business with Maria Bartiromo',
+        locationLabel: 'interview page section on gain-of-function research',
+        textFragment: 'gain-of-function',
         url: 'https://www.ronjohnson.senate.gov/2021/9/sen-johnson-on-fox-business-mornings-with-maria-bartiromo-september-8-2021',
       },
     ],
@@ -549,6 +588,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Kaine and Booker on WHO withdrawal risks',
+        locationLabel: 'Kaine-Booker letter on WHO withdrawal and biosecurity threats',
+        textFragment: 'public health and biosecurity threats',
         url: 'https://www.kaine.senate.gov/press-releases/kaine-and-booker-lead-colleagues-in-pressing-administration-about-public-health-risks-from-withdrawal-from-world-health-organization',
       },
     ],
@@ -564,6 +605,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Kennedy asks Fauci whether Wuhan lab lied',
+        locationLabel: 'Kennedy questioning Fauci on Wuhan gain-of-function research',
+        textFragment: 'you didn’t give any money to the Wuhan lab to conduct gain-of-function research',
         url: 'https://www.kennedy.senate.gov/public/2021/5/kennedy-asks-fauci-whether-wuhan-lab-lied-you-never-know',
       },
     ],
@@ -579,6 +622,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'King sounds alarm on monkeypox outbreak',
+        locationLabel: 'release section on the federal biosecurity program',
+        textFragment: 'biosecurity',
         url: 'https://www.king.senate.gov/newsroom/press-releases/king-sounds-alarm-on-monkeypox-outbreak-calls-for-action-on-vaccine-distribution',
       },
     ],
@@ -594,6 +639,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Lankford, Marshall to stop dangerous viral research by foreign entities',
+        locationLabel: 'Lankford quote on COVID-19 origins and gain-of-function research',
+        textFragment: 'the role of gain-of-function research in its development',
         url: 'https://www.lankford.senate.gov/news/press-releases/lankford-marshall-to-stop-dangerous-viral-research-by-foreign-entities/',
       },
     ],
@@ -609,6 +656,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Lujan introduces legislation to bolster research and development to tackle COVID-19 and emerging biothreats',
+        locationLabel: 'Lujan bill release on COVID-19 and emerging biothreats',
+        textFragment: 'COVID-19 and emerging biothreats',
         url: 'https://www.lujan.senate.gov/newsroom/press-releases/lujan-introduces-legislation-to-bolster-research-and-development-to-tackle-covid-19-and-emerging-biothreats/',
       },
     ],
@@ -624,6 +673,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Opening Statement of Chairman Robert B. Aderholt',
+        locationLabel: 'page 1 opening statement section on biodefense',
+        page: 1,
+        searchText: 'biodefense',
         url: 'https://docs.house.gov/meetings/AP/AP07/20230419/115687/HHRG-118-AP07-MState-A000055-20230419.pdf',
       },
     ],
@@ -639,6 +691,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'The Contract',
+        locationLabel: 'contract plank on Chinese gain-of-function research',
+        textFragment: 'gain-of-function research in China',
         url: 'https://biggs.house.gov/america-first-contract/contract',
       },
     ],
@@ -654,6 +708,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Biosecurity for the Future: Strengthening Deterrence and Detection',
+        locationLabel: 'Bera opening statement on biological threats, biosecurity, and bioterrorism',
+        textFragment:
+          'mechanisms to prevent and defeat both naturally occurring health challenges, as well as acts of bioterrorism',
         url: 'https://www.congress.gov/event/117th-congress/house-event/114290/text',
       },
     ],
@@ -669,6 +726,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Taxes and Spending | Representative Lauren Boebert',
+        locationLabel: 'issues page section on cutting funding for gain-of-function research',
+        textFragment: 'gain-of-function research in China',
         url: 'https://boebert.house.gov/issues/taxes-and-spending',
       },
     ],
@@ -707,6 +766,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Himes celebrates $400,000 grant for Sacred Heart University bee research',
+        locationLabel: 'Himes quote on NSF funding to study biological threats to pollinators',
+        textFragment: 'study biological threats to pollinators',
         url: 'https://himes.house.gov/2024/8/himes-celebrates-400-000-grant-for-sacred-heart-university-bee-research',
       },
     ],
@@ -740,9 +801,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House hearing transcript',
-        locationLabel: 'p. 42, McGuire on sensitive data and the creation of a bioweapon',
-        page: 42,
-        searchText: 'creation of a bioweapon',
+        locationLabel: 'hearing transcript section using "bioweapon"',
+        searchText: 'bioweapon',
         url: 'https://docs.house.gov/meetings/GO/GO00/20250610/118362/HHRG-119-GO00-Transcript-20250610.pdf',
       },
     ],
@@ -758,6 +818,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House hearing transcript',
+        locationLabel: "p. 43, McGuire on Americans' data being weaponized through the creation of a bioweapon",
+        page: 43,
+        searchText: 'creation of a bioweapon',
         url: 'https://docs.house.gov/meetings/GO/GO00/20250610/118362/HHRG-119-GO00-Transcript-20250610.pdf',
       },
     ],
@@ -773,6 +836,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House hearing transcript',
+        locationLabel: 'p. 51, Timmons on DNA data being used for bioweapons',
+        page: 51,
+        searchText: 'used for bioweapons',
         url: 'https://docs.house.gov/meetings/GO/GO00/20250610/118362/HHRG-119-GO00-Transcript-20250610.pdf',
       },
     ],
@@ -788,6 +854,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House hearing transcript',
+        locationLabel: 'p. 56, Crane on unsecured DNA profiles being used to develop bioweapons',
+        page: 56,
+        searchText: 'could be used to develop bioweapons',
         url: 'https://docs.house.gov/meetings/GO/GO00/20250610/118362/HHRG-119-GO00-Transcript-20250610.pdf',
       },
     ],
@@ -803,10 +872,16 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House hearing transcript, May 1, 2024',
+        locationLabel: 'p. 17, Ruiz asking whether the virus was used as a bioweapon',
+        page: 17,
+        searchText: 'used as a bioweapon',
         url: 'https://docs.house.gov/meetings/VC/VC00/20240501/117221/HHRG-118-VC00-Transcript-20240501.pdf',
       },
       {
         label: 'House hearing transcript, Jun. 3, 2024',
+        locationLabel: 'p. 21, Ruiz rejecting claims that NIH funding supported a bioweapons research capacity',
+        page: 21,
+        searchText: 'bioweapons research capacity',
         url: 'https://docs.house.gov/meetings/VC/VC00/20240603/117378/HHRG-118-VC00-Transcript-20240603.pdf',
       },
     ],
@@ -822,10 +897,16 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House hearing transcript, May 1, 2024',
+        locationLabel: 'p. 37, Garcia criticizing claims about a Chinese-made bioweapon',
+        page: 37,
+        searchText: 'Chinese-made bioweapon',
         url: 'https://docs.house.gov/meetings/VC/VC00/20240501/117221/HHRG-118-VC00-Transcript-20240501.pdf',
       },
       {
         label: 'House hearing transcript, Jun. 3, 2024',
+        locationLabel: 'p. 47, Garcia quoting and condemning claims that COVID was a bioweapon',
+        page: 47,
+        searchText: 'COVID was a bioweapon',
         url: 'https://docs.house.gov/meetings/VC/VC00/20240603/117378/HHRG-118-VC00-Transcript-20240603.pdf',
       },
     ],
@@ -1093,6 +1174,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Cotton-Klobuchar biotech security release',
+        locationLabel: 'release section quoting misuse of genetic material to create bioweapons',
+        textFragment: 'including to create bioweapons',
         url: 'https://www.cotton.senate.gov/news/press-releases/cotton-klobuchar-introduce-bill-to-establish-federal-biotech-security-framework',
       },
     ],
@@ -1108,6 +1191,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Coons innovation issue page',
+        locationLabel: 'innovation page section using "bioweapons"',
+        textFragment: 'bioweapons',
         url: 'https://www.coons.senate.gov/issues/innovation/',
       },
     ],
@@ -1123,6 +1208,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Durbin remarks honoring Dr. Fauci',
+        locationLabel: 'Durbin prepared remarks on anthrax and bioterrorism scares',
+        textFragment: 'post-9/11 anthrax and bioterrorism scares',
         url: 'https://www.durbin.senate.gov/newsroom/press-releases/durbin-delivers-remarks-honoring-dr-fauci-as-he-receives-the-senator-paul-h-douglas-award-for-ethics-in-government',
       },
     ],
@@ -1138,6 +1225,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Foreign Relations Committee release',
+        locationLabel: 'headline on curbing biological weapons development',
+        textFragment: 'biological weapons development',
         url: 'https://www.foreign.senate.gov/press/rep/release/risch-introduces-legislation-to-curb-biological-weapons-development',
       },
     ],
@@ -1160,10 +1249,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Gillibrand biodefense release',
+        locationLabel: 'Gillibrand release on Senate passage of the biodefense bill',
+        textFragment: 'bipartisan biodefense bill',
         url: 'https://www.gillibrand.senate.gov/news/press/release/gillibrand-announces-senate-passage-of-biodefense-bill-to-strengthen-us-response-to-disease-outbreaks-bioterrorism/',
       },
       {
         label: 'Gillibrand biosecurity strategy release',
+        locationLabel: 'headline on strategy to strengthen biosecurity',
+        textFragment: 'strengthen biosecurity',
         url: 'https://www.gillibrand.senate.gov/news/press/release/new-report-gives-us-failing-grade-on-preparedness-on-tenth-anniversary-of-anthrax-attacks-gillibrand-announces-strategy-to-strengthen-biosecurity/',
       },
     ],
@@ -1179,6 +1272,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Markey-Budd release',
+        locationLabel: 'headline on AI public health threats',
+        textFragment: 'AI public health threats',
         url: 'https://www.markey.senate.gov/news/press-releases/markey-budd-introduce-bipartisan-bill-to-prepare-for-ai-public-health-threats',
       },
     ],
@@ -1194,6 +1289,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Markey-Budd release',
+        locationLabel: 'headline on AI public health threats',
+        textFragment: 'AI public health threats',
         url: 'https://www.markey.senate.gov/news/press-releases/markey-budd-introduce-bipartisan-bill-to-prepare-for-ai-public-health-threats',
       },
     ],
@@ -1209,6 +1306,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Hagerty-Peters release',
+        locationLabel: 'release section using "bioweapon"',
+        textFragment: 'bioweapon',
         url: 'https://www.hagerty.senate.gov/press-releases/2024/03/06/hagerty-peters-applaud-committee-approval-of-bipartisan-legislation-to-protect-american-genetic-data-from-china-controlled-companies/',
       },
     ],
@@ -1239,6 +1338,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Hawley rebukes former NIH chief over COVID censorship',
+        locationLabel: 'Hawley question on NIH funding of gain-of-function research',
+        textFragment: 'NIH’s role in funding gain-of-function research at the lab',
         url: 'https://www.hawley.senate.gov/what-world-are-you-living-in-hawley-rebukes-former-nih-chief-for-claiming-zero-censorship-took-place-during-covid-peak/',
       },
     ],
@@ -1254,6 +1355,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Hirono secures commitments from Forest Service chief',
+        locationLabel: "hearing coverage section on Hawaii's biosecurity plan",
+        textFragment: 'biosecurity',
         url: 'https://www.hirono.senate.gov/news/press-releases/hirono-secures-commitments-from-forest-service-chief-on-vital-hawaii-priorities-during-energy-committee-hearing_',
       },
     ],
@@ -1269,10 +1372,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Hosted Google response PDF',
+        locationLabel: 'hosted PDF section using "bioweapon"',
+        searchText: 'bioweapon',
         url: 'https://www.lee.senate.gov/_cache/files/d17836e7-7aaa-43e1-97d7-e2f1d6956d9a/google.pdf',
       },
       {
         label: 'Lee letter on GOF, WIV, and lab leak',
+        locationLabel: 'letter section on gain-of-function research',
+        searchText: 'gain-of-function',
         url: 'https://www.lee.senate.gov/services/files/C8F3A56B-6127-4EE7-A3EA-F470ED511BFB',
       },
     ],
@@ -1288,10 +1395,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Kennedy welcomes debarment over Wuhan gain-of-function research',
+        locationLabel: 'headline on Wuhan gain-of-function research',
+        textFragment: 'gain-of-function research in Wuhan',
         url: 'https://www.kennedy.senate.gov/public/2025/3/kennedy-welcomes-debarment-of-doctor-who-facilitated-gain-of-function-research-in-wuhan-we-now-have-justice',
       },
       {
         label: 'Kennedy asks Fauci whether Wuhan lab lied',
+        locationLabel: 'headline and exchange on gain-of-function research in Wuhan',
+        textFragment: 'gain-of-function research in Wuhan',
         url: 'https://www.kennedy.senate.gov/public/2021/5/kennedy-asks-fauci-whether-wuhan-lab-lied-you-never-know',
       },
     ],
@@ -1307,6 +1418,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'King AI risks framework release',
+        locationLabel: 'framework release section on catastrophic misuse including bioweapons',
+        textFragment: 'bioweapons',
         url: 'https://www.king.senate.gov/newsroom/press-releases/king-colleagues-unveil-bipartisan-framework-to-identify-minimize-artificial-intelligence-risks',
       },
     ],
@@ -1322,6 +1435,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Lankford renews effort to place moratorium on risky gain-of-function projects',
+        locationLabel: 'headline on risky gain-of-function projects',
+        textFragment: 'gain-of-function projects',
         url: 'https://www.lankford.senate.gov/news/press-releases/lankford-marshall-colleagues-renew-effort-to-place-moratorium-on-federally-funded-risky-gain-of-function-projects/',
       },
     ],
@@ -1337,6 +1452,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Merkley leads colleagues on monkeypox vaccine-access inequities',
+        locationLabel: 'release section on the federal biosecurity program',
+        textFragment: 'biosecurity',
         url: 'https://www.merkley.senate.gov/merkley-leads-colleagues-sounding-alarm-on-monkeypox-outbreak-highlighting-inequities-of-vaccine-access/',
       },
     ],
@@ -1367,6 +1484,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Ricketts highlights Nebraska wins in bipartisan solution ending government shutdown',
+        locationLabel: 'release section on biosecurity measures',
+        textFragment: 'biosecurity',
         url: 'https://www.ricketts.senate.gov/news/press-releases/ricketts-highlights-nebraska-wins-in-bipartisan-solution-ending-government-shutdown/',
       },
     ],
@@ -1382,6 +1501,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Murkowski speaks on genetical engineered animal species',
+        locationLabel: 'video page title on genetically engineered animal species',
+        textFragment: 'genetical engineered animal species',
         url: 'https://www.murkowski.senate.gov/press/videos/watch/senator-murkowski-speaks-on-genetical-engineered-animal-species',
       },
     ],
@@ -1397,6 +1518,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Moran urges USDA to exempt NBAF from hiring freeze',
+        locationLabel: 'release quote calling NBAF a premier biosecurity facility',
+        textFragment: 'biosecurity facility',
         url: 'https://www.moran.senate.gov/public/index.cfm/2025/11/sen-moran-urges-usda-secretary-rollins-to-exempt-nbaf-from-federal-hiring-freeze',
       },
     ],
@@ -1412,10 +1535,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Paul reintroduces Risky Research Review Act',
+        locationLabel: 'headline on oversight of gain-of-function research',
+        textFragment: 'gain-of-function research',
         url: 'https://www.paul.senate.gov/dr-rand-paul-reintroduces-bipartisan-risky-research-review-act-to-oversee-gain-of-function-research/',
       },
       {
         label: 'Paul stops gain-of-function research funding in China',
+        locationLabel: 'headline on stopping gain-of-function funding in China',
+        textFragment: 'gain-of-function',
         url: 'https://www.paul.senate.gov/dr-rand-paul-stops-gain-function-research-funding-china/',
       },
     ],
@@ -1431,6 +1558,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House Foreign Affairs report PDF',
+        locationLabel: 'report PDF section using "bioweapons"',
+        searchText: 'bioweapons',
         url: 'https://foreignaffairs.house.gov/sites/evo-subsites/republicans-foreignaffairs.house.gov/files/migrated/uploads/2021/08/ORIGINS-OF-COVID-19-REPORT.pdf',
       },
     ],
@@ -1446,6 +1575,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Gooden STOP COVID Act release',
+        locationLabel: 'release section using "bioweapon"',
+        textFragment: 'bioweapon',
         url: 'https://gooden.house.gov/2020/4/gooden-introduces-stop-covid-act-hold-china-accountable-coronavirus-pandemic',
       },
     ],
@@ -1461,6 +1592,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Roy demands answers on Fauci emails',
+        locationLabel: 'release section on gain-of-function research',
+        textFragment: 'gain-of-function',
         url: 'https://roy.house.gov/media/press-releases/rep-roy-doubles-down-and-demands-answers-fauci-emails',
       },
     ],
@@ -1476,6 +1609,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Crenshaw-Peters BIO Early Warning Act release',
+        locationLabel: 'headline on the BIO Early Warning Act',
+        textFragment: 'BIO Early Warning Act',
         url: 'https://crenshaw.house.gov/2023/6/crenshaw-peters-release-discussion-draft-of-the-bipartisan-bio-early-warning-act',
       },
     ],
@@ -1491,6 +1626,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Rep. Jackson delivers remarks during Fauci hearing',
+        locationLabel: 'hearing remarks section on gain-of-function research',
+        textFragment: 'gain-of-function',
         url: 'https://jackson.house.gov/news/documentsingle.aspx?DocumentID=1091',
       },
     ],
@@ -1506,6 +1643,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Nehls-hosted Rogan-Malone transcript PDF',
+        locationLabel: 'hosted transcript section using "biodefense"',
+        searchText: 'biodefense',
         url: 'https://nehls.house.gov/sites/evo-subsites/nehls.house.gov/files/2022-01/JRE-Rogan-Malone-Transcript.pdf',
       },
     ],
@@ -1521,6 +1660,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Mace NDAA markup release',
+        locationLabel: 'release section on banning gain-of-function pathogen research',
+        textFragment: 'gain-of-function pathogen research',
         url: 'https://mace.house.gov/media/press-releases/rep-nancy-mace-secures-26-major-legislative-wins-fy26-ndaa-markup-house-armed',
       },
     ],
@@ -1536,6 +1677,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Auchincloss biotech release',
+        locationLabel: 'release section using "bioweapon"',
+        textFragment: 'bioweapon',
         url: 'https://auchincloss.house.gov/media/press-releases/release-auchincloss-joins-bipartisan-group-of-select-committee-members-in-introducing-house-and-senate-bills-to-ban-foreign-adversary-biotech-companies-including-bgi-group',
       },
     ],
@@ -1551,6 +1694,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'McClain Delaney Fort Detrick release',
+        locationLabel: 'headline on protecting U.S. biodefense and pandemic preparedness',
+        textFragment: 'Protecting U.S. Biodefense and Pandemic Preparedness',
         url: 'https://mcclaindelaney.house.gov/media/press-releases/protecting-us-biodefense-and-pandemic-preparedness-rep-mcclain-delaney',
       },
     ],
@@ -1566,6 +1711,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Lynch inspectors general release',
+        locationLabel: 'release section on lapses in national biodefense',
+        textFragment: 'biodefense',
         url: 'https://lynch.house.gov/2021/4/reps-lynch-maloney-hoyer-connolly-gomez-porter-and-lieu-introduce-comprehensive-inspectors-general-legislation-to-increase-transparency-independence',
       },
     ],
@@ -1581,6 +1728,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Hoyer shutdown remarks page',
+        locationLabel: 'remarks section reading a biodefense headline aloud',
+        textFragment: 'biodefense',
         url: 'https://hoyer.house.gov/media/press-releases/hoyer-every-authoritarian-leader-has-had-his-grim-reaper-russell-vought-donald',
       },
     ],
@@ -1596,10 +1745,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Barr China select committee release',
+        locationLabel: 'floor speech text using "biosecurity"',
+        textFragment: 'biosecurity',
         url: 'https://barr.house.gov/press-releases?ContentRecord_id=83EA1EA5-4D58-4F31-A678-19DD5CB92520',
       },
       {
         label: 'Barr Wuhan lab release',
+        locationLabel: 'release section on banning gain-of-function research',
+        textFragment: 'gain-of-function research',
         url: 'https://barr.house.gov/2021/8/rep-barr-covid-19-likely-leaked-from-wuhan-virology-lab-time-to-ban-gain-of-function-research',
       },
     ],
@@ -1615,6 +1768,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Johnson DHS shutdown remarks page',
+        locationLabel: 'remarks section on anti-bioterrorism matters',
+        textFragment: 'bioterrorism',
         url: 'https://mikejohnson.house.gov/news/documentsingle.aspx?DocumentID=2863',
       },
     ],
@@ -1630,6 +1785,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'LaHood COVID-origins statement',
+        locationLabel: "statement section on China's bioweapons research program",
+        textFragment: 'bioweapons research program',
         url: 'https://lahood.house.gov/2022/12/lahood-statement-on-intel-gop-report-on-covid-19-origins',
       },
     ],
@@ -1645,6 +1802,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Messmer agricultural and national security release',
+        locationLabel: 'release section on biosecurity innovation',
+        textFragment: 'biosecurity innovation',
         url: 'https://messmer.house.gov/news/documentsingle.aspx?DocumentID=206',
       },
     ],
@@ -1660,6 +1819,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'GovInfo Congressional Record, Apr. 12, 2013',
+        locationLabel: 'GovInfo wrapper for extension-of-remarks text using "bioterrorism"',
+        textFragment: 'bioterrorism',
         url: 'https://www.govinfo.gov/app/details/CREC-2013-04-12/CREC-2013-04-12-pt1-PgE447',
       },
     ],
@@ -1675,6 +1836,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Congress.gov hearing text, May 11, 2022',
+        locationLabel: 'Schrier testimony on PHEP grants and bioterrorism preparedness',
+        textFragment: 'including bioterrorism, natural disasters, and infectious disease outbreaks',
         url: 'https://www.congress.gov/event/117th-congress/house-event/114802/text',
       },
     ],
@@ -1690,6 +1853,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'GovInfo DHS appropriations hearing HTML',
+        locationLabel: 'Newhouse on national-lab support for DHS biodefense and cybersecurity work',
+        textFragment: 'areas like biodefense and cybersecurity, which you mentioned',
         url: 'https://www.govinfo.gov/content/pkg/CHRG-116hhrg43031/html/CHRG-116hhrg43031.htm',
       },
     ],
@@ -1705,6 +1870,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Grothman statement on Fauci retirement',
+        locationLabel: 'statement section on Wuhan Lab gain-of-function research',
+        textFragment: 'gain-of-function research',
         url: 'https://grothman.house.gov/news/documentsingle.aspx?DocumentID=3107',
       },
     ],
@@ -1720,6 +1887,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'WisPolitics opinion column, Aug. 4, 2021',
+        locationLabel: 'opinion column section on Wuhan-related gain-of-function experiments',
+        textFragment: 'gain-of-function',
         url: 'https://www.wispolitics.com/2021/tom-tiffany-federal-health-officials-lack-of-transparency-leads-to-confusion-among-americans/',
       },
     ],
@@ -1741,6 +1910,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'WisPolitics press release, Apr. 25, 2023',
+        locationLabel: 'press release letter text using "gain-of-function"',
+        textFragment: 'gain-of-function',
         url: 'https://www.wispolitics.com/2023/wisconsin-congressional-republicans-demand-answers-on-biosafety-incident-at-uw-madison/?pdf=291516',
       },
     ],
@@ -1756,6 +1927,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Congress.gov HHS FY2023 budget hearing text',
+        locationLabel: 'Cline exchange on NIH funding and gain-of-function research',
+        textFragment: 'gain-of-function research was occurring and it was known to NIH',
         url: 'https://www.congress.gov/event/117th-congress/house-event/114622/text',
       },
     ],
@@ -1771,10 +1944,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Griffith statement, Jan. 23, 2025',
+        locationLabel: 'statement section on gain-of-function research',
+        textFragment: 'gain-of-function',
         url: 'https://morgangriffith.house.gov/news/documentsingle.aspx?DocumentID=404288',
       },
       {
         label: 'Griffith hearing remarks, Feb. 1, 2023',
+        locationLabel: 'hearing remarks section on biodefense capabilities',
+        textFragment: 'biodefense',
         url: 'https://morgangriffith.house.gov/news/documentsingle.aspx?DocumentID=402787',
       },
     ],
@@ -1796,10 +1973,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Beyer office page, Feb. 4, 2025',
+        locationLabel: 'office page section saying Virginia must prioritize biosecurity',
+        textFragment: 'biosecurity',
         url: 'https://beyer.house.gov/news/documentsingle.aspx?DocumentID=6362',
       },
       {
         label: 'Signed Virginia delegation letter PDF',
+        locationLabel: 'signed delegation letter section using "biosecurity"',
+        searchText: 'biosecurity',
         url: 'https://beyer.house.gov/UploadedFiles/Congressional_Letter_-_Help_Virginia_Bird_Flu_Response_-_02-04-2025.pdf',
       },
     ],
@@ -1815,6 +1996,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Fox News opinion column, Sept. 15, 2021',
+        locationLabel: 'opinion column section on COVID origins and gain-of-function research',
+        textFragment: 'gain-of-function',
         url: 'https://www.foxnews.com/opinion/world-truth-covid-origin-rep-wittman-rep-stefanik',
       },
     ],
@@ -1830,10 +2013,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Schiff-Padilla-Lofgren national labs release',
+        locationLabel: 'release section on the national-lab biosecurity mission',
+        textFragment: 'biosecurity',
         url: 'https://www.schiff.senate.gov/news/press-releases/news-schiff-padilla-lofgren-demand-reversal-of-layoffs-budget-cuts-at-national-laboratories/',
       },
       {
         label: 'Schiff-Padilla-Lofgren national labs PDF',
+        locationLabel: 'hosted PDF section using "biosecurity"',
+        searchText: 'biosecurity',
         url: 'https://www.schiff.senate.gov/wp-content/uploads/2025/07/Schiff-Padilla-Lofgren-national-lab-staffing-cuts.pdf',
       },
     ],
@@ -1849,6 +2036,10 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Congressional hearing written testimony PDF',
+        locationLabel: 'p. 5, Schmitt testimony on Fauci and Wuhan gain-of-function research',
+        page: 5,
+        searchText:
+          'funded dangerous gain-of-function research on coronaviruses at the Wuhan Institute of Virology',
         url: 'https://www.congress.gov/118/meeting/house/115611/witnesses/HHRG-118-FD00-Wstate-SchmittE-20230330.pdf',
       },
     ],
@@ -1864,10 +2055,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Rick Scott COVID-origin release',
+        locationLabel: 'release section on Wuhan-related gain-of-function research',
+        textFragment: 'gain-of-function research',
         url: 'https://www.rickscott.senate.gov/2023/3/sen-rick-scott-to-hhs-secretary-covid-19-origin-records-were-mishandled-hold-people-accountable',
       },
       {
         label: 'Rick Scott hosted letter PDF',
+        locationLabel: 'hosted letter section on gain-of-function research',
+        searchText: 'gain-of-function',
         url: 'https://www.rickscott.senate.gov/services/files/A28A12BD-CA98-404C-A343-400EC6A2BA05',
       },
     ],
@@ -1883,6 +2078,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Shaheen homeland security floor remarks',
+        locationLabel: 'floor remarks section on homeland security and bioterrorism',
+        textFragment: 'bioterrorism',
         url: 'https://www.shaheen.senate.gov/news/press/on-senate-floor-shaheen-highlights-bipartisan-priorties-in-clean-homeland-security-funding-bill',
       },
     ],
@@ -1898,6 +2095,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Schatz-Britt AI safety disclosures release',
+        locationLabel: 'release section on frontier-model biosecurity risks',
+        textFragment: 'biosecurity',
         url: 'https://www.schatz.senate.gov/news/press-releases/schatz-britt-colleagues-press-ai-companies-to-commit-to-timely-consistent-safety-disclosures-on-models',
       },
     ],
@@ -1913,6 +2112,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Agriculture Committee avian-flu response page',
+        locationLabel: 'letter page section on advanced biosecurity practices',
+        textFragment: 'biosecurity',
         url: 'https://www.agriculture.senate.gov/newsroom/dem/press/release/klobuchar-grassley-rounds-slotkin-press-usda-on-avian-flu-response',
       },
     ],
@@ -1928,6 +2129,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Baldwin NAHLN labs funding letter page',
+        locationLabel: 'letter page section on labs conducting biosecurity measures',
+        textFragment: 'biosecurity measures',
         url: 'https://www.baldwin.senate.gov/news/press-releases/baldwin-demands-trump-admin-stop-withholding-funding-for-labs-that-protect-food-supply-to-prevent-disease-spread-and-price-hikes',
       },
     ],
@@ -1943,6 +2146,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Sullivan on evolving threats from China and Russia',
+        locationLabel: 'interview page section using "bioterrorism"',
+        textFragment: 'bioterrorism',
         url: 'https://www.sullivan.senate.gov/newsroom/press-releases/sullivan-highlights-need-for-golden-dome-amid-evolving-threats-from-china-and-russia',
       },
     ],
@@ -1958,6 +2163,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Baldwin avian-flu coordination letter page',
+        locationLabel: 'letter page section on advanced biosecurity practices',
+        textFragment: 'biosecurity',
         url: 'https://www.baldwin.senate.gov/news/press-releases/baldwin-bipartisan-group-of-senators-urge-usda-to-strengthen-coordination-in-avian-flu-outbreak-response',
       },
     ],
@@ -1973,10 +2180,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Tillis and Burr appropriations package release',
+        locationLabel: 'appropriations release section on biodefense',
+        textFragment: 'biodefense',
         url: 'https://www.tillis.senate.gov/2019/12/tillis-burr-deliver-major-wins-for-north-carolina-including-2-2-billion-for-n-c-military-installations',
       },
       {
         label: 'Baldwin avian-flu coordination letter page',
+        locationLabel: 'letter page section on advanced biosecurity practices',
+        textFragment: 'biosecurity',
         url: 'https://www.baldwin.senate.gov/news/press-releases/baldwin-bipartisan-group-of-senators-urge-usda-to-strengthen-coordination-in-avian-flu-outbreak-response',
       },
     ],
@@ -1992,6 +2203,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Tuberville speaks with NIH director about improving research transparency',
+        locationLabel: 'hearing page section on gain-of-function research',
+        textFragment: 'gain-of-function',
         url: 'https://www.tuberville.senate.gov/newsroom/press-releases/tuberville-speaks-with-nih-director-about-improving-research-transparency/',
       },
     ],
@@ -2007,6 +2220,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Tuberville public health funding oversight bills release',
+        locationLabel: 'release section on biosecurity oversight',
+        textFragment: 'biosecurity',
         url: 'https://www.tuberville.senate.gov/newsroom/press-releases/tuberville-continues-demands-for-public-health-funding-oversight-in-two-new-bills/',
       },
     ],
@@ -2022,6 +2237,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Warnock bird-flu response letter page',
+        locationLabel: 'letter page section on biosecurity audits',
+        textFragment: 'biosecurity',
         url: 'https://www.warnock.senate.gov/newsroom/press-releases/senator-reverend-warnock-colleagues-aim-to-create-road-map-to-fight-bird-flu-lower-egg-prices/',
       },
     ],
@@ -2037,6 +2254,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Warren biosecurity video page',
+        locationLabel: 'video page title on stable long-term funding for biosecurity',
+        textFragment: 'Stable long-term funding for biosecurity',
         url: 'https://www.warren.senate.gov/newsroom/videos/watch/stable-long-term-funding-for-biosecurity-helps-us-prepare-for-public-health-emergencies',
       },
     ],
@@ -2052,6 +2271,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Welch NSF awards page',
+        locationLabel: 'awards page section with a biosecurity grant title',
+        textFragment: 'biosecurity',
         url: 'https://www.welch.senate.gov/welch-celebrates-more-than-8-million-to-vermont-research-institutions-from-national-science-foundation/',
       },
     ],
@@ -2067,6 +2288,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Alliance for Biosecurity award release',
+        locationLabel: 'release section on strengthening America’s biosecurity',
+        textFragment: 'biosecurity',
         url: 'https://www.whitehouse.senate.gov/news/release/alliance-for-biosecurity-honors-senator-whitehouse-with-biosecurity-champion-award/',
       },
     ],
@@ -2082,10 +2305,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Congressional Record Senate PDF, Oct. 9, 2025',
+        locationLabel: 'Senate floor debate section using "bioweapon"',
+        searchText: 'bioweapon',
         url: 'https://www.govinfo.gov/content/pkg/CREC-2025-10-09/pdf/CREC-2025-10-09-senate.pdf',
       },
       {
         label: 'Wicker SAFE Act release',
+        locationLabel: 'SAFE Act release section on biosecurity',
+        textFragment: 'biosecurity',
         url: 'https://www.wicker.senate.gov/2025/4/wicker-feenstra-introduce-legislation-to-continue-safe-exports-of-agricultural-products-in-event-of-foreign-animal-disease-outbreak',
       },
     ],
@@ -2101,6 +2328,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Wyden defense projects page',
+        locationLabel: 'defense-projects page section using "bioterrorism"',
+        textFragment: 'bioterrorism',
         url: 'https://www.wyden.senate.gov/news/press-releases/wyden-smith-securing-over-100-million-for-oregon-defense-projects',
       },
     ],
@@ -2116,6 +2345,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Balderson pandemic preparedness caucus release',
+        locationLabel: 'release section on Pandemic Preparedness Caucus biodefense priorities',
+        textFragment: 'biodefense',
         url: 'https://balderson.house.gov/news/documentsingle.aspx?DocumentID=1833',
       },
     ],
@@ -2131,6 +2362,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House hearing statement PDF, Dec. 17, 2025',
+        locationLabel: 'p. 2, Clarke on examining biosecurity and AI',
+        page: 2,
+        searchText: 'examining biosecurity and AI',
         url: 'https://docs.house.gov/meetings/IF/IF02/20251217/118773/HHRG-119-IF02-MState-C001067-20251217.pdf',
       },
     ],
@@ -2146,6 +2380,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House CWMD hearing appendix PDF',
+        locationLabel: "p. 46, Garbarino question on CWMD's role in detecting and protecting against biological threats",
+        page: 46,
+        searchText: 'protecting against biological threats',
         url: 'https://www.congress.gov/117/chrg/CHRG-117hhrg45763/CHRG-117hhrg45763.pdf',
       },
     ],
@@ -2161,6 +2398,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Fedorchak FY26 appropriations release',
+        locationLabel: 'appropriations release section on American biosecurity and biological threats',
+        textFragment: 'biosecurity',
         url: 'https://fedorchak.house.gov/media/press-releases/fedorchak-votes-complete-annual-appropriations-through-regular-order',
       },
     ],
@@ -2176,6 +2415,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Cassidy-Romney-McMorris Rodgers-Hudson oversight letter page',
+        locationLabel: 'oversight-letter page section on stronger domestic biosecurity oversight',
+        textFragment: 'biosecurity oversight',
         url: 'https://www.cassidy.senate.gov/newsroom/press-releases/ranking-member-cassidy-romney-mcmorris-rodgers-hudson-call-on-biden-administration-to-bolster-oversight-of-pandemic-research/',
       },
     ],
@@ -2191,6 +2432,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House Select Subcommittee transcript, July 11, 2023',
+        locationLabel: 'p. 46, Jordan asking whether gain-of-function research should be done',
+        page: 46,
+        searchText: 'should we be doing gain-of-function research',
         url: 'https://docs.house.gov/meetings/VC/VC00/20230711/116185/HHRG-118-VC00-Transcript-20230711.pdf',
       },
     ],
@@ -2206,6 +2450,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House Select Subcommittee transcript, May 16, 2024',
+        locationLabel: 'p. 23, Joyce questioning NIH review of whether proposed work was gain-of-function research',
+        page: 23,
+        searchText: 'was or was not gain-of-function research',
         url: 'https://docs.house.gov/meetings/VC/VC00/20240516/117318/HHRG-118-VC00-Transcript-20240516.pdf',
       },
     ],
@@ -2221,6 +2468,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House Appropriations hearing text, Feb. 28, 2002',
+        locationLabel: 'Kaptur follow-up on the biosecurity issue in agricultural preparedness',
+        textFragment: 'follow up to the biosecurity issue',
         url: 'https://www.congress.gov/event/107th-congress/house-event/LC16999/text',
       },
     ],
@@ -2236,6 +2485,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Homeland Democrats hearing statement PDF, Sept. 16, 2025',
+        locationLabel: 'p. 1, Kennedy on agroterrorism and broader biosecurity preparedness',
+        page: 1,
+        searchText: 'agroterrorism and biosecurity more broadly',
         url: 'https://democrats-homeland.house.gov/download/kennedy-091625?download=1',
       },
     ],
@@ -2251,6 +2503,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Energy and Commerce hearing PDF, May 6, 2010',
+        locationLabel: 'p. 18, Latta on imported food safety and bioterrorism risk',
+        page: 18,
+        searchText: 'bioterrorism continues to be a threat',
         url: 'https://www.govinfo.gov/content/pkg/CHRG-111hhrg76573/pdf/CHRG-111hhrg76573.pdf',
       },
     ],
@@ -2266,10 +2521,14 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House Select Subcommittee hearing PDF, May 7, 2024',
+        locationLabel: 'hearing PDF section on EcoHealth gain-of-function research',
+        searchText: 'gain-of-function',
         url: 'https://www.congress.gov/118/chrg/CHRG-118hhrg55548/CHRG-118hhrg55548.pdf',
       },
       {
         label: 'Strengthening Biosafety and Biosecurity Standards hearing text',
+        locationLabel: 'hearing text on strengthening biosafety and biosecurity standards',
+        textFragment: 'biosecurity standards',
         url: 'https://www.congress.gov/event/118th-congress/house-event/116474/text',
       },
     ],
@@ -2285,6 +2544,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Congressional Record extensions PDF, May 20, 2021',
+        locationLabel: 'extension of remarks introducing the Global Pandemic Prevention and Biosecurity Act',
+        searchText: 'Global Pandemic Prevention and Biosecurity Act',
         url: 'https://www.govinfo.gov/content/pkg/CREC-2021-05-20/pdf/CREC-2021-05-20-extensions.pdf',
       },
     ],
@@ -2300,6 +2561,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Meeks Adelphi speech page',
+        locationLabel: 'speech section on the Biological Weapons Convention',
+        textFragment: 'Biological Weapons Convention',
         url: 'https://meeks.house.gov/taxonomy/story-type/speech/america-and-world-balance-between-dominance-and-cooperation-adelphi',
       },
     ],
@@ -2315,6 +2578,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Rouzer Agriculture Committee newsletter page',
+        locationLabel: 'newsletter section on enhancing livestock biosecurity',
+        textFragment: 'biosecurity',
         url: 'https://rouzer.house.gov/news/email/show.aspx?ID=HNHKVQO6NTREZOLG655IIFZMK4',
       },
     ],
@@ -2330,6 +2595,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'House Select Subcommittee transcript, May 16, 2024',
+        locationLabel: 'hearing transcript section on NIH oversight of gain-of-function research',
+        searchText: 'gain-of-function',
         url: 'https://docs.house.gov/meetings/VC/VC00/20240516/117318/HHRG-118-VC00-Transcript-20240516.pdf',
       },
     ],
@@ -2345,6 +2612,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Turner EMPOWER NIH Act release',
+        locationLabel: 'release section describing Wuhan-related gain-of-function experimentation',
+        textFragment: 'gain-of-function',
         url: 'https://turner.house.gov/2021/6/rep-mike-turner-oh-10-introduces-empower-nih-act',
       },
     ],
@@ -2360,6 +2629,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Norcross DHS shutdown release',
+        locationLabel: 'release section on countermeasures to devastating biological threats',
+        textFragment: 'biological threats',
         url: 'https://norcross.house.gov/2015/2/rep-norcross-calls-congress-fund-department-homeland-security-avert',
       },
     ],
@@ -2375,6 +2646,9 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Pallone statement at hearing on H.R. 3299',
+        locationLabel: 'p. 1, Pallone on U.S. readiness to combat and respond to biological threats',
+        page: 1,
+        searchText: 'combat and respond to biological threats',
         url: 'https://docs.house.gov/meetings/IF/IF14/20160519/104953/HHRG-114-IF14-MState-P000034-20160519.pdf',
       },
     ],
@@ -2420,6 +2694,8 @@ export const BIOTECH_MENTIONS: BiotechMentionRecord[] = [
     sources: [
       {
         label: 'Bacon national defense issue page',
+        locationLabel: 'issue page section listing national biodefense readiness',
+        textFragment: 'national biodefense readiness',
         url: 'https://bacon.house.gov/issues/issue?IssueID=14899',
       },
     ],
