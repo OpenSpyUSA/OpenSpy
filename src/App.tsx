@@ -52,6 +52,12 @@ import {
   BIOTECH_MENTIONS,
   type BiotechMentionTier,
 } from './biotechMentionEvidence'
+import { BIOTECH_EVENT_INDEX } from './biotechEventIndex'
+import {
+  JUDICIAL_BIOTECH_CASES,
+  JUDICIAL_BIOTECH_CASE_GROUPS,
+} from './judicialBiotechCases'
+import { SOURCE_DATE_OVERRIDES_BY_URL } from './sourceDateOverrides'
 import { TRUMP_TRUTH_SNAPSHOT, type TrumpTruthPost } from './trumpTruthSnapshot'
 import { formatTrumpScore, getTrumpBand } from './trumpScore'
 import { formatXHandle } from './xProfile'
@@ -107,6 +113,7 @@ const shutdownChipMonthDayYearFormatter = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
   year: 'numeric',
 })
+const FALLBACK_SOURCE_CHECKED_DATE_LABEL = 'Checked Apr 10, 2026'
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 const ECONOMY_SHORT_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const ECONOMY_MONTH_INDEX_BY_NAME = new Map(
@@ -149,6 +156,53 @@ const sourceMonthYearFormatter = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
   year: 'numeric',
 })
+type JudicialMediaMirrorLink = {
+  label: string
+  url: string
+}
+
+function createYouTubeWatchUrl(videoId: string) {
+  return `https://www.youtube.com/watch?v=${videoId}`
+}
+
+const JUDICIAL_MEDIA_MIRRORS: Record<string, JudicialMediaMirrorLink> = {
+  'amgen-v-sanofi': {
+    label: 'The High Court Report video',
+    url: createYouTubeWatchUrl('xPSqZsr-z44'),
+  },
+  'bowman-v-monsanto': {
+    label: 'PuppyJusticeAutomated video',
+    url: createYouTubeWatchUrl('Oeh1ZnLLMsc'),
+  },
+  'bruesewitz-v-wyeth': {
+    label: 'PuppyJusticeAutomated video',
+    url: createYouTubeWatchUrl('P6P4o7vhpX0'),
+  },
+  'dobbs-v-jackson': {
+    label: '@SCOTUSOralArgument video',
+    url: createYouTubeWatchUrl('11g5nAAPw4M'),
+  },
+  'fda-v-alliance-for-hippocratic-medicine': {
+    label: '@SCOTUSOralArgument video',
+    url: createYouTubeWatchUrl('TzXCPlqpRiI'),
+  },
+  'mayo-v-prometheus': {
+    label: 'PuppyJusticeAutomated video',
+    url: createYouTubeWatchUrl('ydRGXjAX-Vs'),
+  },
+  'myriad-genetics': {
+    label: 'PuppyJusticeAutomated video',
+    url: createYouTubeWatchUrl('ukihf6A-5bo'),
+  },
+  'mutual-pharmaceutical-v-bartlett': {
+    label: 'PuppyJusticeAutomated video',
+    url: createYouTubeWatchUrl('CAwjRS5Rp38'),
+  },
+  'pliva-v-mensing': {
+    label: 'PuppyJusticeAutomated video',
+    url: createYouTubeWatchUrl('br3Qj76xFCI'),
+  },
+}
 
 function createUtcDate(year: number, monthIndex: number, day: number) {
   return new Date(Date.UTC(year, monthIndex, day))
@@ -159,7 +213,25 @@ function normalizeSourceMonthName(monthName: string) {
 }
 
 function formatParsedSourceDate(year: number, monthIndex: number, day?: number) {
+  if (
+    !Number.isInteger(year) ||
+    !Number.isInteger(monthIndex) ||
+    monthIndex < 0 ||
+    monthIndex > 11 ||
+    (day != null && (!Number.isInteger(day) || day < 1 || day > 31))
+  ) {
+    return null
+  }
+
   const safeDate = createUtcDate(year, monthIndex, day ?? 1)
+  if (
+    safeDate.getUTCFullYear() !== year ||
+    safeDate.getUTCMonth() !== monthIndex ||
+    (day != null && safeDate.getUTCDate() !== day)
+  ) {
+    return null
+  }
+
   return day ? sourceDateFormatter.format(safeDate) : sourceMonthYearFormatter.format(safeDate)
 }
 
@@ -205,7 +277,9 @@ function inferSourceDateFromText(text: string) {
 }
 
 function inferSourceDateFromUrl(url: string) {
-  const slugDateMatch = url.match(/\/(20\d{2})(\d{2})(\d{2})(?:\/|$)/)
+  const normalizedUrl = decodeURIComponent(url)
+
+  const slugDateMatch = normalizedUrl.match(/\/(20\d{2})(\d{2})(\d{2})(?:[/?#]|$)/)
   if (slugDateMatch) {
     return formatParsedSourceDate(
       Number(slugDateMatch[1]),
@@ -214,7 +288,7 @@ function inferSourceDateFromUrl(url: string) {
     )
   }
 
-  const pathDateMatch = url.match(/\/(20\d{2})\/(\d{2})\/(\d{2})(?:\/|$)/)
+  const pathDateMatch = normalizedUrl.match(/\/(20\d{2})\/(\d{1,2})\/(\d{1,2})(?:[/?#]|$)/)
   if (pathDateMatch) {
     return formatParsedSourceDate(
       Number(pathDateMatch[1]),
@@ -223,7 +297,7 @@ function inferSourceDateFromUrl(url: string) {
     )
   }
 
-  const packageDateMatch = url.match(/\b(?:CREC|cr?ec)-?(20\d{2})-(\d{2})-(\d{2})\b/i)
+  const packageDateMatch = normalizedUrl.match(/\b(?:CREC|cr?ec)-?(20\d{2})-(\d{2})-(\d{2})\b/i)
   if (packageDateMatch) {
     return formatParsedSourceDate(
       Number(packageDateMatch[1]),
@@ -232,7 +306,27 @@ function inferSourceDateFromUrl(url: string) {
     )
   }
 
-  const yearMonthPathMatch = url.match(/\/(20\d{2})\/(\d{2})(?:\/|$)/)
+  const dottedDateMatch = normalizedUrl.match(/(?:^|[^\d])(20\d{2})[._-](\d{1,2})[._-](\d{1,2})(?=[^\d]|$)/)
+  if (dottedDateMatch) {
+    return formatParsedSourceDate(
+      Number(dottedDateMatch[1]),
+      Number(dottedDateMatch[2]) - 1,
+      Number(dottedDateMatch[3]),
+    )
+  }
+
+  const shortYearDateMatch = normalizedUrl.match(
+    /(?:^|[^\d])(\d{1,2})[._-](\d{1,2})[._-](\d{2})(?=[^\d]|$)/,
+  )
+  if (shortYearDateMatch) {
+    return formatParsedSourceDate(
+      2000 + Number(shortYearDateMatch[3]),
+      Number(shortYearDateMatch[1]) - 1,
+      Number(shortYearDateMatch[2]),
+    )
+  }
+
+  const yearMonthPathMatch = normalizedUrl.match(/\/(20\d{2})\/(\d{1,2})(?:[/?#]|$)/)
   if (yearMonthPathMatch) {
     return formatParsedSourceDate(Number(yearMonthPathMatch[1]), Number(yearMonthPathMatch[2]) - 1)
   }
@@ -245,7 +339,12 @@ function getSourceDateLabel(source: SourceLink) {
     return source.dateLabel
   }
 
-  return inferSourceDateFromText(source.label) ?? inferSourceDateFromUrl(source.url)
+  return (
+    SOURCE_DATE_OVERRIDES_BY_URL[source.url] ??
+    inferSourceDateFromText(source.label) ??
+    inferSourceDateFromUrl(source.url) ??
+    FALLBACK_SOURCE_CHECKED_DATE_LABEL
+  )
 }
 
 function looksLikePdfUrl(url: string) {
@@ -356,11 +455,23 @@ function getSourceLocationTitle(source: SourceLink, fallbackExactMatches?: strin
   return titleParts.join(' — ')
 }
 
+function formatBiotechProceedingVenue(venue: string) {
+  if (venue === 'House') {
+    return 'House of Congress'
+  }
+  if (venue === 'Senate') {
+    return 'Senate of Congress'
+  }
+  return venue
+}
+
 function SourceEvidenceLink({
   fallbackExactMatches,
+  hideDate = false,
   source,
 }: {
   fallbackExactMatches?: string[]
+  hideDate?: boolean
   source: SourceLink
 }) {
   const sourceDateLabel = getSourceDateLabel(source)
@@ -373,7 +484,9 @@ function SourceEvidenceLink({
       target="_blank"
       title={getSourceLocationTitle(source, fallbackExactMatches)}
     >
-      {sourceDateLabel ? <span className="source-evidence-link__date">{sourceDateLabel}</span> : null}
+      {!hideDate && sourceDateLabel ? (
+        <span className="source-evidence-link__date">{sourceDateLabel}</span>
+      ) : null}
       <span className="source-evidence-link__label">{source.label}</span>
       {locationNote ? <span className="source-evidence-link__locator">{locationNote}</span> : null}
     </a>
@@ -381,10 +494,16 @@ function SourceEvidenceLink({
 }
 
 type ExecutivePageId = 'profiles' | 'systems'
+type BiotechPageId =
+  | 'judicial-cases'
+  | 'proceedings'
+  | 'people-profiles'
+  | 'official-language'
 type SpecialPageId = 'biotech'
 
 type RouteState = {
   branchId: BranchId | null
+  biotechPage: BiotechPageId | null
   executivePage: ExecutivePageId | null
   personId: string | null
   specialPage: SpecialPageId | null
@@ -432,6 +551,12 @@ const JUDICIAL_INFERENCE_NOTE =
   "A \"?\" means this justice's stance is inferred from the Court's result or a partial public statement, rather than fully listed justice-by-justice in the official text."
 const AUDIENCE_MODE_STORAGE_KEY = 'open-spy-audience-mode'
 const executivePageIdSet = new Set<ExecutivePageId>(['profiles', 'systems'])
+const biotechPageIdSet = new Set<BiotechPageId>([
+  'judicial-cases',
+  'proceedings',
+  'people-profiles',
+  'official-language',
+])
 const specialPageIdSet = new Set<SpecialPageId>(['biotech'])
 const BIOTECH_CATEGORY_ORDER = [
   'biotech policy',
@@ -493,6 +618,34 @@ const BIOTECH_MENTION_TIER_META: Record<
     heading: 'Official Contextual Mention',
     summary:
       "The official source contains the target language on material tied to the person, but not as that person's own direct self-use in this pass.",
+  },
+}
+const BIOTECH_PAGE_META: Record<
+  BiotechPageId,
+  { eyebrow: string; title: string; summary: string }
+> = {
+  'judicial-cases': {
+    eyebrow: 'Biotech page one',
+    title: 'Judicial Cases',
+    summary: 'Biotech and bioethics cases from the Supreme Court, federal courts, and state courts.',
+  },
+  proceedings: {
+    eyebrow: 'Biotech page two',
+    title: 'Biotech, Healthcare & Biosecurity Proceedings',
+    summary:
+      'Hearings, agency meetings, advisory proceedings, and official health-security or biotech forums.',
+  },
+  'people-profiles': {
+    eyebrow: 'Biotech page three',
+    title: 'People Profiles',
+    summary:
+      'Current people on this site with source-linked biotech, biomedical, regulator, or biosecurity ties.',
+  },
+  'official-language': {
+    eyebrow: 'Biotech page four',
+    title: 'Official Biosecurity / Bioweapon Language',
+    summary:
+      'Official-source language hits for biosecurity, bioweapon, biodefense, gain-of-function, and related terms.',
   },
 }
 const EXECUTIVE_PAGE_META: Record<
@@ -734,6 +887,385 @@ const supremeCourtCaseDocketOverrides = new Map<string, string>([
   ['trump-v-east-bay-sanctuary-covenant', 'https://www.supremecourt.gov/docket/docketfiles/html/public/18a615.html'],
   ['republican-party-of-pa-v-degraffenreid', 'https://www.supremecourt.gov/docket/docketfiles/html/public/20-542.html'],
   ['texas-v-pennsylvania', 'https://www.supremecourt.gov/search.aspx?filename=%2Fdocket%2Fdocketfiles%2Fhtml%2Fpublic%2F22o155.html'],
+])
+
+const supremeCourtCaseOralArgumentOverrides = new Map<string, SourceLink[]>([
+  [
+    'learning-resources-v-trump',
+    [
+      {
+        dateLabel: 'May 15, 2025',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2025/24-1287',
+      },
+    ],
+  ],
+  [
+    'trump-v-united-states',
+    [
+      {
+        dateLabel: 'Apr 25, 2024',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2023/23-939',
+      },
+    ],
+  ],
+  [
+    'trump-v-anderson',
+    [
+      {
+        dateLabel: 'Feb 8, 2024',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2023/23-719',
+      },
+    ],
+  ],
+  [
+    'trump-v-vance',
+    [
+      {
+        dateLabel: 'May 12, 2020',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/19-635',
+      },
+    ],
+  ],
+  [
+    'trump-v-mazars',
+    [
+      {
+        dateLabel: 'May 12, 2020',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/19-715',
+      },
+    ],
+  ],
+  [
+    'collins-v-yellen',
+    [
+      {
+        dateLabel: 'Dec 9, 2020',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2020/19-422',
+      },
+    ],
+  ],
+  [
+    'california-v-texas',
+    [
+      {
+        dateLabel: 'Nov 10, 2020',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2020/19-840',
+      },
+    ],
+  ],
+  [
+    'dhs-v-thuraissigiam',
+    [
+      {
+        dateLabel: 'Mar 2, 2020',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/19-161',
+      },
+    ],
+  ],
+  [
+    'little-sisters-v-pennsylvania',
+    [
+      {
+        dateLabel: 'May 6, 2020',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/19-431',
+      },
+    ],
+  ],
+  [
+    'seila-law-v-cfpb',
+    [
+      {
+        dateLabel: 'Mar 3, 2020',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/19-7',
+      },
+    ],
+  ],
+  [
+    'barton-v-barr',
+    [
+      {
+        dateLabel: 'Nov 4, 2019',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/18-725',
+      },
+    ],
+  ],
+  [
+    'nasrallah-v-barr',
+    [
+      {
+        dateLabel: 'Nov 4, 2019',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/18-1432',
+      },
+    ],
+  ],
+  [
+    'guerrero-lasprilla-v-barr',
+    [
+      {
+        dateLabel: 'Oct 7, 2019',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/18-776',
+      },
+    ],
+  ],
+  [
+    'dhs-v-regents',
+    [
+      {
+        dateLabel: 'Nov 12, 2019',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/18-587',
+      },
+    ],
+  ],
+  [
+    'trump-v-deutsche-bank',
+    [
+      {
+        dateLabel: 'May 12, 2020',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page for the consolidated records-subpoena argument',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2019/19-715',
+      },
+    ],
+  ],
+  [
+    'nielsen-v-preap',
+    [
+      {
+        dateLabel: 'Oct 10, 2018',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2018/16-1363',
+      },
+    ],
+  ],
+  [
+    'department-of-commerce-v-new-york',
+    [
+      {
+        dateLabel: 'Apr 23, 2019',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2018/18-966',
+      },
+    ],
+  ],
+  [
+    'trump-v-hawaii',
+    [
+      {
+        dateLabel: 'Apr 25, 2018',
+        label: 'Oral argument audio + transcript',
+        locationLabel: 'official Supreme Court oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2017/17-965',
+      },
+    ],
+  ],
+])
+
+const judicialBiotechCaseSourceOverrides = new Map<string, SourceLink[]>([
+  [
+    'mayo-v-prometheus',
+    [
+      {
+        dateLabel: 'Dec 7, 2011',
+        label: 'Supreme Court oral argument audio',
+        locationLabel: 'official oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2011/10-1150',
+      },
+      {
+        dateLabel: 'Dec 7, 2011',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/oral_arguments/argument_transcripts/2011/10-1150.pdf',
+      },
+    ],
+  ],
+  [
+    'myriad-genetics',
+    [
+      {
+        dateLabel: 'Apr 15, 2013',
+        label: 'Supreme Court oral argument audio',
+        locationLabel: 'official oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2012/12-398',
+      },
+      {
+        dateLabel: 'Apr 15, 2013',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/oral_arguments/argument_transcripts/2012/12-398_h3dj.pdf',
+      },
+    ],
+  ],
+  [
+    'bowman-v-monsanto',
+    [
+      {
+        dateLabel: 'Feb 19, 2013',
+        label: 'Supreme Court oral argument audio',
+        locationLabel: 'official oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2012/11-796',
+      },
+      {
+        dateLabel: 'Feb 19, 2013',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/oral_arguments/argument_transcripts/2012/11-796-1j43.pdf',
+      },
+    ],
+  ],
+  [
+    'amgen-v-sanofi',
+    [
+      {
+        dateLabel: 'Mar 27, 2023',
+        label: 'Supreme Court oral argument audio',
+        locationLabel: 'official oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2022/21-757',
+      },
+      {
+        dateLabel: 'Mar 27, 2023',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/oral_arguments/argument_transcripts/2022/21-757_cjmb.pdf',
+      },
+    ],
+  ],
+  [
+    'bruesewitz-v-wyeth',
+    [
+      {
+        dateLabel: 'Oct 12, 2010',
+        label: 'Supreme Court oral argument audio',
+        locationLabel: 'official oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2010/09-152',
+      },
+      {
+        dateLabel: 'Oct 12, 2010',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/oral_arguments/argument_transcripts/2010/09-152.pdf',
+      },
+    ],
+  ],
+  [
+    'fda-v-alliance-for-hippocratic-medicine',
+    [
+      {
+        dateLabel: 'Mar 26, 2024',
+        label: 'Supreme Court oral argument audio',
+        locationLabel: 'official oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2023/23-235',
+      },
+      {
+        dateLabel: 'Mar 26, 2024',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/oral_arguments/argument_transcripts/2023/23-235_g71f.pdf',
+      },
+    ],
+  ],
+  [
+    'pliva-v-mensing',
+    [
+      {
+        dateLabel: 'Nov 30, 2010',
+        label: 'Supreme Court oral argument audio',
+        locationLabel: 'official oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2010/09-993',
+      },
+      {
+        dateLabel: 'Nov 30, 2010',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/oral_arguments/argument_transcripts/2010/09-993.pdf',
+      },
+    ],
+  ],
+  [
+    'mutual-pharmaceutical-v-bartlett',
+    [
+      {
+        dateLabel: 'Mar 19, 2013',
+        label: 'Supreme Court oral argument audio',
+        locationLabel: 'official oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2012/12-142',
+      },
+      {
+        dateLabel: 'Mar 19, 2013',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/oral_arguments/argument_transcripts/2012/12-142_fchk.pdf',
+      },
+    ],
+  ],
+  [
+    'dobbs-v-jackson',
+    [
+      {
+        dateLabel: 'Dec 1, 2021',
+        label: 'Supreme Court oral argument audio',
+        locationLabel: 'official oral-argument page',
+        url: 'https://www.supremecourt.gov/oral_arguments/audio/2021/19-1392',
+      },
+      {
+        dateLabel: 'Dec 1, 2021',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/oral_arguments/argument_transcripts/2021/19-1392_bq7d.pdf',
+      },
+    ],
+  ],
+  [
+    'diamond-v-chakrabarty',
+    [
+      {
+        dateLabel: 'Mar 17, 1980',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/pdfs/transcripts/1979/79-136_03-17-1980.pdf',
+      },
+    ],
+  ],
+  [
+    'merck-v-integra',
+    [
+      {
+        dateLabel: 'Apr 20, 2005',
+        label: 'Supreme Court oral argument transcript',
+        locationLabel: 'official transcript PDF',
+        url: 'https://www.supremecourt.gov/pdfs/transcripts/2004/03-1237.pdf',
+      },
+    ],
+  ],
 ])
 
 const supremeCourtCaseOfficialWording: Record<string, string[]> = {
@@ -1160,12 +1692,18 @@ function getSupremeCourtCaseDocketUrl(caseItem: SupremeCourtCase) {
   return docketId ? buildSupremeCourtDocketUrl(docketId) : null
 }
 
+function getSupremeCourtCaseOralArgumentLinks(caseItem: SupremeCourtCase) {
+  return supremeCourtCaseOralArgumentOverrides.get(caseItem.id) ?? []
+}
+
 function SupremeCourtCaseLinks({ caseItem }: { caseItem: SupremeCourtCase }) {
   const opinionUrl = getSupremeCourtCaseOpinionUrl(caseItem)
   const docketUrl = getSupremeCourtCaseDocketUrl(caseItem)
+  const oralArgumentLinks = getSupremeCourtCaseOralArgumentLinks(caseItem)
+  const linkCount = Number(Boolean(opinionUrl)) + Number(Boolean(docketUrl)) + oralArgumentLinks.length
 
   return (
-    <div className="detail-links detail-links--pair">
+    <div className={`detail-links${linkCount === 2 ? ' detail-links--pair' : ''}`}>
       {opinionUrl ? (
         <a href={opinionUrl} rel="noreferrer" target="_blank">
           Opinion
@@ -1180,6 +1718,11 @@ function SupremeCourtCaseLinks({ caseItem }: { caseItem: SupremeCourtCase }) {
       ) : (
         <span className="detail-link-disabled">Docket unavailable</span>
       )}
+      {oralArgumentLinks.map((link) => (
+        <a href={link.url} key={`${caseItem.id}-${link.url}`} rel="noreferrer" target="_blank">
+          {link.label}
+        </a>
+      ))}
     </div>
   )
 }
@@ -1380,6 +1923,10 @@ function isExecutivePageId(value: string | null | undefined): value is Executive
   return executivePageIdSet.has(value as ExecutivePageId)
 }
 
+function isBiotechPageId(value: string | null | undefined): value is BiotechPageId {
+  return biotechPageIdSet.has(value as BiotechPageId)
+}
+
 function isSpecialPageId(value: string | null | undefined): value is SpecialPageId {
   return specialPageIdSet.has(value as SpecialPageId)
 }
@@ -1388,13 +1935,19 @@ function parseHash(hash: string, peopleById?: Map<string, GovernmentPerson>): Ro
   const clean = hash.replace(/^#\/?/, '').trim()
 
   if (!clean) {
-    return { branchId: null, executivePage: null, personId: null, specialPage: null }
+    return { biotechPage: null, branchId: null, executivePage: null, personId: null, specialPage: null }
   }
 
   const [branchCandidate, secondSegment, thirdSegment] = clean.split('/')
 
   if (isSpecialPageId(branchCandidate)) {
-    return { branchId: null, executivePage: null, personId: null, specialPage: branchCandidate }
+    return {
+      biotechPage: branchCandidate === 'biotech' && isBiotechPageId(secondSegment) ? secondSegment : null,
+      branchId: null,
+      executivePage: null,
+      personId: null,
+      specialPage: branchCandidate,
+    }
   }
 
   const branchId = branchIdSet.has(branchCandidate as BranchId)
@@ -1402,7 +1955,7 @@ function parseHash(hash: string, peopleById?: Map<string, GovernmentPerson>): Ro
     : null
 
   if (!branchId) {
-    return { branchId: null, executivePage: null, personId: null, specialPage: null }
+    return { biotechPage: null, branchId: null, executivePage: null, personId: null, specialPage: null }
   }
 
   const executivePage =
@@ -1420,10 +1973,11 @@ function parseHash(hash: string, peopleById?: Map<string, GovernmentPerson>): Ro
   const selectedPerson = personId && peopleById ? peopleById.get(personId) : null
 
   if (selectedPerson && selectedPerson.branchId !== branchId) {
-    return { branchId, executivePage, personId: null, specialPage: null }
+    return { biotechPage: null, branchId, executivePage, personId: null, specialPage: null }
   }
 
   return {
+    biotechPage: null,
     branchId,
     executivePage:
       branchId === 'executive'
@@ -1450,8 +2004,16 @@ function toHash(branchId: BranchId | null, personId?: string | null, executivePa
   return personId ? `#/${branchId}/${personId}` : `#/${branchId}`
 }
 
-function toSpecialHash(specialPage: SpecialPageId | null) {
-  return specialPage ? `#/${specialPage}` : '#/'
+function toSpecialHash(specialPage: SpecialPageId | null, biotechPage?: BiotechPageId | null) {
+  if (!specialPage) {
+    return '#/'
+  }
+
+  if (specialPage === 'biotech' && biotechPage) {
+    return `#/biotech/${biotechPage}`
+  }
+
+  return `#/${specialPage}`
 }
 
 function formatSectionMeta(person: GovernmentPerson) {
@@ -3022,6 +3584,101 @@ function SupremeCourtCaseMatrix({
   )
 }
 
+function JudicialBiotechCasesSection() {
+  return (
+    <section className="section-card case-section case-section--judicial-biotech">
+      <div className="section-card__header case-section__header">
+        <div>
+          <h2>Biotech & Bioethics Cases</h2>
+        </div>
+        <p>
+          A broader judicial layer beyond the featured docket: genetics, patents, GMOs, FDA
+          power, tissue ownership, IVF, embryo disputes, and hard bioethics. State cases below are
+          not automatically overrulable; the U.S. Supreme Court usually steps in only if a real
+          federal question is presented.
+        </p>
+        <p className="case-section__subnote">
+          Where available, judicial cards now show multiple links instead of forcing everything
+          into one source slot.
+        </p>
+      </div>
+
+      <div className="judicial-case-groups">
+        {JUDICIAL_BIOTECH_CASE_GROUPS.map((group) => {
+          const groupCases = JUDICIAL_BIOTECH_CASES.filter((caseItem) => caseItem.groupId === group.id)
+
+          return (
+            <section className="judicial-case-group" key={group.id}>
+              <div className="judicial-case-group__header">
+                <div>
+                  <h3>{group.title}</h3>
+                  <p>{group.description}</p>
+                </div>
+                <span className="judicial-case-group__count">{groupCases.length} cases</span>
+              </div>
+
+              <div className="case-grid">
+                {groupCases.map((caseItem) => {
+                  const mediaMirror = JUDICIAL_MEDIA_MIRRORS[caseItem.id]
+                  const sourceLinks = [
+                    caseItem.source,
+                    ...(caseItem.sourceLinks ?? []),
+                    ...(judicialBiotechCaseSourceOverrides.get(caseItem.id) ?? []),
+                  ]
+
+                  return (
+                    <article className="case-card case-card--judicial-biotech" key={caseItem.id}>
+                      <div className="case-card__meta">
+                        <div className="case-card__tags">
+                          <span className="case-tag">{caseItem.court}</span>
+                          <span className="case-date">{caseItem.year}</span>
+                        </div>
+                        <span className={`case-type case-type--${caseItem.reviewTone}`}>
+                          {caseItem.reviewLabel}
+                        </span>
+                      </div>
+
+                      <div className="case-card__header">
+                        <h3>{caseItem.caseName}</h3>
+                      </div>
+
+                      <p className="case-card__issue">
+                        <strong>Issue:</strong> {caseItem.issue}
+                      </p>
+                      <p className="case-card__result">
+                        <strong>Holding:</strong> {caseItem.holding}
+                      </p>
+                      <p className="case-card__note">
+                        <strong>Why it matters:</strong> {caseItem.whyItMatters}
+                      </p>
+
+                      <div className="biotech-card__sources">
+                        {sourceLinks.map((source) => (
+                          <SourceEvidenceLink
+                            key={`${caseItem.id}-${source.label}-${source.url}`}
+                            source={source}
+                          />
+                        ))}
+                        {mediaMirror ? (
+                          <a href={mediaMirror.url} rel="noreferrer" target="_blank">
+                            <span className="source-evidence-link__date">Mirror</span>
+                            <span className="source-evidence-link__label">{mediaMirror.label}</span>
+                            <span className="source-evidence-link__locator">Unofficial YouTube mirror upload</span>
+                          </a>
+                        ) : null}
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            </section>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function EconomySnapshotSection({ metrics }: { metrics: EconomyMetric[] }) {
   const [historyRange, setHistoryRange] = useState<EconomyHistoryRange>('1y')
   const timeline = getEconomyTimeline(metrics, historyRange)
@@ -3631,249 +4288,467 @@ function HomeView({
 }
 
 function BiotechConnectionsView({
+  biotechPage,
   branchesById,
-  onBack,
+  onBackHome,
+  onBackToChooser,
+  onOpenBiotechPage,
   onOpenPerson,
   peopleById,
 }: {
+  biotechPage: BiotechPageId | null
   branchesById: Map<BranchId, GovernmentBranch>
-  onBack: () => void
+  onBackHome: () => void
+  onBackToChooser: () => void
+  onOpenBiotechPage: (pageId: BiotechPageId) => void
   onOpenPerson: (personId: string) => void
   peopleById: Map<string, GovernmentPerson>
 }) {
   const [expandedPersonId, setExpandedPersonId] = useState<string | null>(null)
+  const biotechConnections = BIOTECH_CONNECTIONS.filter(
+    (connection) => connection.branchId !== 'judicial',
+  )
+  const biotechMentions = BIOTECH_MENTIONS.filter(
+    (entry) => !entry.personIds.some((personId) => personId.startsWith('judicial-')),
+  )
   const groupedConnections = BIOTECH_CATEGORY_ORDER.map((category) => ({
     category,
-    items: BIOTECH_CONNECTIONS.filter((connection) => connection.category === category),
+    items: biotechConnections.filter((connection) => connection.category === category),
     meta: BIOTECH_CATEGORY_META[category],
   })).filter((group) => group.items.length > 0)
   const mentionGroups = BIOTECH_MENTION_TIER_ORDER.map((tier) => ({
-    items: BIOTECH_MENTIONS.filter((entry) => entry.tier === tier),
+    items: biotechMentions.filter((entry) => entry.tier === tier),
     meta: BIOTECH_MENTION_TIER_META[tier],
     tier,
   })).filter((group) => group.items.length > 0)
+  const biotechEventRows = BIOTECH_EVENT_INDEX.map((event) => ({
+    ...event,
+    displayDate: caseDateFormatter.format(new Date(`${event.date}T00:00:00Z`)),
+    primarySource:
+      event.sourceLinks && event.sourceLinks.length > 0 ? event.sourceLinks[0] : event.source,
+    sourceLinks:
+      event.sourceLinks && event.sourceLinks.length > 0 ? event.sourceLinks : [event.source],
+  }))
+    .map((event) => ({
+      ...event,
+      secondarySourceLinks: event.sourceLinks.filter(
+        (source, index, collection) =>
+          source.url !== event.primarySource.url &&
+          collection.findIndex(
+            (candidate) => candidate.url === source.url && candidate.label === source.label,
+          ) === index,
+      ),
+    }))
+    .sort((left, right) => right.date.localeCompare(left.date))
+  const biotechProfileCount = new Set(biotechConnections.map((connection) => connection.personId)).size
+  const biotechEntryPages = [
+    {
+      count: JUDICIAL_BIOTECH_CASES.length,
+      id: 'judicial-cases',
+      tone: 'judicial',
+    },
+    {
+      count: biotechEventRows.length,
+      id: 'proceedings',
+      tone: 'proceedings',
+    },
+    {
+      count: biotechProfileCount,
+      id: 'people-profiles',
+      tone: 'profiles',
+    },
+    {
+      count: biotechMentions.length,
+      id: 'official-language',
+      tone: 'language',
+    },
+  ] satisfies Array<{
+    count: number
+    id: BiotechPageId
+    tone: 'judicial' | 'proceedings' | 'profiles' | 'language'
+  }>
+  const biotechEntryPageCards = biotechEntryPages.map((entry) => ({
+    ...entry,
+    ...BIOTECH_PAGE_META[entry.id],
+  }))
+  const currentBiotechMeta = biotechPage ? BIOTECH_PAGE_META[biotechPage] : null
+
+  useEffect(() => {
+    setExpandedPersonId(null)
+  }, [biotechPage])
+
+  const biotechEntryGrid = (
+    <nav aria-label="Biotech page sections" className="biotech-entry-grid">
+      {biotechEntryPageCards.map((entry) => (
+        <button
+          className={`biotech-entry-block biotech-entry-block--${entry.tone}`}
+          key={entry.id}
+          onClick={() => onOpenBiotechPage(entry.id)}
+          type="button"
+        >
+          <span className="biotech-entry-block__eyebrow">Click to enter</span>
+          <strong className="biotech-entry-block__count">
+            {populationCountFormatter.format(entry.count)}
+          </strong>
+          <div className="biotech-entry-block__body">
+            <h3>{entry.title}</h3>
+            <p>{entry.summary}</p>
+          </div>
+          <span className="biotech-entry-block__cta">Open page</span>
+        </button>
+      ))}
+    </nav>
+  )
+
+  if (!biotechPage) {
+    return (
+      <main className="screen screen--topic">
+        <header className="branch-banner branch-banner--topic">
+          <div className="branch-banner__top">
+            <button className="back-link" onClick={onBackHome} type="button">
+              Back to home
+            </button>
+            <div className="branch-banner__title-row">
+              <h1>Biotech, Biosecurity, and Lab Politics</h1>
+              <h2 className="branch-state-heading">Choose a biotech page</h2>
+            </div>
+          </div>
+          <div className="branch-banner__copy branch-banner__copy--topic">
+            <p className="branch-banner__lede">
+              Enter one dedicated biotech page at a time: judicial cases, proceedings, people
+              profiles, or official language.
+            </p>
+            <p className="branch-summary">
+              Public mention of a lab, pathogen, or alleged bioweapon is tracked here as documented
+              rhetoric or official role, not as proof of an actual biological-weapons program.
+            </p>
+          </div>
+          {biotechEntryGrid}
+        </header>
+      </main>
+    )
+  }
 
   return (
     <main className="screen screen--topic">
       <header className="branch-banner branch-banner--topic">
         <div className="branch-banner__top">
-          <button className="back-link" onClick={onBack} type="button">
-            Back to home
+          <button className="back-link" onClick={onBackToChooser} type="button">
+            Back to biotech
           </button>
           <div className="branch-banner__title-row">
             <h1>Biotech, Biosecurity, and Lab Politics</h1>
-            <h2 className="branch-state-heading">Existing profiles on this site</h2>
+            <h2 className="branch-state-heading">{currentBiotechMeta?.title}</h2>
           </div>
         </div>
         <div className="branch-banner__copy branch-banner__copy--topic">
           <p className="branch-banner__lede">
-            This section uses a broader standard: formal biotech and biomedical power, plus public
-            gain-of-function, biolab, and lab-leak involvement among people already profiled on
-            your site.
+            {currentBiotechMeta?.summary}
           </p>
           <p className="branch-summary">
-            Public mention of a lab, pathogen, or alleged bioweapon is not treated here as proof
-            of an actual biological-weapons program. The point is to track who has real biotech or
-            biosecurity power, and who has publicly pushed these themes in politics.
+            Public mention of a lab, pathogen, or alleged bioweapon is tracked here as documented
+            rhetoric or official role, not as proof of an actual biological-weapons program.
           </p>
-        </div>
-        <div className="branch-stats branch-stats--topic">
-          {groupedConnections.map((group) => (
-            <div className={`stat-card stat-card--topic stat-card--topic-${group.category.replace(/[^a-z]+/g, '-')}`} key={group.category}>
-              <strong>{group.items.length}</strong>
-              <span>{group.meta.heading}</span>
-            </div>
-          ))}
         </div>
       </header>
 
       <section className="biotech-sections">
-        {groupedConnections.map((group) => (
-          <section className="section-card" key={group.category}>
+        {biotechPage === 'judicial-cases' ? <JudicialBiotechCasesSection /> : null}
+
+        {biotechPage === 'proceedings' ? (
+          <section className="section-card biotech-event-index">
             <div className="section-card__header">
               <div>
-                <p className="eyebrow">{group.items.length} profiles</p>
-                <h2>{group.meta.heading}</h2>
+                <p className="eyebrow">{biotechEventRows.length} proceedings</p>
+                <h2>Biotech, Healthcare & Biosecurity Proceedings</h2>
               </div>
-              <p>{group.meta.summary}</p>
+              <p>
+                This is now a broader proceedings index rather than a roster-only appendix. It
+                includes congressional hearings plus administrative and advisory proceedings across
+                biotech, healthcare, public health, biodefense, food safety, pandemic oversight, and
+                related governance, with a dedicated official-source sweep across HHS agencies and
+                advisory bodies including FDA, CDC, NIH, CMS, USDA, HRSA, AHRQ, SAMHSA, IHS,
+                DHS/CWMD, DoD health and biotech venues, VA research bodies, and OSTP/NSF
+                bioeconomy proceedings.
+              </p>
             </div>
 
-            <div className="biotech-grid">
-              {group.items.map((connection) => (
-                (() => {
-                  const person = peopleById.get(connection.personId)
-                  const branch = person ? branchesById.get(person.branchId) ?? null : null
-                  const section =
-                    person && branch
-                      ? branch.sections.find((candidate) => candidate.id === person.sectionId) ?? null
-                      : null
-
-                  if (!person || !branch || !section) {
-                    return null
-                  }
-
-                  const isExpanded = expandedPersonId === connection.personId
-
-                  return (
-                    <article className="biotech-card" key={connection.personId}>
-                      <section className="biotech-card__intro">
-                        <div className="biotech-card__intro-top">
-                          <div className="biotech-card__pill-row">
+            <div className="biotech-event-index__table-wrap">
+              <table className="biotech-event-index__table">
+                <thead>
+                  <tr>
+                    <th scope="col">Venue</th>
+                    <th scope="col">Proceeding</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Themes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {biotechEventRows.map((event) => (
+                    <tr key={event.id}>
+                      <td>
+                        <div className="biotech-event-index__venue-cell">
+                          <strong className="biotech-event-index__venue-name">
+                            {formatBiotechProceedingVenue(event.venue)}
+                          </strong>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="biotech-event-index__event-cell">
+                          <a
+                            className="biotech-event-index__title-link"
+                            href={getDeepLinkedSourceUrl(event.primarySource)}
+                            rel="noreferrer"
+                            target="_blank"
+                            title={getSourceLocationTitle(event.primarySource)}
+                          >
+                            {event.title}
+                          </a>
+                          {event.secondarySourceLinks.length > 0 ? (
+                            <div className="biotech-event-index__source-note">
+                              {event.secondarySourceLinks.map((source) => (
+                                <SourceEvidenceLink
+                                  hideDate
+                                  key={`${event.id}-${source.label}-${source.url}`}
+                                  source={source}
+                                />
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                      </td>
+                      <td className="biotech-event-index__date-cell">{event.displayDate}</td>
+                      <td>
+                        <div className="biotech-event-index__topics">
+                          {event.topics.map((topic) => (
                             <span
-                              className={`biotech-pill biotech-pill--${connection.category.replace(/[^a-z]+/g, '-')}`}
+                              className="biotech-event-index__topic"
+                              key={`${event.id}-${topic}`}
+                              title={topic}
                             >
-                              {group.meta.pillLabel}
+                              {topic}
                             </span>
-                            <span className="biotech-evidence-pill">{connection.evidenceLabel}</span>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
+
+        {biotechPage === 'people-profiles' ? (
+          <div className="biotech-stack">
+            <section className="section-card">
+              <div className="section-card__header">
+                <div>
+                  <p className="eyebrow">
+                    {populationCountFormatter.format(biotechProfileCount)} current profiles
+                  </p>
+                  <h2>People Profiles</h2>
+                </div>
+                <p>
+                  Role-based profiles already on this site, grouped by biotechnology policy,
+                  biomedical regulation, biosecurity oversight, pharma background, and lab-leak /
+                  gain-of-function politics.
+                </p>
+              </div>
+            </section>
+
+            {groupedConnections.map((group) => (
+              <section className="section-card" key={group.category}>
+                <div className="section-card__header">
+                  <div>
+                    <p className="eyebrow">{group.items.length} profiles</p>
+                    <h2>{group.meta.heading}</h2>
+                  </div>
+                  <p>{group.meta.summary}</p>
+                </div>
+
+                <div className="biotech-grid">
+                  {group.items.map((connection) => (
+                    (() => {
+                      const person = peopleById.get(connection.personId)
+                      const branch = person ? branchesById.get(person.branchId) ?? null : null
+                      const section =
+                        person && branch
+                          ? branch.sections.find((candidate) => candidate.id === person.sectionId) ?? null
+                          : null
+
+                      if (!person || !branch || !section) {
+                        return null
+                      }
+
+                      const isExpanded = expandedPersonId === connection.personId
+
+                      return (
+                        <article className="biotech-card" key={connection.personId}>
+                          <section className="biotech-card__intro">
+                            <div className="biotech-card__intro-top">
+                              <div className="biotech-card__pill-row">
+                                <span
+                                  className={`biotech-pill biotech-pill--${connection.category.replace(/[^a-z]+/g, '-')}`}
+                                >
+                                  {group.meta.pillLabel}
+                                </span>
+                                <span className="biotech-evidence-pill">{connection.evidenceLabel}</span>
+                              </div>
+                              <div className="biotech-card__actions">
+                                <button
+                                  className={`biotech-card__toggle-button${
+                                    isExpanded ? ' biotech-card__toggle-button--active' : ''
+                                  }`}
+                                  onClick={() =>
+                                    setExpandedPersonId((currentId) =>
+                                      currentId === connection.personId ? null : connection.personId,
+                                    )
+                                  }
+                                  type="button"
+                                >
+                                  {isExpanded ? 'Hide full here' : 'Show full here'}
+                                </button>
+                                <button
+                                  className="biotech-card__profile-button"
+                                  onClick={() => onOpenPerson(connection.personId)}
+                                  type="button"
+                                >
+                                  Open profile
+                                </button>
+                              </div>
+                            </div>
+                            <p className="biotech-card__story">{connection.story}</p>
+                            <div className="biotech-card__sources">
+                              {connection.sources.map((source) => (
+                                <SourceEvidenceLink
+                                  key={`${connection.personId}-${source.label}-${source.url}`}
+                                  source={source}
+                                />
+                              ))}
+                            </div>
+                          </section>
+
+                          <PersonDetailContent
+                            branch={branch}
+                            person={person}
+                            section={section}
+                            variant={isExpanded ? 'default' : 'biotech-compact'}
+                          />
+                        </article>
+                      )
+                    })()
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : null}
+
+        {biotechPage === 'official-language' ? (
+          <div className="biotech-stack">
+            {mentionGroups.length > 0 ? (
+              <section className="section-card biotech-evidence-intro">
+                <div className="section-card__header">
+                  <div>
+                    <p className="eyebrow">{BIOTECH_MENTIONS.length} official-source entries</p>
+                    <h2>Official Biosecurity / Bioweapon Language</h2>
+                  </div>
+                  <p>
+                    Kept separate from the role-based biotech buckets above. This layer tracks where
+                    official material tied to profiles already on this site uses target terms such as
+                    biosecurity, biological threats, bioweapon, bioweapons, biological weapons,
+                    biodefense, bioterrorism, or gain-of-function.
+                  </p>
+                </div>
+                <p className="biotech-evidence-intro__note">
+                  Current-roster Supreme Court justices: no primary-verified target phrase in this
+                  pass.
+                </p>
+              </section>
+            ) : null}
+
+            {mentionGroups.map((group) => (
+              <section className="section-card" key={group.tier}>
+                <div className="section-card__header">
+                  <div>
+                    <p className="eyebrow">{group.items.length} entries</p>
+                    <h2>{group.meta.heading}</h2>
+                  </div>
+                  <p>{group.meta.summary}</p>
+                </div>
+
+                <div className="biotech-mention-grid">
+                  {group.items.map((entry) => {
+                    const profiles = entry.personIds
+                      .map((personId) => peopleById.get(personId))
+                      .filter(Boolean) as GovernmentPerson[]
+
+                    if (!profiles.length) {
+                      return null
+                    }
+
+                    const primaryProfile = profiles[0]
+                    const hasMultipleProfiles = profiles.length > 1
+
+                    return (
+                      <article className="biotech-mention-card" key={entry.id}>
+                        <div className="biotech-mention-card__top">
+                          <div className="biotech-mention-card__meta">
+                            <p className="eyebrow">
+                              {hasMultipleProfiles
+                                ? `${profiles.length} current profiles on this site`
+                                : primaryProfile.subtitle ?? primaryProfile.title}
+                            </p>
+                            <span className="biotech-evidence-pill">{entry.evidenceLabel}</span>
                           </div>
-                          <div className="biotech-card__actions">
-                            <button
-                              className={`biotech-card__toggle-button${
-                                isExpanded ? ' biotech-card__toggle-button--active' : ''
-                              }`}
-                              onClick={() =>
-                                setExpandedPersonId((currentId) =>
-                                  currentId === connection.personId ? null : connection.personId,
-                                )
-                              }
-                              type="button"
-                            >
-                              {isExpanded ? 'Hide full here' : 'Show full here'}
-                            </button>
-                            <button
-                              className="biotech-card__profile-button"
-                              onClick={() => onOpenPerson(connection.personId)}
-                              type="button"
-                            >
-                              Open profile
-                            </button>
+                          <div className="biotech-mention-card__title-group">
+                            <h3>{primaryProfile.name}</h3>
+                            <p className="biotech-mention-card__title">
+                              {hasMultipleProfiles
+                                ? 'Evidence applies to multiple current profiles here'
+                                : primaryProfile.title}
+                            </p>
                           </div>
                         </div>
-                        <p className="biotech-card__story">{connection.story}</p>
+
+                        <p className="biotech-mention-card__story">{entry.story}</p>
+                        {entry.exactMatches && entry.exactMatches.length > 0 ? (
+                          <p className="biotech-mention-card__matches">
+                            <strong>Exact matches:</strong> {entry.exactMatches.join(', ')}
+                          </p>
+                        ) : null}
+
+                        <div className="biotech-mention-card__actions">
+                          {profiles.map((profile) => (
+                            <button
+                              className="biotech-card__profile-button biotech-mention-card__profile-button"
+                              key={`${entry.id}-${profile.id}`}
+                              onClick={() => onOpenPerson(profile.id)}
+                              type="button"
+                            >
+                              {hasMultipleProfiles ? profile.subtitle ?? profile.title : 'Open profile'}
+                            </button>
+                          ))}
+                        </div>
+
                         <div className="biotech-card__sources">
-                          {connection.sources.map((source) => (
+                          {entry.sources.map((source) => (
                             <SourceEvidenceLink
-                              key={`${connection.personId}-${source.label}-${source.url}`}
+                              fallbackExactMatches={entry.exactMatches}
+                              key={`${entry.id}-${source.label}-${source.url}`}
                               source={source}
                             />
                           ))}
                         </div>
-                      </section>
-
-                      <PersonDetailContent
-                        branch={branch}
-                        person={person}
-                        section={section}
-                        variant={isExpanded ? 'default' : 'biotech-compact'}
-                      />
-                    </article>
-                  )
-                })()
-              ))}
-            </div>
-          </section>
-        ))}
-
-        {mentionGroups.length > 0 ? (
-          <section className="section-card biotech-evidence-intro">
-            <div className="section-card__header">
-              <div>
-                <p className="eyebrow">{BIOTECH_MENTIONS.length} official-source entries</p>
-                <h2>Official Biosecurity / Bioweapon Language</h2>
-              </div>
-              <p>
-                Kept separate from the role-based biotech buckets above. This layer tracks where
-                official material tied to profiles already on this site uses target terms such as
-                biosecurity, biological threats, bioweapon, bioweapons, biological weapons,
-                biodefense, bioterrorism, or gain-of-function.
-              </p>
-            </div>
-            <p className="biotech-evidence-intro__note">
-              Current-roster Supreme Court justices: no primary-verified target phrase in this
-              pass.
-            </p>
-          </section>
+                      </article>
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
         ) : null}
-
-        {mentionGroups.map((group) => (
-          <section className="section-card" key={group.tier}>
-            <div className="section-card__header">
-              <div>
-                <p className="eyebrow">{group.items.length} entries</p>
-                <h2>{group.meta.heading}</h2>
-              </div>
-              <p>{group.meta.summary}</p>
-            </div>
-
-            <div className="biotech-mention-grid">
-              {group.items.map((entry) => {
-                const profiles = entry.personIds
-                  .map((personId) => peopleById.get(personId))
-                  .filter(Boolean) as GovernmentPerson[]
-
-                if (!profiles.length) {
-                  return null
-                }
-
-                const primaryProfile = profiles[0]
-                const hasMultipleProfiles = profiles.length > 1
-
-                return (
-                  <article className="biotech-mention-card" key={entry.id}>
-                    <div className="biotech-mention-card__top">
-                      <div className="biotech-mention-card__meta">
-                        <p className="eyebrow">
-                          {hasMultipleProfiles
-                            ? `${profiles.length} current profiles on this site`
-                            : primaryProfile.subtitle ?? primaryProfile.title}
-                        </p>
-                        <span className="biotech-evidence-pill">{entry.evidenceLabel}</span>
-                      </div>
-                      <div className="biotech-mention-card__title-group">
-                        <h3>{primaryProfile.name}</h3>
-                        <p className="biotech-mention-card__title">
-                          {hasMultipleProfiles
-                            ? 'Evidence applies to multiple current profiles here'
-                            : primaryProfile.title}
-                        </p>
-                      </div>
-                    </div>
-
-                    <p className="biotech-mention-card__story">{entry.story}</p>
-                    {entry.exactMatches && entry.exactMatches.length > 0 ? (
-                      <p className="biotech-mention-card__matches">
-                        <strong>Exact matches:</strong> {entry.exactMatches.join(', ')}
-                      </p>
-                    ) : null}
-
-                    <div className="biotech-mention-card__actions">
-                      {profiles.map((profile) => (
-                        <button
-                          className="biotech-card__profile-button biotech-mention-card__profile-button"
-                          key={`${entry.id}-${profile.id}`}
-                          onClick={() => onOpenPerson(profile.id)}
-                          type="button"
-                        >
-                          {hasMultipleProfiles ? profile.subtitle ?? profile.title : 'Open profile'}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="biotech-card__sources">
-                      {entry.sources.map((source) => (
-                        <SourceEvidenceLink
-                          fallbackExactMatches={entry.exactMatches}
-                          key={`${entry.id}-${source.label}-${source.url}`}
-                          source={source}
-                        />
-                      ))}
-                    </div>
-                  </article>
-                )
-              })}
-            </div>
-          </section>
-        ))}
       </section>
     </main>
   )
@@ -4667,6 +5542,7 @@ function App() {
   const peopleById = new Map(people.map((person) => [person.id, person]))
   const branchesById = new Map(branches.map((branch) => [branch.id, branch]))
   const selectedBranch = route.branchId ? branchesById.get(route.branchId) ?? null : null
+  const selectedBiotechPage = route.biotechPage
   const selectedSpecialPage = route.specialPage
   const selectedExecutivePage = selectedBranch?.id === 'executive' ? route.executivePage : null
   const legislativePeople = people
@@ -4812,8 +5688,8 @@ function App() {
     selectedBranch?.id === 'judicial' && selectedSupremeCourtCaseId
       ? (
           [
-            { cases: supremeCourtCases, groupLabel: 'Trump Administration Cases' },
-            { cases: supremeCourtPersonalCases, groupLabel: 'Trump Personal Cases' },
+            { cases: supremeCourtCases, groupLabel: 'Administration Cases' },
+            { cases: supremeCourtPersonalCases, groupLabel: 'Personal Cases' },
           ] as Array<{ cases: SupremeCourtCase[]; groupLabel: string }>
         )
           .flatMap(({ cases, groupLabel }) => cases.map((caseItem) => ({ caseItem, groupLabel })))
@@ -4992,11 +5868,11 @@ function App() {
     window.location.assign(nextHash)
   }
 
-  function navigateToSpecialPage(specialPage: SpecialPageId | null) {
+  function navigateToSpecialPage(specialPage: SpecialPageId | null, biotechPage?: BiotechPageId | null) {
     setSelectedRollCallId(null)
     setSelectedSupremeCourtCaseId(null)
 
-    const nextHash = toSpecialHash(specialPage)
+    const nextHash = toSpecialHash(specialPage, biotechPage)
 
     if (window.location.hash === nextHash) {
       setRoute(parseHash(nextHash, peopleById))
@@ -5010,8 +5886,8 @@ function App() {
     startTransition(() => navigateTo(branchId))
   }
 
-  function openSpecialPage(specialPage: SpecialPageId) {
-    startTransition(() => navigateToSpecialPage(specialPage))
+  function openSpecialPage(specialPage: SpecialPageId, biotechPage?: BiotechPageId | null) {
+    startTransition(() => navigateToSpecialPage(specialPage, biotechPage))
   }
 
   function openExecutivePage(pageId: ExecutivePageId) {
@@ -5166,8 +6042,11 @@ function App() {
     if (selectedSpecialPage === 'biotech') {
       return (
         <BiotechConnectionsView
+          biotechPage={selectedBiotechPage}
           branchesById={branchesById}
-          onBack={() => navigateToSpecialPage(null)}
+          onBackHome={() => navigateToSpecialPage(null)}
+          onBackToChooser={() => navigateToSpecialPage('biotech')}
+          onOpenBiotechPage={(pageId) => openSpecialPage('biotech', pageId)}
           onOpenPerson={openPerson}
           peopleById={peopleById}
         />
@@ -5467,7 +6346,7 @@ function App() {
                   {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
                     <SupremeCourtCaseMatrix
                       cases={supremeCourtCases}
-                      eyebrow="Trump Administration Cases"
+                      eyebrow="Administration Cases"
                       justices={judicialJustices}
                       onOpenCase={openSupremeCourtCase}
                       onOpenPerson={openPerson}
@@ -5478,7 +6357,7 @@ function App() {
                   {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
                     <SupremeCourtCaseMatrix
                       cases={supremeCourtPersonalCases}
-                      eyebrow="Trump Personal Cases"
+                      eyebrow="Personal Cases"
                       justices={judicialJustices}
                       onOpenCase={openSupremeCourtCase}
                       onOpenPerson={openPerson}
@@ -5486,6 +6365,9 @@ function App() {
                       selectedPersonId={selectedPerson?.id ?? null}
                       showScore={false}
                     />
+                  ) : null}
+                  {selectedBranch.id === 'judicial' && section.id === 'supreme-court' ? (
+                    <JudicialBiotechCasesSection />
                   ) : null}
                 </Fragment>
               )
