@@ -78,7 +78,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Patenting engineered life',
     issue: 'Could a genetically engineered bacterium count as patentable subject matter under federal patent law?',
-    holding: 'Yes. A human-made microorganism could be patented.',
+    holding:
+      'Yes. The Court held that a live, human-made microorganism could qualify as patentable subject matter under federal patent law because it was not simply a naturally occurring organism.',
     whyItMatters:
       'This is the classic case on whether engineered living material can be owned through patents.',
     reviewLabel: 'Already SCOTUS',
@@ -98,7 +99,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Plant and seed patents',
     issue: 'Could newly developed plant breeds receive utility-patent protection?',
-    holding: 'Yes. Utility patents remained available for plants and seeds.',
+    holding:
+      'Yes. The Court held that newly developed plant breeds could receive utility-patent protection, and that the plant-specific patent statutes did not displace ordinary utility patents for plants and seeds.',
     whyItMatters:
       'A major ag-biotech case because it strengthened IP protection for proprietary seed technology.',
     reviewLabel: 'Already SCOTUS',
@@ -160,7 +162,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Diagnostics and laws of nature',
     issue: 'Could a diagnostic method based on metabolite levels and dosage correlations be patented?',
-    holding: 'No. The claims effectively captured a law of nature plus routine steps.',
+    holding:
+      'No. The Court held that the diagnostic claims were not patent-eligible because they effectively captured a law of nature and then added only routine, conventional steps for applying it.',
     whyItMatters:
       'This became one of the foundational limits on diagnostic and precision-medicine patent claims.',
     reviewLabel: 'Already SCOTUS',
@@ -180,7 +183,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Human gene patents',
     issue: 'Can naturally occurring human DNA sequences be patented simply because they were isolated?',
-    holding: 'Naturally occurring DNA was not patentable, while cDNA could be patent-eligible.',
+    holding:
+      'The Court held that naturally occurring DNA segments were not patentable merely because they had been isolated, while cDNA could still be patent-eligible because it was not naturally occurring in the same way.',
     whyItMatters:
       'One of the biggest genomics rulings in U.S. law, especially for genetic testing and sequencing markets.',
     reviewLabel: 'Already SCOTUS',
@@ -201,7 +205,7 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     focus: 'Self-replicating seed technology',
     issue: 'Did patent exhaustion let a farmer replant patented seeds and reproduce later generations?',
     holding:
-      'No. The Court held that patent exhaustion ends Monsanto’s control over the particular soybeans that were lawfully sold, but it does not let a buyer use those beans to make new patented seed through planting and harvesting without permission. In the Court’s view, Bowman was not just using the purchased article; he was creating additional copies of the patented invention.',
+      'No. The Court held that patent exhaustion ends Monsanto\'s control over the particular soybeans that were lawfully sold, but it does not let a buyer use those beans to make new patented seed through planting and harvesting without permission. In the Court\'s view, Bowman was not just using the purchased article; he was creating additional copies of the patented invention.',
     whyItMatters:
       'A key case on self-replicating biotech products and how patent rights survive downstream use.',
     reviewLabel: 'Already SCOTUS',
@@ -221,7 +225,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Court of Appeals for the Federal Circuit',
     focus: 'Patentability of cloned animals',
     issue: 'Could a cloned mammal such as Dolly count as patent-eligible subject matter under federal patent law?',
-    holding: 'No. The Federal Circuit said the claimed clones were not patent-eligible because they were not markedly different from naturally occurring animals.',
+    holding:
+      'No. The Federal Circuit held that the claimed cloned mammals were not patent-eligible on the claims before it because they were not markedly different from naturally occurring animals.',
     whyItMatters:
       'A rare flagship cloning case about whether biotechnology can patent the cloned organism itself rather than only the method used to produce it.',
     reviewLabel: 'Federal lower court',
@@ -241,7 +246,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Court of Appeals for the Federal Circuit',
     focus: 'Prenatal diagnostics patent eligibility',
     issue: 'Could a groundbreaking method for detecting fetal DNA in maternal blood survive patent-eligibility review after Mayo?',
-    holding: 'No. The Federal Circuit held the claims ineligible because they centered on a natural phenomenon plus conventional techniques.',
+    holding:
+      'No. The Federal Circuit held that the claims were not patent-eligible because they were directed to a natural phenomenon, fetal DNA in maternal blood, and relied on conventional techniques to detect it.',
     whyItMatters:
       'One of the most controversial post-Mayo biotech cases because it hit noninvasive prenatal testing and diagnostic patent protection at the same time.',
     reviewLabel: 'Federal lower court',
@@ -261,7 +267,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Biologic drug patent enablement',
     issue: 'Could Amgen claim an entire genus of PCSK9-blocking antibodies without teaching skilled scientists how to make and use the full claimed class?',
-    holding: 'No. The Court held that the patents failed the enablement requirement for the full claimed antibody genus.',
+    holding:
+      'No. The Court held that Amgen\'s patents failed the enablement requirement because they sought to claim an entire genus of antibodies without teaching skilled scientists how to make and use the full claimed class.',
     whyItMatters:
       'A major modern biotech-patent case for antibody drugs, genus claims, and how much disclosure companies must give when seeking broad biologics monopolies.',
     reviewLabel: 'Already SCOTUS',
@@ -281,7 +288,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'GMO deregulation and injunctions',
     issue: 'Could lower courts broadly block planting of genetically engineered alfalfa after NEPA defects?',
-    holding: 'The Court said the nationwide injunction was too broad.',
+    holding:
+      'The Court held that the nationwide injunction was too broad because plaintiffs had not shown that such sweeping relief was necessary, even though the USDA\'s deregulation decision violated NEPA.',
     whyItMatters:
       'A major GMO-regulation case about how aggressively courts can halt biotech rollout after agency errors.',
     reviewLabel: 'Already SCOTUS',
@@ -301,7 +309,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Medical-device preemption',
     issue: 'Did FDA premarket approval preempt certain state-law claims over a medical device?',
-    holding: 'Yes. Federal law preempted those state requirements in this setting.',
+    holding:
+      'Yes. The Court held that federal law preempted state-law requirements that would differ from or add to the federal requirements governing a medical device that had received premarket approval.',
     whyItMatters:
       'A central case on the balance between FDA approval and state tort litigation over medical technology.',
     reviewLabel: 'Already SCOTUS',
@@ -321,7 +330,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Drug-label liability',
     issue: 'Did FDA approval of a drug label automatically wipe out state failure-to-warn suits?',
-    holding: 'No. FDA approval did not automatically preempt the claim here.',
+    holding:
+      'No. The Court held that FDA approval of the drug label did not automatically preempt the state failure-to-warn claim because Wyeth had not shown that it was impossible to comply with both federal and state law.',
     whyItMatters:
       'It remains one of the defining cases on drug regulation, warnings, and federal-state litigation overlap.',
     reviewLabel: 'Already SCOTUS',
@@ -341,7 +351,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Vaccine-law preemption',
     issue: 'Did the National Vaccine Injury Compensation Act bar certain design-defect claims against vaccine makers?',
-    holding: 'Yes. The statute preempted that class of design-defect claims.',
+    holding:
+      'Yes. The Court held that the National Vaccine Injury Compensation Act bars that class of design-defect claims against vaccine manufacturers.',
     whyItMatters:
       'A major vaccine-liability case with long-term effects on product-litigation strategy and vaccine policy debates.',
     reviewLabel: 'Already SCOTUS',
@@ -361,7 +372,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Standing in science-regulation suits',
     issue: 'Could challengers unwind FDA actions on mifepristone on the record presented?',
-    holding: 'No. The plaintiffs lacked Article III standing.',
+    holding:
+      'No. The Court held that the plaintiffs lacked Article III standing, so it did not reach the merits of their challenge to the FDA\'s mifepristone actions.',
     whyItMatters:
       'This is a modern case about who gets into court to attack federal biomedical-regulation decisions.',
     reviewLabel: 'Already SCOTUS',
@@ -381,7 +393,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Device preemption before full PMA review',
     issue: 'Did federal medical-device law broadly wipe out state tort claims over a pacemaker that reached market through the 510(k) pathway?',
-    holding: 'Not broadly. The Court allowed core claims to proceed and read preemption narrowly in that setting.',
+    holding:
+      'Not broadly. The Court held that federal medical-device law did not broadly preempt the plaintiffs\' core state-law claims because the device had entered the market through the 510(k) pathway rather than full premarket approval.',
     whyItMatters:
       'A foundational medical-device case on FDA clearance, state tort law, and the later preemption battles that dominate device litigation.',
     reviewLabel: 'Already SCOTUS',
@@ -401,7 +414,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Fraud-on-the-FDA claims',
     issue: 'Could plaintiffs use state tort law to argue that a device reached market only because the defendant misled the FDA?',
-    holding: 'No. The Court held those fraud-on-the-FDA claims were impliedly preempted by federal law.',
+    holding:
+      'No. The Court held that those fraud-on-the-FDA claims were impliedly preempted because policing fraud in the FDA process belongs to the federal regulatory scheme, not to private plaintiffs using state tort law.',
     whyItMatters:
       'A landmark case on who polices deception in the FDA process and how far private plaintiffs can weaponize agency-approval disputes.',
     reviewLabel: 'Already SCOTUS',
@@ -421,7 +435,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Generic-drug warning preemption',
     issue: 'Could injured patients bring state failure-to-warn claims against generic manufacturers when federal law required the generic label to match the brand-name label?',
-    holding: 'No. The claims were preempted because the generic manufacturers could not unilaterally change their labels.',
+    holding:
+      'No. The Court held that the claims were preempted because federal law required the generic manufacturers to keep their labels the same as the brand-name label, so they could not unilaterally change the warnings.',
     whyItMatters:
       'One of the most important modern drug-preemption cases and hugely consequential for generic-drug litigation and patient recovery.',
     reviewLabel: 'Already SCOTUS',
@@ -441,7 +456,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Generic-drug design-defect preemption',
     issue: "Could a plaintiff recover on a state design-defect theory when federal law barred the generic maker from changing the drug's composition or label?",
-    holding: 'No. The Court held the design-defect claim was preempted in that setting.',
+    holding:
+      'No. The Court held that the design-defect claim was preempted because federal law barred the generic manufacturer from changing either the drug\'s composition or its labeling to satisfy state law.',
     whyItMatters:
       'It extended the modern generic-preemption line and closed another major path for product-liability suits over generic drugs.',
     reviewLabel: 'Already SCOTUS',
@@ -461,7 +477,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'California Supreme Court',
     focus: 'Ownership of excised cells',
     issue: 'Did a patient keep property rights in cells removed from his body and later commercialized?',
-    holding: 'The court rejected a conversion claim over the cells but allowed informed-consent-related theories.',
+    holding:
+      'The California Supreme Court held that Moore could not maintain a conversion claim based on continued property rights in his excised cells, but he could pursue informed-consent and related disclosure-based theories.',
     whyItMatters:
       'One of the most famous cases on tissue ownership, commercialization, and physician disclosure duties.',
     reviewLabel: 'State court',
@@ -481,7 +498,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the Northern District of Illinois',
     focus: 'Donor rights, gene patents, and disease research',
     issue: 'What legal rights did families and advocacy groups have after they supplied tissue, data, and funding for Canavan disease research and later learned the resulting gene work had been patented and tightly licensed?',
-    holding: 'In the Illinois opinion most often cited from this dispute, the court transferred the case on jurisdiction and venue grounds rather than resolving the full merits in Illinois.',
+    holding:
+      'In the Illinois opinion most often cited from this dispute, the court did not resolve the full merits; instead, it transferred the case on jurisdiction and venue grounds, leaving the larger donor-rights controversy unresolved there.',
     whyItMatters:
       'Even with that procedural posture, it became one of the signature judicial disputes about donor expectations, genetic research, and the commercialization of disease-related discoveries.',
     reviewLabel: 'Federal lower court',
@@ -501,7 +519,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Arizona Court of Appeals',
     focus: 'Secondary use of biospecimens beyond consent',
     issue: 'Could tribal members pursue claims after blood samples given for diabetes research were allegedly used for unrelated genetic, migration, and other studies without proper consent?',
-    holding: 'The appellate court held that the notices of claim were sufficient and allowed the litigation to go forward rather than ending it on the state notice-of-claim issue.',
+    holding:
+      'The Arizona Court of Appeals held that the tribe\'s notices of claim were sufficient, allowing the litigation to go forward rather than ending it on the state\'s notice-of-claim rules.',
     whyItMatters:
       'One of the most important U.S. biospecimen-consent disputes because it centers on secondary use, group dignity, and research involving indigenous communities.',
     reviewLabel: 'State court',
@@ -521,7 +540,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'California Court of Appeal',
     focus: 'Misuse of eggs and pre-embryos',
     issue: 'Could patients sue over allegations that a fertility clinic stole and misused their eggs and pre-embryos?',
-    holding: 'The court allowed key claims to go forward and rejected the idea that media coverage alone put plaintiffs on notice.',
+    holding:
+      'The court held that key claims could go forward and rejected the idea that media coverage alone gave plaintiffs inquiry notice of the alleged misuse of their eggs and pre-embryos.',
     whyItMatters:
       'A major fertility-clinic abuse case about consent, misuse of reproductive material, and delayed discovery of wrongdoing.',
     reviewLabel: 'State court',
@@ -541,7 +561,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Court of Appeals for the Eighth Circuit',
     focus: 'Research specimen control',
     issue: 'Who controlled donated biological specimens held in a university research repository?',
-    holding: 'The court sided with the university rather than treating donors as retaining full ownership control.',
+    holding:
+      'The Eighth Circuit held that the research specimens were controlled by the university rather than by the individual donors, rejecting the view that donors retained full ownership power over the repository.',
     whyItMatters:
       'It is a major biospecimen-governance case for biobanks, consent language, and research institutions.',
     reviewLabel: 'Federal lower court',
@@ -562,7 +583,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'New York Court of Appeals',
     focus: 'Directed organ-donation rights',
     issue: 'What legal rights arise when a specifically directed organ donation cannot be completed as intended?',
-    holding: 'The court declined to recognize the broad property-style recovery the plaintiff sought on the facts presented.',
+    holding:
+      'The New York Court of Appeals declined to recognize the broad property-style recovery the plaintiff sought on the facts presented and limited the legal rights arising from the unsuccessful directed donation.',
     whyItMatters:
       'A leading body-material case because it tests how far private rights and conversion theories extend in organ donation.',
     reviewLabel: 'State court',
@@ -582,7 +604,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the Eastern District of Virginia',
     focus: 'Frozen embryo transfer rights',
     issue: 'Could a couple compel an IVF clinic to transfer their cryopreserved embryo to another clinic?',
-    holding: 'The court allowed the contract-based claim to proceed.',
+    holding:
+      'The district court held that the couple\'s contract-based claim could proceed, allowing them to try to compel the IVF clinic to transfer the cryopreserved embryo to another clinic.',
     whyItMatters:
       'An early and influential reproductive-technology case about clinic control over cryopreserved embryos.',
     reviewLabel: 'Federal lower court',
@@ -602,7 +625,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'California Court of Appeal',
     focus: 'Stored sperm after death',
     issue: 'What legal interests attach to cryopreserved sperm after the donor dies?',
-    holding: 'The court recognized a legally protected interest sufficient to let the dispute proceed.',
+    holding:
+      'The California Court of Appeal held that the decedent\'s stored sperm involved a legally protected interest sufficient to let the dispute proceed, rather than treating it as having no cognizable legal status.',
     whyItMatters:
       'A widely cited posthumous-reproduction case about stored gametes, intent, and estate control.',
     reviewLabel: 'State court',
@@ -622,7 +646,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Tennessee Supreme Court',
     focus: 'Embryo disposition after divorce',
     issue: 'How should frozen embryos be treated when former spouses disagree about their future use?',
-    holding: 'The court generally favored the right to avoid procreation absent a prior controlling agreement.',
+    holding:
+      'The Tennessee Supreme Court held that, absent a prior controlling agreement, disputes over frozen embryos should generally be resolved in favor of the party wishing to avoid procreation.',
     whyItMatters:
       'This is one of the foundational embryo-disposition cases in American reproductive law.',
     reviewLabel: 'State court',
@@ -643,7 +668,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'New York Court of Appeals',
     focus: 'IVF consent contracts',
     issue: 'Should an IVF consent form control what happens to frozen pre-zygotes after the couple separates?',
-    holding: "Yes. The court enforced the parties' previous written agreement.",
+    holding:
+      'Yes. The New York Court of Appeals held that the parties\' previous written IVF agreement controlled the disposition of the frozen pre-zygotes after the couple separated.',
     whyItMatters:
       'It is the leading example of courts enforcing reproductive-technology consent documents as contracts.',
     reviewLabel: 'State court',
@@ -663,7 +689,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'California Supreme Court',
     focus: 'Egg donation, parentage, and intended family structure',
     issue: 'Was a woman who provided ova to her domestic partner merely a donor, or could she also be a legal parent of the resulting children?',
-    holding: 'The court held that she was a parent too, not merely an ova donor, because the children were meant to be raised in the couple\'s joint home.',
+    holding:
+      'The California Supreme Court held that she was a parent too, not merely an ova donor, because the children were intended to be raised in the couple\'s joint family.',
     whyItMatters:
       'It is a major assisted-reproduction parentage case because it rejects an overly simple donor analogy in a real family-setting.',
     reviewLabel: 'State court',
@@ -683,7 +710,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'California Supreme Court',
     focus: 'Gestational surrogacy and intended parenthood',
     issue: 'When genetic and gestational motherhood split, who is the legal mother under a surrogacy arrangement?',
-    holding: 'The court recognized the intended genetic mother, not the gestational surrogate, as the legal mother.',
+    holding:
+      'The California Supreme Court held that the intended genetic mother, not the gestational surrogate, was the legal mother under the surrogacy arrangement.',
     whyItMatters:
       'One of the most famous assisted-reproduction cases because it shaped the intent-based approach to surrogacy and parentage.',
     reviewLabel: 'State court',
@@ -703,7 +731,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Massachusetts Supreme Judicial Court',
     focus: 'Limits on embryo-disposition contracts',
     issue: "Could a prior clinic form be enforced to compel one former spouse to become a parent against that person's will?",
-    holding: 'No. The court refused to enforce the arrangement in a way that would force parenthood.',
+    holding:
+      'No. The Massachusetts Supreme Judicial Court held that the prior clinic form could not be enforced in a way that would force one former spouse into parenthood against that person\'s will.',
     whyItMatters:
       'A major counterpoint to the strong contract approach because it treats compelled parenthood as a public-policy problem.',
     reviewLabel: 'State court',
@@ -723,7 +752,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Supreme Court of New Jersey',
     focus: 'Revocable consent and the right not to procreate',
     issue: 'Could a divorced husband force preserved preembryos to be donated or used after the wife changed her mind and wanted them destroyed?',
-    holding: 'No. The New Jersey Supreme Court held that the wife could not be forced into unwanted genetic parenthood and adopted a rule giving special weight to the right not to procreate.',
+    holding:
+      'No. The New Jersey Supreme Court held that the wife could not be forced into unwanted genetic parenthood and adopted a rule giving special weight to the right not to procreate after consent had been revoked.',
     whyItMatters:
       'One of the core embryo-disposition precedents because it refines the contract-versus-balancing debate and strongly protects revocable consent.',
     reviewLabel: 'State court',
@@ -743,7 +773,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Iowa Supreme Court',
     focus: 'Contemporaneous mutual-consent approach',
     issue: 'How should frozen embryos be handled when ex-spouses disagree and no one can use or release them without the other\'s consent?',
-    holding: 'The court adopted a contemporaneous mutual-consent approach that effectively kept the embryos in storage unless both parties agreed on a disposition.',
+    holding:
+      'The Iowa Supreme Court adopted a contemporaneous mutual-consent approach, which effectively kept the embryos in storage unless both former spouses agreed on a disposition.',
     whyItMatters:
       'This is one of the classic counter-models in embryo case law, often contrasted with both contract-first and balancing approaches.',
     reviewLabel: 'State court',
@@ -764,7 +795,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Oregon Court of Appeals',
     focus: 'Enforcing IVF consent forms after divorce',
     issue: 'Should an Oregon divorce court enforce the parties\' signed IVF storage agreement directing what would happen to frozen embryos when they later disagreed?',
-    holding: 'Yes. The Oregon Court of Appeals upheld the agreement and affirmed the judgment ordering destruction of the embryos under its terms.',
+    holding:
+      'Yes. The Oregon Court of Appeals held that the parties\' signed IVF storage agreement was enforceable and affirmed destruction of the embryos under its terms.',
     whyItMatters:
       'A major embryo-disposition case because it strongly reinforces the contract-first approach and is often cited alongside Davis, Kass, and Witten.',
     reviewLabel: 'State court',
@@ -784,7 +816,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Washington Supreme Court',
     focus: 'Frozen-embryo contract limits',
     issue: 'How should a court resolve a dispute over cryopreserved embryos after a couple separates?',
-    holding: "The court resolved the dispute by applying the parties' agreement and the clinic timeline.",
+    holding:
+      'The Washington Supreme Court resolved the dispute by applying the parties\' agreement and the clinic\'s time limits, rather than awarding the embryos for one party\'s unilateral use.',
     whyItMatters:
       'It is one of the major state high-court embryo cases after Davis and Kass.',
     reviewLabel: 'State court',
@@ -804,7 +837,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'New Jersey Supreme Court',
     focus: 'Surrogacy and parental rights',
     issue: 'How should the law treat a commercial surrogacy arrangement and the resulting custody dispute?',
-    holding: "The court invalidated the surrogacy contract while resolving custody under the child's best interests.",
+    holding:
+      'The New Jersey Supreme Court invalidated the surrogacy contract but resolved custody according to the child\'s best interests rather than enforcing the contract as written.',
     whyItMatters:
       'A landmark assisted-reproduction case that still shapes how courts and legislatures think about surrogacy.',
     reviewLabel: 'State court',
@@ -824,7 +858,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Alabama Supreme Court',
     focus: 'Embryo status and wrongful death',
     issue: "Could frozen embryos count as children under Alabama's wrongful-death statute?",
-    holding: 'The court allowed the wrongful-death claims to proceed on that theory.',
+    holding:
+      'The Alabama Supreme Court held that the wrongful-death claims could proceed on the theory that frozen embryos counted as children under the state statute.',
     whyItMatters:
       'One of the most consequential recent IVF cases because it directly disrupted fertility-clinic practice.',
     reviewLabel: 'State court',
@@ -844,7 +879,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Texas Court of Appeals',
     focus: 'Enforcing embryo agreements in divorce',
     issue: 'Should a divorce court follow the couple\'s prior embryo-disposition agreement or reassign the frozen embryos as part of the property division?',
-    holding: 'The appellate court held the agreement should control and that the embryos should be discarded as the parties had specified for divorce.',
+    holding:
+      'The Texas Court of Appeals held that the parties\' prior embryo-disposition agreement controlled and that the embryos should be discarded as the parties had specified for divorce.',
     whyItMatters:
       'It is a leading contract-first embryo case and one of the clearest examples of a court refusing to rewrite the parties\' prior IVF agreement.',
     reviewLabel: 'State court',
@@ -864,7 +900,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'New York Appellate Division, First Department',
     focus: 'Revocation of consent and disposal',
     issue: 'Could one spouse revoke consent under the clinic agreement and prevent the other spouse from using the remaining frozen embryo?',
-    holding: 'The appellate court ruled that the revocation language in the consent agreement controlled and awarded the embryo for disposal under clinic procedures.',
+    holding:
+      'The appellate court held that the revocation language in the consent agreement controlled and required disposal of the embryo under clinic procedures.',
     whyItMatters:
       'It is an important modern embryo-disposition case because it turns on the exact wording of clinic consent and revocation provisions.',
     reviewLabel: 'State court',
@@ -884,7 +921,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Pennsylvania Superior Court',
     focus: 'Cancer-related fertility preservation and balancing approach',
     issue: 'Could a wife who created frozen pre-embryos before cancer treatment receive control of them over her ex-husband\'s objection when they were likely her only realistic path to biological motherhood?',
-    holding: 'Yes. The Pennsylvania Superior Court used a balancing approach and awarded the pre-embryos to the wife on the specific facts presented.',
+    holding:
+      'Yes. The Pennsylvania Superior Court used a balancing approach and awarded the pre-embryos to the wife because, on the specific facts presented, they were likely her only realistic path to biological motherhood.',
     whyItMatters:
       'This is one of the most-cited embryo-disposition cases in the country because it made the balancing approach concrete in a cancer-preservation setting before later cases like Rooks and Pieper.',
     reviewLabel: 'State court',
@@ -904,7 +942,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Illinois Appellate Court',
     focus: 'Cancer-preservation embryos and oral agreement',
     issue: 'Could a woman use frozen pre-embryos created before cancer treatment over the objection of the former partner who provided sperm?',
-    holding: 'The court treated the dispute through a contract-centered framework and remanded for that approach to be applied.',
+    holding:
+      'The Illinois Appellate Court treated the dispute through a contract-centered framework and remanded for that approach to be applied to the parties\' alleged agreement.',
     whyItMatters:
       'A nationally cited embryo case because fertility preservation in the face of cancer treatment made the equities especially stark.',
     reviewLabel: 'State court',
@@ -924,7 +963,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Colorado Supreme Court',
     focus: 'Balancing test for embryo disputes',
     issue: 'How should courts resolve embryo disputes when no controlling agreement clearly answers the divorce scenario?',
-    holding: 'The court adopted a structured balancing framework rather than a pure contemporaneous-consent rule.',
+    holding:
+      'The Colorado Supreme Court rejected a pure contemporaneous-consent rule and adopted a structured balancing framework for embryo disputes when no controlling agreement clearly resolved the situation.',
     whyItMatters:
       'One of the most influential modern embryo cases because later courts repeatedly borrow its balancing factors.',
     reviewLabel: 'State court',
@@ -944,7 +984,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Connecticut Supreme Court',
     focus: 'Embryo-disposition framework synthesis',
     issue: 'What approach should govern the disposition of frozen pre-embryos when relationships end and agreements are disputed?',
-    holding: 'The court endorsed a contract-first approach while mapping the major competing frameworks in other states.',
+    holding:
+      'The Connecticut Supreme Court endorsed a contract-first approach while also mapping the major competing frameworks used in other states for frozen pre-embryo disputes.',
     whyItMatters:
       'It is one of the clearest state supreme court opinions comparing the national embryo-case landscape in one place.',
     reviewLabel: 'State court',
@@ -964,7 +1005,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Arizona Court of Appeals',
     focus: 'Embryo disputes after cancer-related preservation',
     issue: 'How should Arizona courts handle frozen-embryo disputes when a party argues the embryos are the last realistic path to genetic parenthood?',
-    holding: 'The court rejected automatic enforcement and sent the dispute back under a more nuanced legal framework.',
+    holding:
+      'The Arizona Court of Appeals rejected automatic enforcement of the prior arrangement and sent the dispute back to be resolved under a more nuanced legal framework.',
     whyItMatters:
       'A strong modern case because it sits at the intersection of cancer-related fertility preservation and post-relationship conflict.',
     reviewLabel: 'State court',
@@ -984,7 +1026,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Missouri Court of Appeals',
     focus: 'Embryos as marital property of special character',
     issue: 'In a divorce, should frozen pre-embryos be treated as children, ordinary property, or something in between?',
-    holding: 'The court treated them as marital property of a special character and refused to award them for use over the ex-husband\'s objection.',
+    holding:
+      'The Missouri Court of Appeals held that the frozen pre-embryos were marital property of a special character and refused to award them for use over the ex-husband\'s objection.',
     whyItMatters:
       'A widely cited embryo-disposition case because it rejected simple personhood and simple property analogies at the same time.',
     reviewLabel: 'State court',
@@ -1004,7 +1047,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Indiana Court of Appeals',
     focus: 'Modern balancing approach in embryo disputes',
     issue: 'Did awarding a remaining frozen pre-embryo to the ex-wife over the ex-husband\'s objection violate his constitutional interest in avoiding procreation?',
-    holding: 'The appellate court affirmed the award to the wife after concluding that the trial court used the appropriate balancing framework.',
+    holding:
+      'The appellate court affirmed the award to the wife after concluding that the trial court properly used a balancing framework and did not violate the husband\'s constitutional interest in avoiding procreation.',
     whyItMatters:
       'It is a very recent embryo-disposition case that explicitly walks through the national case-law split and chooses a modern balancing approach.',
     reviewLabel: 'State court',
@@ -1024,7 +1068,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Supreme Court of New York County',
     focus: 'Recent contract-first embryo ruling',
     issue: 'Should the court enforce the parties\' declarations of intent for cryopreserved embryos after divorce, or instead order destruction?',
-    holding: 'The court awarded the cryopreserved embryos for implantation under the parties\' written declarations and denied the request to destroy them.',
+    holding:
+      'The court held that the parties\' written declarations of intent controlled and awarded the cryopreserved embryos for implantation rather than ordering their destruction.',
     whyItMatters:
       'It is a very recent embryo-disposition decision that synthesizes Kass, Finkelstein, A.Z., J.B., and Davis while emphasizing the force of clear written IVF directives.',
     reviewLabel: 'State court',
@@ -1044,7 +1089,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'California Court of Appeal',
     focus: 'Intended parenthood without genetic ties',
     issue: 'When a child is born through assisted reproduction using donor egg, donor sperm, and a surrogate, can the intending couple still be the legal parents even without a genetic link?',
-    holding: 'Yes. The appellate court held that the intending husband and wife were the lawful parents.',
+    holding:
+      'Yes. The California Court of Appeal held that the intending husband and wife were the lawful parents even though neither had a genetic connection to the child.',
     whyItMatters:
       'A major assisted-reproduction case because it pushes parentage doctrine beyond simple genetics or gestation and toward intentional creation of a family.',
     reviewLabel: 'State court',
@@ -1064,7 +1110,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Maryland Appellate Court',
     focus: 'Modern framework for frozen pre-embryo disputes',
     issue: 'How should Maryland courts decide the fate of a frozen pre-embryo when divorcing spouses disagree about whether it should be used or discarded?',
-    holding: 'The court treated the dispute as one of first impression, directed trial courts to look first to the parties\' prior agreement, and then use a balancing framework if no controlling agreement resolves the issue.',
+    holding:
+      'The Maryland Appellate Court held that courts should look first to the parties\' prior agreement and then use a balancing framework if no controlling agreement resolves the frozen pre-embryo dispute.',
     whyItMatters:
       'A significant modern embryo-dispute case because it lays out a detailed framework in a large state that previously lacked binding appellate guidance.',
     reviewLabel: 'State court',
@@ -1084,7 +1131,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Iowa Supreme Court',
     focus: 'Gestational surrogacy contract enforcement',
     issue: 'Could Iowa courts enforce a gestational-surrogacy agreement in favor of the intended biological father against the surrogate and her husband?',
-    holding: 'Yes. The Iowa Supreme Court enforced the gestational-surrogacy contract, recognized the intended biological father\'s parental status, and terminated the surrogate couple\'s presumptive parental rights.',
+    holding:
+      'Yes. The Iowa Supreme Court enforced the gestational-surrogacy contract, recognized the intended biological father as the legal parent, and terminated the surrogate couple\'s presumptive parental rights.',
     whyItMatters:
       'A strong assisted-reproduction precedent because it squarely treats gestational-surrogacy contracts as enforceable absent contrary state law.',
     reviewLabel: 'State court',
@@ -1104,7 +1152,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Michigan Court of Appeals',
     focus: 'Frozen embryo as special marital property in divorce',
     issue: 'How should a Michigan divorce court treat a cryogenically preserved embryo when the parties dispute whether it should be awarded to one spouse for possible implantation?',
-    holding: 'The appellate court remanded for a more complete property analysis while emphasizing that a frozen embryo is not just ordinary marital property and may warrant special treatment.',
+    holding:
+      'The appellate court remanded for a fuller property analysis while emphasizing that a frozen embryo is not simply ordinary marital property and may require special treatment.',
     whyItMatters:
       'A notable modern embryo-disposition case because Michigan had little direct precedent and the court explicitly recognized the embryo\'s unique status in divorce litigation.',
     reviewLabel: 'State court',
@@ -1124,7 +1173,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Colorado Court of Appeals',
     focus: 'Donation-versus-nonprocreation dispute after breakup',
     issue: 'Could a spouse who wanted to donate disputed pre-embryos prevail over the other spouse\'s objection that donation would still make him a genetic parent against his will?',
-    holding: 'No. Applying Colorado\'s Rooks framework, the court held that this was not one of the rare cases in which donation should overcome the other party\'s interest in avoiding procreation.',
+    holding:
+      'No. Applying Colorado\'s Rooks framework, the court held that this was not one of the unusual cases in which donation should override the other party\'s interest in avoiding procreation.',
     whyItMatters:
       'A strong follow-on to Rooks because it shows how the balancing framework works when one side seeks donation rather than implantation.',
     reviewLabel: 'State court',
@@ -1144,7 +1194,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Court of Appeals of Georgia',
     focus: 'Contract-controlled embryo disposition in divorce',
     issue: 'Did the trial court err by awarding the stored embryo to the wife for possible implantation instead of enforcing the couple\'s prior IVF agreement calling for donation if they later could not agree?',
-    holding: 'Yes. The Georgia Court of Appeals held that the agreement controlled and that the embryo should be handled according to the parties\' prior donation choice rather than a fresh equitable balancing by the divorce court.',
+    holding:
+      'Yes. The Georgia Court of Appeals held that the prior IVF agreement controlled and that the embryo should be handled according to the parties\' prior donation choice rather than a fresh equitable balancing by the divorce court.',
     whyItMatters:
       'A major modern state appellate case because it treats embryo-disposition contracts as enforceable even in emotionally difficult divorce disputes.',
     reviewLabel: 'State court',
@@ -1164,7 +1215,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Minnesota Court of Appeals',
     focus: 'Balancing interests in preserved pre-embryos after relationship breakdown',
     issue: 'Should a former partner receive control of preserved pre-embryos to pursue biological parenthood when the other former partner opposes becoming a genetic parent?',
-    holding: 'No. The court affirmed the denial of relief after a balancing analysis that favored the objecting partner\'s interest in avoiding genetic parenthood on the specific record presented.',
+    holding:
+      'No. The court affirmed the denial of relief after concluding that the balancing analysis favored the objecting partner\'s interest in avoiding genetic parenthood on the record presented.',
     whyItMatters:
       'A useful modern case because it shows how lower courts are borrowing from Rooks, Reber, and Davis even in states that still lack a definitive homegrown framework.',
     reviewLabel: 'State court',
@@ -1184,7 +1236,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Court of Appeals for the D.C. Circuit',
     focus: 'Modern informed-consent doctrine',
     issue: 'Did a physician have a duty to disclose material risks of surgery even if many doctors would not ordinarily volunteer that information?',
-    holding: 'Yes. The D.C. Circuit made patient-centered informed consent a legal duty rather than leaving disclosure almost entirely to medical custom.',
+    holding:
+      'Yes. The D.C. Circuit held that informed consent is measured by the patient\'s need for material information, not solely by customary medical practice, and made patient-centered disclosure a legal duty.',
     whyItMatters:
       'This is one of the most influential informed-consent cases in American law and a cornerstone of modern medical autonomy doctrine.',
     reviewLabel: 'Federal lower court',
@@ -1204,7 +1257,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the Northern District of Illinois',
     focus: 'Nonconsensual medical experimentation',
     issue: 'Did women who were given DES during prenatal care without their knowledge or consent state a viable claim arising from secret participation in a medical experiment?',
-    holding: 'Yes. The district court held that the allegations could support a battery claim and allowed the core claim to proceed.',
+    holding:
+      'Yes. The district court held that the allegations could support a battery claim arising from secret administration of DES during prenatal care without the women\'s knowledge or consent.',
     whyItMatters:
       'One of the clearest judicial treatments of nonconsensual human experimentation in U.S. medical research litigation.',
     reviewLabel: 'Federal lower court',
@@ -1224,7 +1278,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Secret LSD testing on human subjects',
     issue: 'Could a serviceman secretly dosed with LSD during military experimentation pursue a constitutional damages remedy against federal officials?',
-    holding: 'No. The Court barred the Bivens route in the military setting, even though the case arose from covert human experimentation.',
+    holding:
+      'No. The Court held that the serviceman could not pursue a Bivens damages remedy in the military setting, even though the case arose from covert human experimentation.',
     whyItMatters:
       'A major human-subjects case because the facts involve undisclosed military drug experiments, and the ruling shows how little damages access can remain even in shocking experimentation cases.',
     reviewLabel: 'Already SCOTUS',
@@ -1244,7 +1299,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the Southern District of New York',
     focus: 'Secret mescaline experimentation and cover-up',
     issue: 'Could claims proceed arising from allegations that Harold Blauer was injected with Army-supplied mescaline derivatives in a psychiatric setting without informed consent, followed by a long concealment of the experiment?',
-    holding: 'The district court allowed the claims to proceed against the United States under the Federal Tort Claims Act framework then before it.',
+    holding:
+      'The district court held that the claims could proceed against the United States under the Federal Tort Claims Act framework then before it, based on allegations of nonconsensual mescaline experimentation and a long cover-up.',
     whyItMatters:
       'A major Cold War human-experimentation case because it deals with nonconsensual chemical testing, death, and an alleged government cover-up.',
     reviewLabel: 'Federal lower court',
@@ -1264,7 +1320,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the District of Nebraska',
     focus: 'Mandatory HIV testing of employees',
     issue: 'Could a state human-services agency require broad mandatory HIV testing of workers whose jobs involved contact with clients, based on a claimed risk of transmission?',
-    holding: 'No. The district court held the policy unconstitutional on the record before it because the testing burden outweighed the asserted need.',
+    holding:
+      'No. The district court held that the mandatory HIV-testing policy was unconstitutional on the record before it because the intrusion and testing burden outweighed the asserted need.',
     whyItMatters:
       'A high-signal HIV-testing case because it treats broad compulsory testing as an unjustified intrusion where the underlying transmission risk was extremely low.',
     reviewLabel: 'Federal lower court',
@@ -1284,7 +1341,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the Eastern District of Virginia',
     focus: 'Nonconsensual HIV testing on an existing blood sample',
     issue: 'Did a civilian Army employee have viable constitutional claims after military doctors added an HIV test to blood already drawn for other diagnostic purposes without telling him in advance?',
-    holding: 'The court ultimately granted summary judgment to the defendant commander, but the case squarely confronted the legality of nonconsensual HIV testing from an already-collected sample.',
+    holding:
+      'The court ultimately granted summary judgment to the defendant commander, but in doing so it squarely confronted the legality of adding an HIV test to an already-collected blood sample without prior notice or consent.',
     whyItMatters:
       'A significant covert-testing case because it sharply frames the difference between consent to a blood draw and consent to additional hidden testing on that sample.',
     reviewLabel: 'Federal lower court',
@@ -1304,7 +1362,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the Western District of New York',
     focus: 'Secret plutonium injection and long-term covert study',
     issue: 'Could claims proceed based on allegations that a patient was injected with plutonium while being told she was receiving treatment for scleroderma, and then studied for years without being told the truth?',
-    holding: 'Yes. The district court refused to dismiss the core federal claim at the pleading stage.',
+    holding:
+      'Yes. The district court refused to dismiss the core federal claim at the pleading stage, allowing the plutonium-injection case to go forward.',
     whyItMatters:
       'One of the starkest U.S. covert-experiment cases because it links Cold War radiation research, false pretenses, and years of undisclosed follow-up testing.',
     reviewLabel: 'Federal lower court',
@@ -1324,7 +1383,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Court of Appeals for the Ninth Circuit',
     focus: 'Unauthorized pregnancy, syphilis, and sickle-cell testing',
     issue: 'Did employees state viable privacy and constitutional claims after alleging that blood and urine samples were secretly tested for pregnancy, syphilis, and sickle-cell trait without valid notice or consent?',
-    holding: 'Yes in substantial part. The Ninth Circuit recognized a powerful privacy interest against secret testing for sensitive medical conditions and allowed core claims to proceed.',
+    holding:
+      'Yes in substantial part. The Ninth Circuit held that employees had a powerful privacy interest against secret testing for sensitive medical conditions and allowed core claims to proceed.',
     whyItMatters:
       'A flagship unauthorized-testing case because it squarely treats covert medical screening as a serious invasion of privacy, especially where the tests carry stigma or genetic implications.',
     reviewLabel: 'Federal lower court',
@@ -1344,7 +1404,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Colorado Court of Appeals',
     focus: 'Unauthorized HIV testing and disclosure',
     issue: 'Did a student state a privacy claim after consenting to a rubella test but then having his blood secretly tested for HIV and the result disclosed?',
-    holding: 'Yes. The Colorado Court of Appeals held that unauthorized HIV testing under those alleged circumstances could amount to an offensive intrusion on privacy.',
+    holding:
+      'Yes. The Colorado Court of Appeals held that unauthorized HIV testing and disclosure under the alleged circumstances could amount to an offensive intrusion on privacy.',
     whyItMatters:
       'A strong unauthorized-testing case because it treats limited consent to one medical test as not automatically authorizing hidden testing for something far more sensitive.',
     reviewLabel: 'State court',
@@ -1364,7 +1425,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Abortion rights and reproductive autonomy',
     issue: 'Did the Constitution protect a decision to terminate pregnancy before fetal viability?',
-    holding: 'Yes. The Court held that the Due Process Clause protected that choice under the framework it adopted at the time.',
+    holding:
+      'Yes. The Court held that the Due Process Clause protected a decision to terminate pregnancy before viability under the constitutional framework it adopted at the time.',
     whyItMatters:
       'One of the most important reproductive-autonomy and medical-choice decisions in modern American law.',
     reviewLabel: 'Already SCOTUS',
@@ -1384,7 +1446,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Supreme Court of New Jersey',
     focus: 'Withdrawal of life support',
     issue: 'Could a guardian authorize removal of a respirator from a patient in a persistent vegetative state?',
-    holding: 'Yes. The New Jersey Supreme Court recognized a privacy-based framework and allowed the guardian and physicians to proceed.',
+    holding:
+      'Yes. The New Jersey Supreme Court recognized a privacy-based framework and allowed the guardian and physicians to proceed with withdrawal of the respirator.',
     whyItMatters:
       'One of the most famous end-of-life cases in American law and a direct ancestor to later right-to-refuse-treatment doctrine.',
     reviewLabel: 'State court',
@@ -1404,7 +1467,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Supreme Judicial Court of Massachusetts',
     focus: 'Refusing burdensome treatment for an incompetent patient',
     issue: 'Could chemotherapy be withheld from a profoundly disabled patient with leukemia through a substituted-judgment approach?',
-    holding: 'Yes. The Massachusetts high court allowed treatment to be withheld using substituted judgment.',
+    holding:
+      'Yes. The Massachusetts high court held that treatment could be withheld using substituted judgment for the incompetent patient.',
     whyItMatters:
       'A canonical bioethics case on informed consent, substituted judgment, and the limits of life-prolonging treatment.',
     reviewLabel: 'State court',
@@ -1424,7 +1488,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Health-data privacy and prescription monitoring',
     issue: 'Could New York require identifying information to be reported for certain prescription drugs without violating constitutional privacy interests?',
-    holding: 'Yes. The Court upheld the reporting system on the record before it.',
+    holding:
+      'Yes. The Court upheld New York\'s prescription-reporting system on the record before it and rejected the constitutional privacy challenge.',
     whyItMatters:
       'An early landmark on medical-data privacy, prescription surveillance, and how public-health regulation intersects with personal information.',
     reviewLabel: 'Already SCOTUS',
@@ -1444,7 +1509,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the Southern District of Ohio',
     focus: 'Concealed radiation experiments',
     issue: 'Could plaintiffs pursue constitutional and related claims based on allegations that the true purpose and dangers of human radiation experiments had been concealed from them for decades?',
-    holding: 'At the pleading stage, the district court held that the plaintiffs had sufficiently alleged constitutional injuries tied to concealment of the experiments and their risks.',
+    holding:
+      'At the pleading stage, the district court held that the plaintiffs had sufficiently alleged constitutional injuries based on concealment of the radiation experiments and their risks.',
     whyItMatters:
       'One of the most important modern judicial opinions arising from Cold War human experimentation and the concealment of research risks.',
     reviewLabel: 'Federal lower court',
@@ -1464,7 +1530,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Supreme Court of New Jersey',
     focus: 'Withdrawing artificial nutrition and hydration',
     issue: 'What standards and procedures should govern decisions to withhold or withdraw life-sustaining treatment from an incompetent nursing-home patient?',
-    holding: 'The court created a detailed state-law framework for when life-sustaining treatment, including artificial feeding, could be withdrawn.',
+    holding:
+      'The New Jersey Supreme Court created a detailed state-law framework for when life-sustaining treatment, including artificial nutrition and hydration, could be withdrawn.',
     whyItMatters:
       'A landmark right-to-die case because it translated Quinlan into a more detailed doctrine for incompetent patients and feeding-tube disputes.',
     reviewLabel: 'State court',
@@ -1484,7 +1551,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'California Court of Appeal',
     focus: 'Competent patient refusing forced feeding',
     issue: 'Could a competent, severely disabled patient demand removal of a feeding tube and refuse life-prolonging nutrition against hospital wishes?',
-    holding: 'Yes. The court held that a competent patient could refuse that treatment even if death would follow.',
+    holding:
+      'Yes. The California Court of Appeal held that a competent patient could refuse forced feeding and life-prolonging nutrition even if death would follow.',
     whyItMatters:
       'A major bodily-autonomy case because it strongly framed refusal of treatment as the patient\'s decision, not the hospital\'s.',
     reviewLabel: 'State court',
@@ -1504,7 +1572,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Supreme Court of New Jersey',
     focus: 'Withdrawal of tube feeding in persistent vegetative state',
     issue: 'Under what standards could a guardian seek withdrawal of a nasogastric tube from a patient in a persistent vegetative state who was not expected to die in the immediate future?',
-    holding: 'The New Jersey Supreme Court allowed withdrawal under a state-law framework built around the patient\'s likely wishes and surrogate decisionmaking.',
+    holding:
+      'The New Jersey Supreme Court held that withdrawal could be allowed under a state-law framework built around the patient\'s likely wishes and surrogate decisionmaking.',
     whyItMatters:
       'An important right-to-die decision because it pushed end-of-life doctrine beyond imminent-death cases and addressed long-term tube feeding directly.',
     reviewLabel: 'State court',
@@ -1524,7 +1593,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Standard of proof for involuntary civil commitment',
     issue: 'What burden of proof does due process require before the state can involuntarily commit a person for mental-health treatment?',
-    holding: 'The Court required at least clear-and-convincing evidence rather than a mere preponderance standard.',
+    holding:
+      'The Court held that due process requires at least clear-and-convincing evidence, rather than a mere preponderance standard, before involuntary civil commitment.',
     whyItMatters:
       'A major mental-health law case on bodily liberty, psychiatric confinement, and the procedural safeguards surrounding involuntary treatment.',
     reviewLabel: 'Already SCOTUS',
@@ -1544,7 +1614,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Commitment of minors for psychiatric treatment',
     issue: 'How much process is constitutionally required before a child is admitted to a state mental hospital at the request of a parent or guardian?',
-    holding: 'The Court rejected a full adversarial hearing requirement but required an independent medical-style inquiry into whether commitment was appropriate.',
+    holding:
+      'The Court rejected a full adversarial hearing requirement but held that due process requires an independent medical-style inquiry into whether commitment is appropriate.',
     whyItMatters:
       'A key case on child psychiatry, parental authority, and the state procedures needed before major mental-health confinement decisions.',
     reviewLabel: 'Already SCOTUS',
@@ -1564,7 +1635,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Right to refuse treatment',
     issue: 'What process may a state require before life-sustaining treatment is withdrawn from an incompetent patient?',
-    holding: "The Court allowed Missouri to require clear and convincing evidence of the patient's wishes.",
+    holding:
+      "The Court held that Missouri could require clear and convincing evidence of the patient's wishes before life-sustaining treatment was withdrawn.",
     whyItMatters:
       'This is a foundational end-of-life autonomy case in modern American bioethics.',
     reviewLabel: 'Already SCOTUS',
@@ -1584,7 +1656,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Supreme Court of Kentucky',
     focus: 'Withdrawal of feeding tube and artificial nutrition',
     issue: 'Could life-sustaining artificial nutrition and hydration be withdrawn from a woman in a persistent vegetative state under Kentucky law?',
-    holding: 'Yes. The Kentucky Supreme Court treated tube feeding as a medical intervention that could be withdrawn under the governing right-to-refuse-treatment principles.',
+    holding:
+      'Yes. The Kentucky Supreme Court held that tube feeding is a medical intervention that can be withdrawn under the governing right-to-refuse-treatment principles.',
     whyItMatters:
       'A significant right-to-die case because it squarely treats artificial nutrition and hydration as medical treatment rather than something categorically different.',
     reviewLabel: 'State court',
@@ -1604,7 +1677,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Supreme Court of California',
     focus: 'Prisoner refusing life-sustaining care',
     issue: 'Could a competent prisoner refuse life-sustaining feeding, medication, and related treatment even if death might follow?',
-    holding: 'Yes. The California Supreme Court held that a competent adult retained the right to refuse treatment, and prison officials generally could not override that choice absent special institutional concerns.',
+    holding:
+      'Yes. The California Supreme Court held that a competent prisoner retained the right to refuse treatment, and prison officials generally could not override that choice absent special institutional concerns.',
     whyItMatters:
       'A strong autonomy case because it extends refusal-of-treatment principles into the prison setting instead of confining them to ordinary hospital patients.',
     reviewLabel: 'State court',
@@ -1624,7 +1698,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Compulsory vaccination and public health power',
     issue: 'Could a state require vaccination during a smallpox outbreak as a matter of public-health law?',
-    holding: 'Yes. The Court upheld compulsory vaccination as a valid exercise of the state police power, subject to limits against arbitrary or oppressive use.',
+    holding:
+      'Yes. The Court held that compulsory vaccination during a smallpox outbreak was a valid exercise of the state police power, subject to limits against arbitrary or oppressive use.',
     whyItMatters:
       'It is the classic U.S. vaccination and public-health case, and it still shapes debates over state power in biomedical emergencies.',
     reviewLabel: 'Already SCOTUS',
@@ -1644,7 +1719,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Forced antipsychotic medication in prison',
     issue: 'What process and substantive limits apply when the state wants to medicate a mentally ill prison inmate against his will?',
-    holding: 'The Court held that due process allows forced antipsychotic medication of a seriously mentally ill inmate who is dangerous to self or others when the treatment is in the inmate\'s medical interest.',
+    holding:
+      'The Court held that due process allows forced antipsychotic medication of a seriously mentally ill prisoner who is dangerous and whose treatment is in the prisoner\'s medical interest.',
     whyItMatters:
       'This is one of the core cases on bodily autonomy, psychiatry, state custody, and forced medical treatment.',
     reviewLabel: 'Already SCOTUS',
@@ -1664,7 +1740,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Forced medication during trial',
     issue: 'Could the state continue antipsychotic medication during a murder trial without adequately showing need and reasonable alternatives?',
-    holding: 'No. The forced medication violated due process because the state did not make the required showing of need and less intrusive alternatives.',
+    holding:
+      'No. The Court held that the forced medication violated due process because the state did not make the required showing of need and less intrusive alternatives.',
     whyItMatters:
       'It is a major follow-on to Harper because it focuses on trial fairness, courtroom demeanor, and the effect of psychiatric drugs on criminal proceedings.',
     reviewLabel: 'Already SCOTUS',
@@ -1684,7 +1761,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Reproductive autonomy and abortion regulation',
     issue: 'Should Roe be reaffirmed, and what constitutional test should govern abortion regulations before viability?',
-    holding: 'The Court reaffirmed the core abortion right at the time but replaced Roe\'s framework with the undue-burden standard and upheld most of the challenged provisions.',
+    holding:
+      'The Court reaffirmed what it described at the time as Roe\'s essential holding, replaced Roe\'s framework with the undue-burden standard, and upheld most of the challenged provisions.',
     whyItMatters:
       'This became the controlling abortion-regulation framework for decades and reshaped the constitutional law of reproductive decisionmaking.',
     reviewLabel: 'Already SCOTUS',
@@ -1704,7 +1782,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'District of Columbia Court of Appeals',
     focus: 'Forced cesarean and maternal autonomy',
     issue: 'Under what circumstances, if any, can a court order major surgery on a pregnant patient for the sake of the fetus?',
-    holding: 'The D.C. Court of Appeals condemned the handling of the case and emphasized that competent patients generally control their own medical decisions.',
+    holding:
+      'The D.C. Court of Appeals condemned the handling of the case and made clear that competent patients generally control their own medical decisions, even in maternal-fetal conflict cases.',
     whyItMatters:
       'A leading maternal-fetal conflict case in American bioethics and hospital decisionmaking.',
     reviewLabel: 'State court',
@@ -1724,7 +1803,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Forced medication to restore trial competence',
     issue: 'Could the government forcibly medicate a mentally ill criminal defendant to make him competent to stand trial?',
-    holding: 'Sometimes, but only under a demanding multi-part constitutional standard.',
+    holding:
+      'Sometimes. The Court held that the government may forcibly medicate a defendant to restore trial competence, but only under a demanding multi-part constitutional standard.',
     whyItMatters:
       'A core case on psychiatric medication, bodily autonomy, and the state interest in adjudicating criminal charges.',
     reviewLabel: 'Already SCOTUS',
@@ -1744,7 +1824,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Court of Appeals of Maryland',
     focus: 'Nontherapeutic research on children',
     issue: 'Could parents validly consent to children participating in lead-abatement research that exposed them to risk without offering direct therapeutic benefit?',
-    holding: 'The Maryland high court let negligence claims proceed and sharply questioned whether parents could authorize that kind of risky nontherapeutic research.',
+    holding:
+      'The Maryland high court allowed negligence claims to proceed and sharply questioned whether parents may consent to that kind of risky nontherapeutic research on children without direct benefit.',
     whyItMatters:
       'One of the clearest American judicial opinions on human-subject research ethics, vulnerable children, and the limits of parental consent in experimentation.',
     reviewLabel: 'State court',
@@ -1764,7 +1845,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the Western District of Washington',
     focus: 'Experimental cancer protocols and research consent',
     issue: 'Did participants in an experimental cancer-treatment protocol state federal and research-ethics-based claims based on alleged failures to disclose key risks, conflicts, and alternatives?',
-    holding: 'The district court rejected the standalone Nuremberg-Code and constitutional dignity theories on the pleadings, while sharply distinguishing undisclosed experimentation from cases involving patients who knew they were entering an experimental protocol.',
+    holding:
+      'The district court rejected the standalone Nuremberg Code and constitutional dignity theories on the pleadings, while sharply distinguishing undisclosed experimentation from cases involving patients who knew they were entering an experimental protocol.',
     whyItMatters:
       'A widely cited research-ethics opinion because it maps the boundary between outright secret experimentation and allegedly inadequate informed consent in therapeutic research.',
     reviewLabel: 'Federal lower court',
@@ -1784,7 +1866,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the Northern District of Alabama',
     focus: 'SUPPORT trial and research informed consent',
     issue: 'Could families recover for injuries allegedly tied to the SUPPORT oxygen-randomization study on extremely premature infants, based on arguments that the research design and consent process exposed infants to undisclosed comparative risks?',
-    holding: 'No. The district court granted summary judgment to the defendants under the state-law theory presented.',
+    holding:
+      'No. The district court granted summary judgment to the defendants on the state-law theory presented in the challenge to the SUPPORT trial.',
     whyItMatters:
       'It is one of the highest-profile modern research-ethics cases in the United States because it sits at the center of the SUPPORT-trial debate over randomization, standard-of-care research, and what informed consent must disclose.',
     reviewLabel: 'Federal lower court',
@@ -1804,7 +1887,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. District Court for the District of Massachusetts',
     focus: 'False-pretenses experimentation versus ordinary informed consent',
     issue: 'Could a medical-treatment suit proceed on the theory that the patient was used as an experimental subject under false pretenses rather than merely receiving inadequate informed-consent disclosures?',
-    holding: 'The district court drew a sharp distinction between ordinary informed-consent claims and allegations of nontherapeutic experimentation under false pretenses, allowing the case to proceed on that more serious theory.',
+    holding:
+      'The district court drew a sharp distinction between ordinary informed-consent claims and allegations of nontherapeutic experimentation under false pretenses, allowing the case to proceed on that more serious theory.',
     whyItMatters:
       'It is one of the clearest U.S. opinions distinguishing routine disclosure failures from actual human experimentation carried out without real consent.',
     reviewLabel: 'Federal lower court',
@@ -1824,7 +1908,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Court of Appeals for the Second Circuit',
     focus: 'Nonconsensual drug testing on children',
     issue: 'Could plaintiffs pursue claims arising from allegations that children in Nigeria were subjected to an experimental antibiotic trial without valid consent?',
-    holding: 'The Second Circuit held that the alleged prohibition on nonconsensual human medical experimentation was sufficiently definite to be enforceable through the Alien Tort Statute and sent the case back for further proceedings.',
+    holding:
+      'The Second Circuit held that the alleged prohibition on nonconsensual human medical experimentation was sufficiently definite to support Alien Tort Statute litigation and sent the case back for further proceedings.',
     whyItMatters:
       'A major modern human-subjects case because it treats nonconsensual medical experimentation as a serious, actionable norm in transnational litigation.',
     reviewLabel: 'Federal lower court',
@@ -1844,7 +1929,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Court of Appeals for the Sixth Circuit',
     focus: 'Newborn blood screening, storage, and later research use without informed consent',
     issue: 'Could parents and children press constitutional claims arising from the state\'s collection, retention, storage, and later research or third-party use of newborn blood spots allegedly without valid informed consent?',
-    holding: 'In part yes. The Sixth Circuit revived significant constitutional claims and sent the case back for further proceedings.',
+    holding:
+      'In part yes. The Sixth Circuit revived significant constitutional claims arising from newborn blood-spot collection, retention, and later use without valid informed consent, and sent the case back for further proceedings.',
     whyItMatters:
       'A major modern biospecimen case because it connects newborn screening, biobank retention, later research use, and informed-consent limits in a large state program.',
     reviewLabel: 'Federal lower court',
@@ -1864,7 +1950,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Punitive sterilization and eugenics',
     issue: 'Could Oklahoma forcibly sterilize certain repeat offenders under its habitual-criminal sterilization law?',
-    holding: 'No. The Court struck the law down under the Equal Protection Clause.',
+    holding:
+      'No. The Court held that Oklahoma\'s habitual-criminal sterilization law violated the Equal Protection Clause and could not be enforced.',
     whyItMatters:
       'This is the canonical anti-eugenic sterilization case and a core reproductive-autonomy precedent in American constitutional law.',
     reviewLabel: 'Already SCOTUS',
@@ -1884,7 +1971,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Physician-assisted suicide',
     issue: 'Did the federal Constitution create a fundamental right to physician-assisted suicide?',
-    holding: 'No. The Court rejected that claimed fundamental right.',
+    holding:
+      'No. The Court held that the federal Constitution does not create a fundamental right to physician-assisted suicide.',
     whyItMatters:
       'A defining constitutional bioethics case on assisted dying and bodily autonomy.',
     reviewLabel: 'Already SCOTUS',
@@ -1904,7 +1992,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Assisted suicide and equal protection',
     issue: "Did New York's ban on assisted suicide violate equal protection because patients could refuse life-sustaining treatment?",
-    holding: 'No. The Court upheld the ban and rejected the equal-protection challenge.',
+    holding:
+      'No. The Court held that New York\'s ban on assisted suicide did not violate equal protection merely because patients could refuse life-sustaining treatment.',
     whyItMatters:
       'Together with Glucksberg, this is one of the defining modern Supreme Court cases on assisted dying and end-of-life law.',
     reviewLabel: 'Already SCOTUS',
@@ -1924,7 +2013,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Forced sterilization and eugenics',
     issue: 'Could a state forcibly sterilize a woman under a eugenic statute?',
-    holding: 'The Court upheld the sterilization law.',
+    holding:
+      'The Court upheld the sterilization law and allowed the forced sterilization to proceed under the Virginia eugenics statute.',
     whyItMatters:
       'This is one of the darkest and most infamous bioethics cases in American judicial history.',
     reviewLabel: 'Already SCOTUS',
@@ -1944,7 +2034,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Court of Appeals for the D.C. Circuit',
     focus: 'Access to experimental drugs',
     issue: 'Did terminally ill patients have a constitutional right to access investigational drugs after Phase I testing?',
-    holding: 'No. The en banc court rejected that claimed constitutional right.',
+    holding:
+      'No. The en banc D.C. Circuit held that terminally ill patients did not have a constitutional right to obtain investigational drugs after Phase I testing.',
     whyItMatters:
       'A major case on compassionate use, drug development, and the constitutional limits of experimental access claims.',
     reviewLabel: 'Federal lower court',
@@ -1964,7 +2055,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'Supreme Court of Pennsylvania',
     focus: 'Decision standards for withdrawing life-sustaining treatment',
     issue: 'Who may decide to withdraw life-sustaining treatment from a patient in a persistent vegetative state who left no clear prior directions, and under what standard?',
-    holding: 'The Pennsylvania Supreme Court set out the governing procedures and standards for surrogate decisionmaking in that setting.',
+    holding:
+      'The Pennsylvania Supreme Court set out the governing procedures and standards for surrogate decisionmaking about withdrawal of life-sustaining treatment in that setting.',
     whyItMatters:
       'A leading state high-court case on how right-to-die rules operate when the patient\'s wishes are not clearly documented in advance.',
     reviewLabel: 'State court',
@@ -1984,7 +2076,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Terminal patients and unapproved drugs',
     issue: 'Did terminally ill cancer patients have a statutory right to obtain Laetrile outside the normal FDA approval framework?',
-    holding: 'No. The Court refused to create that exception to federal drug law.',
+    holding:
+      'No. The Court held that terminally ill cancer patients did not have a statutory right to obtain Laetrile outside the ordinary FDA approval framework.',
     whyItMatters:
       'An early landmark on experimental treatment access and the tension between desperation medicine and FDA gatekeeping.',
     reviewLabel: 'Already SCOTUS',
@@ -2004,7 +2097,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Supreme Court',
     focus: 'Abortion rights reversal',
     issue: 'Did the Constitution continue to protect a pre-viability abortion right?',
-    holding: 'No. The Court overruled Roe and Casey and returned abortion regulation largely to the political process.',
+    holding:
+      'No. The Court held that the Constitution does not protect a pre-viability abortion right, overruled Roe and Casey, and returned abortion regulation largely to the political process.',
     whyItMatters:
       'One of the most consequential modern bioethics and reproductive-autonomy decisions because it overturned nearly fifty years of Supreme Court abortion-rights doctrine.',
     reviewLabel: 'Already SCOTUS',
@@ -2024,7 +2118,8 @@ export const JUDICIAL_BIOTECH_CASES: JudicialBiotechCase[] = [
     court: 'U.S. Court of Appeals for the D.C. Circuit',
     focus: 'Embryonic stem-cell funding',
     issue: 'Did federal funding rules for embryonic stem-cell research violate the Dickey-Wicker Amendment?',
-    holding: 'The court let the NIH embryonic stem-cell funding policy stay in effect, so federal funding for that research continued.',
+    holding:
+      'The D.C. Circuit held that the challenge failed and the NIH embryonic stem-cell funding policy could remain in effect, so federal funding for that research continued.',
     whyItMatters:
       'A leading case on how courts treat federal stem-cell-research policy and statutory limits on embryo destruction.',
     reviewLabel: 'Federal lower court',

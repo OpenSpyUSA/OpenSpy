@@ -514,8 +514,13 @@ function getBiotechProceedingFilterCategory(event: {
   sourceLinks?: SourceLink[]
   title: string
   topics: string[]
+  type: 'Administrative' | 'Congress'
   venue: string
 }) {
+  if (event.type === 'Congress') {
+    return 'hearings'
+  }
+
   const sources = event.sourceLinks && event.sourceLinks.length > 0 ? event.sourceLinks : [event.source]
   const sourceHaystack = sources
     .flatMap((source) => [source.label, source.locationLabel ?? '', source.searchText ?? '', source.url])
@@ -3846,8 +3851,9 @@ function JudicialBiotechCasesSection() {
               <div className="case-grid">
                 {groupCases.map((caseItem) => {
                   const mediaMirror = JUDICIAL_MEDIA_MIRRORS[caseItem.id]
+                  const titleSourceUrl = getDeepLinkedSourceUrl(caseItem.source)
+                  const titleSourceTitle = getSourceLocationTitle(caseItem.source)
                   const sourceLinks = [
-                    caseItem.source,
                     ...(caseItem.sourceLinks ?? []),
                     ...(judicialBiotechCaseSourceOverrides.get(caseItem.id) ?? []),
                   ]
@@ -3862,7 +3868,17 @@ function JudicialBiotechCasesSection() {
                       </div>
 
                       <div className="case-card__header">
-                        <h3>{caseItem.caseName}</h3>
+                        <h3>
+                          <a
+                            className="case-card__title-link"
+                            href={titleSourceUrl}
+                            rel="noreferrer"
+                            target="_blank"
+                            title={titleSourceTitle}
+                          >
+                            {caseItem.caseName}
+                          </a>
+                        </h3>
                       </div>
 
                       <p className="case-card__issue">
@@ -3875,22 +3891,24 @@ function JudicialBiotechCasesSection() {
                         <strong>Why it matters:</strong> {caseItem.whyItMatters}
                       </p>
 
-                      <div className="biotech-card__sources">
-                        {sourceLinks.map((source) => (
-                          <SourceEvidenceLink
-                            hideDate
-                            key={`${caseItem.id}-${source.label}-${source.url}`}
-                            source={source}
-                          />
-                        ))}
-                        {mediaMirror ? (
-                          <a href={mediaMirror.url} rel="noreferrer" target="_blank">
-                            <span className="source-evidence-link__date">Mirror</span>
-                            <span className="source-evidence-link__label">{mediaMirror.label}</span>
-                            <span className="source-evidence-link__locator">Unofficial YouTube mirror upload</span>
-                          </a>
-                        ) : null}
-                      </div>
+                      {sourceLinks.length > 0 || mediaMirror ? (
+                        <div className="biotech-card__sources">
+                          {sourceLinks.map((source) => (
+                            <SourceEvidenceLink
+                              hideDate
+                              key={`${caseItem.id}-${source.label}-${source.url}`}
+                              source={source}
+                            />
+                          ))}
+                          {mediaMirror ? (
+                            <a href={mediaMirror.url} rel="noreferrer" target="_blank">
+                              <span className="source-evidence-link__date">Mirror</span>
+                              <span className="source-evidence-link__label">{mediaMirror.label}</span>
+                              <span className="source-evidence-link__locator">Unofficial YouTube mirror upload</span>
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : null}
                     </article>
                   )
                 })}
@@ -4791,9 +4809,6 @@ function BiotechConnectionsView({
                     <div className="biotech-company-card__headerline">
                       <div className="biotech-company-card__badges">
                         <p className="eyebrow">#{index + 1}</p>
-                        <span className="biotech-company-chip biotech-company-chip--category">
-                          {company.category}
-                        </span>
                       </div>
 
                       <div className="biotech-company-card__market">

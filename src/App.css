@@ -2789,24 +2789,48 @@ a.biotech-event-index__title-link:focus-visible {
 }
 
 .biotech-company-card__market {
-  display: grid;
-  gap: 6px;
-  min-width: clamp(190px, 34%, 228px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px 8px;
+  width: fit-content;
+  min-width: 0;
   margin-left: auto;
-  padding: 12px 14px;
-  border-radius: 22px;
+  padding: 7px 11px;
   border: 1px solid rgba(16, 111, 132, 0.12);
+  border-radius: 16px;
   background:
-    linear-gradient(180deg, rgba(240, 248, 250, 0.96), rgba(229, 243, 246, 0.8)),
-    rgba(236, 246, 248, 0.72);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.94);
+    linear-gradient(180deg, rgba(248, 252, 253, 0.96), rgba(240, 248, 250, 0.82)),
+    rgba(244, 250, 251, 0.78);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 6px 16px rgba(15, 23, 42, 0.03);
+  text-align: right;
 }
 
 .biotech-company-card__market strong {
   color: #0b677b;
-  font-size: clamp(1.52rem, 2.6vw, 2.04rem);
+  font-size: clamp(1.08rem, 1.5vw, 1.34rem);
   letter-spacing: -0.06em;
-  line-height: 0.94;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.biotech-company-card__market-label {
+  color: rgba(29, 29, 31, 0.5);
+  font-size: clamp(0.94rem, 1.2vw, 1.12rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.biotech-company-card__market-date {
+  color: rgba(29, 29, 31, 0.58);
+  font-size: 0.82rem;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .biotech-company-card__meta {
@@ -4372,6 +4396,19 @@ a.biotech-event-index__title-link:focus-visible {
   font-size: clamp(1.35rem, 2vw, 1.7rem);
   line-height: 1.05;
   color: var(--ink);
+}
+
+.case-card__header .case-card__title-link {
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-decoration-color: rgba(29, 29, 31, 0.22);
+  text-underline-offset: 0.14em;
+}
+
+.case-card__header .case-card__title-link:hover,
+.case-card__header .case-card__title-link:focus-visible {
+  text-decoration-color: rgba(29, 29, 31, 0.52);
 }
 
 .case-card__header a {
@@ -7473,6 +7510,8 @@ a.biotech-event-index__title-link:focus-visible {
   .biotech-company-card__market {
     min-width: 0;
     margin-left: 0;
+    justify-content: flex-start;
+    text-align: left;
   }
 
   .agency-directory__stats {
