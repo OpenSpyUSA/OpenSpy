@@ -798,7 +798,7 @@ const BIOTECH_PAGE_META: Record<
     eyebrow: 'Biotech page one',
     title: 'Judicial Cases of the U.S.',
     summary:
-      'A broader judicial layer beyond the featured docket: genetics, patents, GMOs, FDA power, tissue ownership, IVF, embryo disputes, and hard bioethics. State cases below are not automatically overrulable; the U.S. Supreme Court usually steps in only if a real federal question is presented.',
+      'Judicial cases spanning genetics, patents, GMOs, FDA power, tissue ownership, IVF, embryo disputes, and hard bioethics. State cases below are not automatically overrulable; the U.S. Supreme Court usually steps in only if a real federal question is presented.',
   },
   proceedings: {
     eyebrow: 'Biotech page two',
