@@ -8,6 +8,7 @@ import {
 } from 'react'
 import type { CSSProperties } from 'react'
 import { Avatar } from './components/Avatar'
+import { CompanyLogoMark } from './components/CompanyLogoMark'
 import { ExecutiveMilitaryGlobe } from './components/ExecutiveMilitaryGlobe'
 import { IndependentAgencyDirectory } from './components/IndependentAgencyDirectory'
 import {
@@ -48,7 +49,7 @@ import {
   BIOTECH_CONNECTIONS,
   type BiotechConnectionCategory,
 } from './biotechConnections'
-import { BIOTECH_COMPANIES } from './biotechCompanies'
+import { BIOTECH_COMPANIES, type BiotechCompanyCategory } from './biotechCompanies'
 import {
   BIOTECH_MENTIONS,
   type BiotechMentionTier,
@@ -637,7 +638,18 @@ function SourceEvidenceLink({
   )
 }
 
+function getCompanyWebsiteUrl(sources: SourceLink[]) {
+  const officialSiteSource =
+    sources.find(
+      (source) =>
+        /official site/i.test(source.label) || /company website/i.test(source.locationLabel ?? ''),
+    ) ?? null
+
+  return officialSiteSource?.url ?? null
+}
+
 type ExecutivePageId = 'profiles' | 'systems'
+type BiotechCompanyCategoryFilter = 'all' | BiotechCompanyCategory
 type BiotechProceedingCategoryFilter =
   | 'all'
   | 'technology'
@@ -784,20 +796,21 @@ const BIOTECH_PAGE_META: Record<
 > = {
   companies: {
     eyebrow: 'Biotech page five',
-    title: 'Company Atlas',
+    title: 'Company Atlas of the World',
     summary:
-      'Major global biotech, medtech, pharma, diagnostics, and manufacturing companies with market-value snapshots and product focus.',
+      'A ranked market atlas across pharma, biopharma, medtech, diagnostics, and outsourced biologics manufacturing. Market value moves fast, so the more durable layer here is what each company actually makes, where it is headquartered, and where it sits in the healthcare stack.',
   },
   'judicial-cases': {
     eyebrow: 'Biotech page one',
-    title: 'Judicial Cases',
-    summary: 'Biotech and bioethics cases from the Supreme Court, federal courts, and state courts.',
+    title: 'Judicial Cases of the U.S.',
+    summary:
+      'A broader judicial layer beyond the featured docket: genetics, patents, GMOs, FDA power, tissue ownership, IVF, embryo disputes, and hard bioethics. State cases below are not automatically overrulable; the U.S. Supreme Court usually steps in only if a real federal question is presented.',
   },
   proceedings: {
     eyebrow: 'Biotech page two',
-    title: 'Biotech, Healthcare & Biosecurity Proceedings',
+    title: 'Biotech, Healthcare & Biosecurity Proceedings of the U.S.',
     summary:
-      'Hearings, agency meetings, advisory proceedings, and official health-security or biotech forums.',
+      'It includes congressional hearings plus administrative and advisory proceedings across biotech, healthcare, public health, biodefense, food safety, pandemic oversight, and related governance, with a dedicated official-source sweep across HHS agencies and advisory bodies including FDA, CDC, NIH, CMS, USDA, HRSA, AHRQ, SAMHSA, IHS, DHS/CWMD, DoD health and biotech venues, VA research bodies, and OSTP/NSF bioeconomy proceedings.',
   },
   'people-profiles': {
     eyebrow: 'Biotech page three',
@@ -811,6 +824,22 @@ const BIOTECH_PAGE_META: Record<
     summary:
       'Official-source language hits for biosecurity, bioweapon, biodefense, gain-of-function, and related terms.',
   },
+}
+const BIOTECH_COMPANY_CATEGORY_ORDER = [
+  'Big Pharma',
+  'Biotech / Biopharma',
+  'Medtech',
+  'Diagnostics & Tools',
+  'Biomanufacturing / CDMO',
+] as const satisfies readonly BiotechCompanyCategory[]
+const BIOTECH_COMPANY_CATEGORY_SUMMARY: Record<BiotechCompanyCategory, string> = {
+  'Big Pharma': 'Diversified global drugmakers with broad commercial medicine portfolios.',
+  'Biotech / Biopharma':
+    'Biotech-led or biologics-heavy medicine companies built around platform innovation and specialty therapeutics.',
+  Medtech: 'Medical devices, procedure platforms, implants, and surgical systems.',
+  'Diagnostics & Tools': 'Lab instruments, testing systems, research tools, and diagnostics infrastructure.',
+  'Biomanufacturing / CDMO':
+    'Outsourced drug-development, biologics manufacturing, and production capacity providers.',
 }
 const EXECUTIVE_PAGE_META: Record<
   ExecutivePageId,
@@ -3787,16 +3816,6 @@ function JudicialBiotechCasesSection() {
           </p>
           <h2>Biotech & Bioethics Cases</h2>
         </div>
-        <p>
-          A broader judicial layer beyond the featured docket: genetics, patents, GMOs, FDA
-          power, tissue ownership, IVF, embryo disputes, and hard bioethics. State cases below are
-          not automatically overrulable; the U.S. Supreme Court usually steps in only if a real
-          federal question is presented.
-        </p>
-        <p className="case-section__subnote">
-          Where available, judicial cards now show multiple links instead of forcing everything
-          into one source slot.
-        </p>
       </div>
 
       <div aria-label="Judicial biotech case groups" className="biotech-event-index__filters">
@@ -4521,6 +4540,8 @@ function BiotechConnectionsView({
   peopleById: Map<string, GovernmentPerson>
 }) {
   const [expandedPersonId, setExpandedPersonId] = useState<string | null>(null)
+  const [biotechCompanyCategoryFilter, setBiotechCompanyCategoryFilter] =
+    useState<BiotechCompanyCategoryFilter>('all')
   const [biotechProceedingsCategoryFilter, setBiotechProceedingsCategoryFilter] =
     useState<BiotechProceedingCategoryFilter>('all')
   const biotechConnections = BIOTECH_CONNECTIONS.filter(
@@ -4570,20 +4591,28 @@ function BiotechConnectionsView({
           .filter((label): label is string => Boolean(label)),
       )
       .find(Boolean) ?? 'Apr 2026'
-  const biotechCompanyCategoryCounts = Array.from(
-    biotechCompanies.reduce((counts, company) => {
-      counts.set(company.category, (counts.get(company.category) ?? 0) + 1)
-      return counts
-    }, new Map<string, number>()),
-  ).sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
-  const biotechCompanyTotalMarketCap = biotechCompanies.reduce(
+  const biotechCompanyCategoryCountMap = biotechCompanies.reduce((counts, company) => {
+    counts.set(company.category, (counts.get(company.category) ?? 0) + 1)
+    return counts
+  }, new Map<BiotechCompanyCategory, number>())
+  const biotechCompanyCategoryCounts = BIOTECH_COMPANY_CATEGORY_ORDER.map((category) => [
+    category,
+    biotechCompanyCategoryCountMap.get(category) ?? 0,
+  ] as const).filter(([, count]) => count > 0)
+  const filteredBiotechCompanies =
+    biotechCompanyCategoryFilter === 'all'
+      ? biotechCompanies
+      : biotechCompanies.filter((company) => company.category === biotechCompanyCategoryFilter)
+  const filteredBiotechCompanyTotalMarketCap = filteredBiotechCompanies.reduce(
     (sum, company) => sum + company.marketCapBillions,
     0,
   )
-  const biotechCompanyCountryCount = new Set(
-    biotechCompanies.map((company) => company.headquarters.split(', ').at(-1) ?? company.headquarters),
+  const filteredBiotechCompanyCountryCount = new Set(
+    filteredBiotechCompanies.map(
+      (company) => company.headquarters.split(', ').at(-1) ?? company.headquarters,
+    ),
   ).size
-  const largestBiotechCompany = biotechCompanies[0] ?? null
+  const largestBiotechCompany = filteredBiotechCompanies[0] ?? null
   const filteredBiotechEventRows =
     biotechProceedingsCategoryFilter === 'all'
       ? biotechEventRows
@@ -4631,6 +4660,7 @@ function BiotechConnectionsView({
 
   useEffect(() => {
     setExpandedPersonId(null)
+    setBiotechCompanyCategoryFilter('all')
     setBiotechProceedingsCategoryFilter('all')
   }, [biotechPage])
 
@@ -4666,19 +4696,11 @@ function BiotechConnectionsView({
               Back to home
             </button>
             <div className="branch-banner__title-row">
-              <h1>Biotech, Biosecurity, and Lab Politics</h1>
+              <h1 className="branch-banner__topic-title--biotech">
+                Biotech, Biosecurity & Power
+              </h1>
               <h2 className="branch-state-heading">Choose a biotech page</h2>
             </div>
-          </div>
-          <div className="branch-banner__copy branch-banner__copy--topic">
-            <p className="branch-banner__lede">
-              Enter one dedicated biotech page at a time: company atlas, judicial cases,
-              proceedings, people profiles, or official language.
-            </p>
-            <p className="branch-summary">
-              Public mention of a lab, pathogen, or alleged bioweapon is tracked here as documented
-              rhetoric or official role, not as proof of an actual biological-weapons program.
-            </p>
           </div>
           {biotechEntryGrid}
         </header>
@@ -4694,18 +4716,11 @@ function BiotechConnectionsView({
             Back to biotech
           </button>
           <div className="branch-banner__title-row">
-            <h1>Biotech, Biosecurity, and Lab Politics</h1>
+            <h1 className="branch-banner__topic-title--biotech">
+              Biotech, Biosecurity & Power
+            </h1>
             <h2 className="branch-state-heading">{currentBiotechMeta?.title}</h2>
           </div>
-        </div>
-        <div className="branch-banner__copy branch-banner__copy--topic">
-          <p className="branch-banner__lede">
-            {currentBiotechMeta?.summary}
-          </p>
-          <p className="branch-summary">
-            Public mention of a lab, pathogen, or alleged bioweapon is tracked here as documented
-            rhetoric or official role, not as proof of an actual biological-weapons program.
-          </p>
         </div>
       </header>
 
@@ -4716,23 +4731,55 @@ function BiotechConnectionsView({
               <div className="section-card__header">
                 <div>
                   <p className="eyebrow">
-                    {formatPopulationCount(biotechCompanies.length)} companies •{' '}
+                    {formatPopulationCount(filteredBiotechCompanies.length)} companies
+                    {biotechCompanyCategoryFilter !== 'all'
+                      ? ` • ${biotechCompanyCategoryFilter}`
+                      : ''}
+                    {' • '}
                     {biotechCompaniesSnapshotDate} market-cap snapshot
                   </p>
                   <h2>Global Biotech / Med / Pharma Companies</h2>
                 </div>
-                <p>
-                  A ranked market atlas across pharma, biopharma, medtech, diagnostics, and
-                  outsourced biologics manufacturing. Market value moves fast, so the more durable
-                  layer here is what each company actually makes, where it is headquartered, and
-                  where it sits in the healthcare stack.
+              </div>
+
+              <div className="biotech-company-overview__glossary">
+                <div className="biotech-company-overview__glossary-row">
+                  <span className="biotech-company-overview__glossary-label">Glossary filter</span>
+                  <div className="biotech-company-overview__glossary-filters">
+                    <button
+                      className={`biotech-company-filter-chip${
+                        biotechCompanyCategoryFilter === 'all' ? ' is-active' : ''
+                      }`}
+                      onClick={() => setBiotechCompanyCategoryFilter('all')}
+                      type="button"
+                    >
+                      All <strong>{formatPopulationCount(biotechCompanies.length)}</strong>
+                    </button>
+                    {biotechCompanyCategoryCounts.map(([category, count]) => (
+                      <button
+                        className={`biotech-company-filter-chip${
+                          biotechCompanyCategoryFilter === category ? ' is-active' : ''
+                        }`}
+                        key={category}
+                        onClick={() => setBiotechCompanyCategoryFilter(category)}
+                        type="button"
+                      >
+                        {category} <strong>{formatPopulationCount(count)}</strong>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <p className="biotech-company-overview__glossary-note">
+                  {biotechCompanyCategoryFilter === 'all'
+                    ? 'Click a category and only that lane will be shown below.'
+                    : `${biotechCompanyCategoryFilter}: ${BIOTECH_COMPANY_CATEGORY_SUMMARY[biotechCompanyCategoryFilter]}`}
                 </p>
               </div>
 
               <div className="biotech-company-overview__stats">
                 <article className="biotech-company-stat">
                   <span>Combined market value</span>
-                  <strong>{formatMarketCapSnapshotLabel(biotechCompanyTotalMarketCap)}</strong>
+                  <strong>{formatMarketCapSnapshotLabel(filteredBiotechCompanyTotalMarketCap)}</strong>
                   <small>{biotechCompaniesSnapshotDate} snapshot</small>
                 </article>
                 <article className="biotech-company-stat">
@@ -4742,22 +4789,18 @@ function BiotechConnectionsView({
                 </article>
                 <article className="biotech-company-stat">
                   <span>Footprint</span>
-                  <strong>{biotechCompanyCountryCount} HQ countries</strong>
-                  <small>{biotechCompanyCategoryCounts.length} major categories</small>
+                  <strong>{filteredBiotechCompanyCountryCount} HQ countries</strong>
+                  <small>
+                    {biotechCompanyCategoryFilter === 'all'
+                      ? `${biotechCompanyCategoryCounts.length} major categories`
+                      : `${formatPopulationCount(biotechCompanies.length)} total companies in atlas`}
+                  </small>
                 </article>
-              </div>
-
-              <div className="biotech-company-overview__categories">
-                {biotechCompanyCategoryCounts.map(([category, count]) => (
-                  <span className="biotech-company-category-chip" key={category}>
-                    {category} <strong>{count}</strong>
-                  </span>
-                ))}
               </div>
             </section>
 
             <section className="biotech-company-grid" aria-label="Global biotech and pharma companies">
-              {biotechCompanies.map((company, index) => (
+              {filteredBiotechCompanies.map((company, index) => (
                 <article className="biotech-company-card" key={company.id}>
                   <div className="biotech-company-card__top">
                     <div className="biotech-company-card__headerline">
@@ -4778,16 +4821,19 @@ function BiotechConnectionsView({
                     </div>
 
                     <div className="biotech-company-card__title-group">
-                      <h3>{company.name}</h3>
+                      <div className="biotech-company-card__brand">
+                        <CompanyLogoMark
+                          className="biotech-company-card__logo"
+                          name={company.name}
+                          websiteUrl={getCompanyWebsiteUrl(company.sources)}
+                        />
+                        <h3>{company.name}</h3>
+                      </div>
                       <p className="biotech-company-card__summary">{company.summary}</p>
                     </div>
                   </div>
 
                   <div className="biotech-company-card__meta">
-                    <div className="biotech-company-meta">
-                      <span>Ticker</span>
-                      <strong>{company.ticker}</strong>
-                    </div>
                     <div className="biotech-company-meta">
                       <span>Headquarters</span>
                       <strong>{company.headquarters}</strong>
@@ -4838,15 +4884,6 @@ function BiotechConnectionsView({
                 </p>
                 <h2>Biotech, Healthcare & Biosecurity Proceedings</h2>
               </div>
-              <p>
-                This is now a broader proceedings index rather than a roster-only appendix. It
-                includes congressional hearings plus administrative and advisory proceedings across
-                biotech, healthcare, public health, biodefense, food safety, pandemic oversight, and
-                related governance, with a dedicated official-source sweep across HHS agencies and
-                advisory bodies including FDA, CDC, NIH, CMS, USDA, HRSA, AHRQ, SAMHSA, IHS,
-                DHS/CWMD, DoD health and biotech venues, VA research bodies, and OSTP/NSF
-                bioeconomy proceedings.
-              </p>
             </div>
 
             <div aria-label="Proceedings category filters" className="biotech-event-index__filters">
