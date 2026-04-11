@@ -472,10 +472,6 @@ function includesAnyBiotechProceedingKeyword(haystack: string, keywords: string[
   return keywords.some((keyword) => haystack.includes(keyword))
 }
 
-function countBiotechProceedingKeywordHits(haystack: string, keywords: string[]) {
-  return keywords.reduce((total, keyword) => total + (haystack.includes(keyword) ? 1 : 0), 0)
-}
-
 function biotechProceedingHasPublicMaterials(sources: SourceLink[]) {
   return sources.some((source) =>
     includesAnyBiotechProceedingKeyword(
@@ -520,94 +516,85 @@ function getBiotechProceedingFilterCategory(event: {
   topics: string[]
   venue: string
 }) {
-  const haystack = [event.title, event.venue, ...event.topics].join(' ').toLowerCase()
   const sources = event.sourceLinks && event.sourceLinks.length > 0 ? event.sourceLinks : [event.source]
+  const sourceHaystack = sources
+    .flatMap((source) => [source.label, source.locationLabel ?? '', source.searchText ?? '', source.url])
+    .join(' ')
+    .toLowerCase()
+  const haystack = [event.title, event.venue, ...event.topics, sourceHaystack].join(' ').toLowerCase()
   const hasPublicMaterials = biotechProceedingHasPublicMaterials(sources)
+  const isHearing = includesAnyBiotechProceedingKeyword(haystack, [
+    ' hearing',
+    'hearing ',
+    'hearings',
+    'hearing:',
+    'hearing with',
+    'senate hearing',
+    'house hearing',
+    'congress.gov hearing',
+    'witness statement',
+    'opening statement',
+    'testimony',
+  ])
+  const isWorkshopOrWebinar = includesAnyBiotechProceedingKeyword(haystack, [
+    'workshop',
+    'webinar',
+    'town hall',
+    'listening session',
+    'outreach session',
+    'roundtable',
+    'pitch day',
+    'pitch days',
+  ])
+  const isNoticeOrAgenda = includesAnyBiotechProceedingKeyword(haystack, [
+    'notice',
+    'agenda',
+    'announcement',
+    'save-the-date',
+    'save the date',
+    'federal register',
+    'public inspection',
+  ])
+  const isMeetingLike = includesAnyBiotechProceedingKeyword(haystack, [
+    'meeting',
+    'meetings',
+    'advisory',
+    'committee',
+    'council',
+    'board',
+    'session',
+    'consultation',
+    'materials',
+    'minutes',
+    'archive',
+    'proceedings',
+  ])
+
+  if (isNoticeOrAgenda && !hasPublicMaterials) {
+    return 'notices_agendas'
+  }
+
+  if (isHearing) {
+    return 'hearings'
+  }
+
+  if (isWorkshopOrWebinar) {
+    return 'workshops_webinars'
+  }
+
+  if (isNoticeOrAgenda) {
+    return 'notices_agendas'
+  }
+
+  if (isMeetingLike) {
+    return 'meetings'
+  }
 
   if (!hasPublicMaterials) {
-    return 'no_presentation_video'
+    return 'notices_agendas'
   }
 
-  const technologyScore = countBiotechProceedingKeywordHits(haystack, [
-    'biotech',
-    'biotechnology',
-    'bioeconomy',
-    'synthetic biology',
-    'ai + biology',
-    'ai biotechnology',
-    'genetic',
-    'genetics',
-    'genomic',
-    'genomics',
-    'gene therapy',
-    'gene-edit',
-    'gene edit',
-    'cell therapy',
-    'cellular',
-    'tissue',
-    'stem cell',
-    'microbiome',
-    'embryo',
-    'ivf',
-    'live biotherapeutic',
-    'biomanufacturing',
-    'ag biotech',
-    'molecular',
-    'platform',
-    'therapeutic',
-    'therapeutics',
-    'diagnostic',
-    'device',
-    'vaccine',
-    'vaccines',
-    'rare disease',
-    '23andme',
-  ])
-
-  const policyScore = countBiotechProceedingKeywordHits(haystack, [
-    'policy',
-    'regulation',
-    'regulatory',
-    'oversight',
-    'appropriation',
-    'appropriations',
-    'funding',
-    'governance',
-    'framework',
-    'strategy',
-    'strategic',
-    'standards',
-    'guidance',
-    'privacy',
-    'bankruptcy',
-    'biosecurity',
-    'biodefense',
-    'preparedness',
-    'response',
-    'national security',
-    'agroterrorism',
-    'dual-use',
-    'gain-of-function',
-    'lab leak',
-    'countermeasure',
-    'countermeasures',
-    'threat',
-    'threats',
-  ])
-
-  if (technologyScore > policyScore) {
-    return 'technology'
-  }
-
-  if (policyScore > technologyScore) {
-    return 'policy'
-  }
-
-  if (technologyScore > 0) {
-    return 'technology'
-  }
-
-  return 'policy'
+  return 'meetings'
 }
 
 function SourceEvidenceLink({
@@ -652,9 +639,10 @@ type ExecutivePageId = 'profiles' | 'systems'
 type BiotechCompanyCategoryFilter = 'all' | BiotechCompanyCategory
 type BiotechProceedingCategoryFilter =
   | 'all'
-  | 'technology'
-  | 'policy'
-  | 'no_presentation_video'
+  | 'hearings'
+  | 'meetings'
+  | 'workshops_webinars'
+  | 'notices_agendas'
 type BiotechPageId =
   | 'companies'
   | 'judicial-cases'
@@ -673,9 +661,10 @@ type RouteState = {
 
 const BIOTECH_PROCEEDING_CATEGORY_FILTERS = [
   { id: 'all', label: 'All' },
-  { id: 'technology', label: 'Technology' },
-  { id: 'policy', label: 'Policy' },
-  { id: 'no_presentation_video', label: 'No presentation / video' },
+  { id: 'hearings', label: 'Hearings' },
+  { id: 'meetings', label: 'Meetings' },
+  { id: 'workshops_webinars', label: 'Workshops / webinars' },
+  { id: 'notices_agendas', label: 'Notices / agendas' },
 ] as const satisfies Array<{ id: BiotechProceedingCategoryFilter; label: string }>
 
 type SupremeCourtCaseSelection = {
@@ -4408,10 +4397,6 @@ function HomeView({
   onOpenBiotechPage: () => void
 }) {
   const homeCopy = HOME_AUDIENCE_COPY[audienceMode]
-  const biotechSourceCount = BIOTECH_CONNECTIONS.reduce(
-    (total, connection) => total + connection.sources.length,
-    0,
-  )
 
   return (
     <main className="screen screen--home">
@@ -4489,31 +4474,31 @@ function HomeView({
         <div className="home-topic-card__copy">
           <div>
             <p className="eyebrow">Special topic</p>
-            <h2>Biotech, Biosecurity, and Lab-Leak Politics</h2>
+            <h2>Biotech, Biosecurity &amp; Power</h2>
           </div>
           <p>
-            A source-linked shortlist of people already profiled on this site who have direct ties
-            to biotechnology policy, biomedical-regulation power, biosecurity oversight, or public
-            lab-leak and gain-of-function politics.
+            A dedicated hub for a world company atlas, U.S. judicial cases, and U.S. biotech,
+            healthcare, and biosecurity proceedings, all source-linked and separated from the main
+            three-branch view.
           </p>
         </div>
         <div className="home-topic-card__meta">
           <div className="home-topic-card__stats">
             <div className="stat-card">
-              <strong>{BIOTECH_CONNECTIONS.length}</strong>
-              <span>matched people</span>
+              <strong>{BIOTECH_COMPANIES.length}</strong>
+              <span>companies</span>
             </div>
             <div className="stat-card">
-              <strong>{BIOTECH_CATEGORY_ORDER.length}</strong>
-              <span>categories</span>
+              <strong>{JUDICIAL_BIOTECH_CASES.length}</strong>
+              <span>judicial cases</span>
             </div>
             <div className="stat-card">
-              <strong>{biotechSourceCount}</strong>
-              <span>source links</span>
+              <strong>{BIOTECH_EVENT_INDEX.length}</strong>
+              <span>proceedings</span>
             </div>
           </div>
           <button className="home-topic-card__button" onClick={onOpenBiotechPage} type="button">
-            Open dedicated section
+            Open biotech hub
           </button>
         </div>
       </section>
