@@ -1989,7 +1989,7 @@
 .biotech-entry-grid {
   grid-area: stats;
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
 }
 
@@ -2082,6 +2082,18 @@
 .biotech-entry-block--judicial .biotech-entry-block__count,
 .biotech-entry-block--judicial .biotech-entry-block__cta {
   color: #7a3756;
+}
+
+.biotech-entry-block--companies {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(240, 248, 250, 0.84)),
+    rgba(255, 255, 255, 0.76);
+  border-color: rgba(16, 111, 132, 0.14);
+}
+
+.biotech-entry-block--companies .biotech-entry-block__count,
+.biotech-entry-block--companies .biotech-entry-block__cta {
+  color: #0d6e83;
 }
 
 .biotech-entry-block--proceedings {
@@ -2509,6 +2521,209 @@ a.biotech-event-index__title-link:focus-visible {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
+}
+
+.biotech-company-overview {
+  display: grid;
+  gap: 20px;
+}
+
+.biotech-company-overview__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.biotech-company-stat {
+  display: grid;
+  gap: 6px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--line) 90%, white 10%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(243, 248, 251, 0.74)),
+    rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 10px 24px rgba(15, 23, 42, 0.04);
+}
+
+.biotech-company-stat span,
+.biotech-company-meta span,
+.biotech-company-card__products-label,
+.biotech-company-card__market-label {
+  color: rgba(29, 29, 31, 0.56);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.biotech-company-stat strong {
+  font-size: 1.22rem;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+}
+
+.biotech-company-stat small,
+.biotech-company-card__market-date {
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.biotech-company-overview__categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.biotech-company-category-chip,
+.biotech-company-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.biotech-company-category-chip strong {
+  font-size: 0.78rem;
+}
+
+.biotech-company-chip--category {
+  border-color: rgba(16, 111, 132, 0.16);
+  background:
+    linear-gradient(180deg, rgba(234, 247, 250, 0.96), rgba(224, 242, 246, 0.82)),
+    rgba(231, 245, 249, 0.78);
+  color: #0b677b;
+  font-weight: 700;
+}
+
+.biotech-company-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 18px;
+}
+
+.biotech-company-card {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  padding: 22px;
+  border-radius: 28px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, white 12%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(249, 251, 252, 0.74)),
+    rgba(255, 255, 255, 0.68);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 16px 30px rgba(15, 23, 42, 0.05);
+}
+
+.biotech-company-card__top {
+  display: grid;
+  gap: 14px;
+}
+
+.biotech-company-card__headerline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 12px;
+}
+
+.biotech-company-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.biotech-company-card__title-group {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.biotech-company-card__title-group h3 {
+  margin: 0;
+  font-size: 1.45rem;
+  letter-spacing: -0.04em;
+  line-height: 1.06;
+}
+
+.biotech-company-card__summary {
+  margin: 0;
+  color: var(--ink-soft);
+  max-width: 56ch;
+  line-height: 1.58;
+}
+
+.biotech-company-card__market {
+  display: grid;
+  gap: 6px;
+  min-width: clamp(190px, 34%, 228px);
+  margin-left: auto;
+  padding: 12px 14px;
+  border-radius: 22px;
+  border: 1px solid rgba(16, 111, 132, 0.12);
+  background:
+    linear-gradient(180deg, rgba(240, 248, 250, 0.96), rgba(229, 243, 246, 0.8)),
+    rgba(236, 246, 248, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}
+
+.biotech-company-card__market strong {
+  color: #0b677b;
+  font-size: clamp(1.52rem, 2.6vw, 2.04rem);
+  letter-spacing: -0.06em;
+  line-height: 0.94;
+}
+
+.biotech-company-card__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.biotech-company-meta {
+  display: grid;
+  gap: 8px;
+  padding: 14px 15px;
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--line) 90%, white 10%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(246, 248, 250, 0.76)),
+    rgba(255, 255, 255, 0.68);
+}
+
+.biotech-company-meta strong {
+  font-size: 0.96rem;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+.biotech-company-card__products-wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.biotech-company-card__products-label {
+  margin: 0;
+}
+
+.biotech-company-card__products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .biotech-card {
@@ -6969,7 +7184,7 @@ a.biotech-event-index__title-link:focus-visible {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .biotech-entry-grid {
+  .biotech-company-overview__stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -7098,7 +7313,7 @@ a.biotech-event-index__title-link:focus-visible {
     grid-template-columns: 1fr;
   }
 
-  .biotech-entry-grid {
+  .biotech-company-overview__stats {
     grid-template-columns: 1fr;
   }
 
@@ -7117,6 +7332,16 @@ a.biotech-event-index__title-link:focus-visible {
 
   .biotech-card__actions {
     justify-content: start;
+  }
+
+  .biotech-company-card__headerline {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .biotech-company-card__market {
+    min-width: 0;
+    margin-left: 0;
   }
 
   .agency-directory__stats {
