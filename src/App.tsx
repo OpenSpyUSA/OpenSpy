@@ -56,6 +56,7 @@ import { BIOTECH_EVENT_INDEX } from './biotechEventIndex'
 import {
   JUDICIAL_BIOTECH_CASES,
   JUDICIAL_BIOTECH_CASE_GROUPS,
+  type JudicialBiotechCaseGroupId,
 } from './judicialBiotechCases'
 import { SOURCE_DATE_OVERRIDES_BY_URL } from './sourceDateOverrides'
 import { TRUMP_TRUTH_SNAPSHOT, type TrumpTruthPost } from './trumpTruthSnapshot'
@@ -465,6 +466,123 @@ function formatBiotechProceedingVenue(venue: string) {
   return venue
 }
 
+function includesAnyBiotechProceedingKeyword(haystack: string, keywords: string[]) {
+  return keywords.some((keyword) => haystack.includes(keyword))
+}
+
+function getBiotechProceedingTopicBuckets(event: {
+  title: string
+  topics: string[]
+  venue: string
+}) {
+  const haystack = [event.title, event.venue, ...event.topics].join(' ').toLowerCase()
+  const buckets = new Set<Exclude<BiotechProceedingTopicFilter, 'all'>>()
+
+  if (
+    includesAnyBiotechProceedingKeyword(haystack, [
+      'biotech',
+      'biotechnology',
+      'bioeconomy',
+      'synthetic biology',
+      'ai + biology',
+      'ai biotechnology',
+      'genetic',
+      'genetics',
+      'genomic',
+      'genomics',
+      'gene therapy',
+      'gene-edit',
+      'gene edit',
+      'cell therapy',
+      'cellular',
+      'tissue',
+      'stem cell',
+      'microbiome',
+      'embryo',
+      'ivf',
+      'live biotherapeutic',
+      'biomanufacturing',
+      'ag biotech',
+      'molecular',
+    ])
+  ) {
+    buckets.add('biotech')
+  }
+
+  if (
+    includesAnyBiotechProceedingKeyword(haystack, [
+      'health',
+      'healthcare',
+      'public health',
+      'patient',
+      'patients',
+      'clinical',
+      'care',
+      'medical',
+      'medicine',
+      'therap',
+      'vaccine',
+      'vaccines',
+      'disease',
+      'drug',
+      'drugs',
+      'diagnostic',
+      'nih',
+      'cdc',
+      'cms',
+      'fda',
+      'food safety',
+      'salmonella',
+      'poultry',
+      'antibiotic',
+      'hospital',
+      'medicare',
+      'medicaid',
+    ])
+  ) {
+    buckets.add('healthcare')
+  }
+
+  if (
+    includesAnyBiotechProceedingKeyword(haystack, [
+      'security',
+      'biosecurity',
+      'biodefense',
+      'bioterror',
+      'threat',
+      'threats',
+      'defense',
+      'preparedness',
+      'darpa',
+      'dod',
+      'dhs',
+      'cwmd',
+      'agroterrorism',
+      'dual-use',
+      'wmd',
+      'countermeasure',
+      'countermeasures',
+      'lab leak',
+      'gain-of-function',
+      'national security',
+    ])
+  ) {
+    buckets.add('security')
+  }
+
+  if (!buckets.size) {
+    if (includesAnyBiotechProceedingKeyword(haystack, ['food', 'agriculture', 'usda', 'fsis'])) {
+      buckets.add('healthcare')
+    } else if (includesAnyBiotechProceedingKeyword(haystack, ['darpa', 'dod', 'dhs'])) {
+      buckets.add('security')
+    } else {
+      buckets.add('biotech')
+    }
+  }
+
+  return [...buckets]
+}
+
 function SourceEvidenceLink({
   fallbackExactMatches,
   hideDate = false,
@@ -494,6 +612,7 @@ function SourceEvidenceLink({
 }
 
 type ExecutivePageId = 'profiles' | 'systems'
+type BiotechProceedingTopicFilter = 'all' | 'biotech' | 'healthcare' | 'security'
 type BiotechPageId =
   | 'judicial-cases'
   | 'proceedings'
@@ -508,6 +627,13 @@ type RouteState = {
   personId: string | null
   specialPage: SpecialPageId | null
 }
+
+const BIOTECH_PROCEEDING_TOPIC_FILTERS = [
+  { id: 'all', label: 'All' },
+  { id: 'biotech', label: 'Biotech' },
+  { id: 'healthcare', label: 'Healthcare' },
+  { id: 'security', label: 'Security' },
+] as const satisfies Array<{ id: BiotechProceedingTopicFilter; label: string }>
 
 type SupremeCourtCaseSelection = {
   caseItem: SupremeCourtCase
@@ -3585,10 +3711,28 @@ function SupremeCourtCaseMatrix({
 }
 
 function JudicialBiotechCasesSection() {
+  const [selectedGroupId, setSelectedGroupId] = useState<'all' | JudicialBiotechCaseGroupId>('all')
+  const visibleGroups = JUDICIAL_BIOTECH_CASE_GROUPS.filter((group) =>
+    selectedGroupId === 'all' ? true : group.id === selectedGroupId,
+  )
+  const visibleCaseCount = visibleGroups.reduce(
+    (count, group) =>
+      count + JUDICIAL_BIOTECH_CASES.filter((caseItem) => caseItem.groupId === group.id).length,
+    0,
+  )
+  const selectedGroupLabel =
+    selectedGroupId === 'all'
+      ? null
+      : JUDICIAL_BIOTECH_CASE_GROUPS.find((group) => group.id === selectedGroupId)?.title ?? null
+
   return (
     <section className="section-card case-section case-section--judicial-biotech">
       <div className="section-card__header case-section__header">
         <div>
+          <p className="eyebrow">
+            {populationCountFormatter.format(visibleCaseCount)} cases
+            {selectedGroupLabel ? ` • ${selectedGroupLabel}` : ''}
+          </p>
           <h2>Biotech & Bioethics Cases</h2>
         </div>
         <p>
@@ -3603,8 +3747,30 @@ function JudicialBiotechCasesSection() {
         </p>
       </div>
 
+      <div aria-label="Judicial biotech case groups" className="biotech-event-index__filters">
+        <button
+          className={`biotech-event-index__filter-chip${selectedGroupId === 'all' ? ' is-active' : ''}`}
+          onClick={() => setSelectedGroupId('all')}
+          type="button"
+        >
+          All
+        </button>
+        {JUDICIAL_BIOTECH_CASE_GROUPS.map((group) => (
+          <button
+            className={`biotech-event-index__filter-chip${
+              selectedGroupId === group.id ? ' is-active' : ''
+            }`}
+            key={group.id}
+            onClick={() => setSelectedGroupId(group.id)}
+            type="button"
+          >
+            {group.title}
+          </button>
+        ))}
+      </div>
+
       <div className="judicial-case-groups">
-        {JUDICIAL_BIOTECH_CASE_GROUPS.map((group) => {
+        {visibleGroups.map((group) => {
           const groupCases = JUDICIAL_BIOTECH_CASES.filter((caseItem) => caseItem.groupId === group.id)
 
           return (
@@ -4305,6 +4471,8 @@ function BiotechConnectionsView({
   peopleById: Map<string, GovernmentPerson>
 }) {
   const [expandedPersonId, setExpandedPersonId] = useState<string | null>(null)
+  const [biotechProceedingsTopicFilter, setBiotechProceedingsTopicFilter] =
+    useState<BiotechProceedingTopicFilter>('all')
   const biotechConnections = BIOTECH_CONNECTIONS.filter(
     (connection) => connection.branchId !== 'judicial',
   )
@@ -4328,6 +4496,7 @@ function BiotechConnectionsView({
       event.sourceLinks && event.sourceLinks.length > 0 ? event.sourceLinks[0] : event.source,
     sourceLinks:
       event.sourceLinks && event.sourceLinks.length > 0 ? event.sourceLinks : [event.source],
+    topicBuckets: getBiotechProceedingTopicBuckets(event),
   }))
     .map((event) => ({
       ...event,
@@ -4340,6 +4509,10 @@ function BiotechConnectionsView({
       ),
     }))
     .sort((left, right) => right.date.localeCompare(left.date))
+  const filteredBiotechEventRows =
+    biotechProceedingsTopicFilter === 'all'
+      ? biotechEventRows
+      : biotechEventRows.filter((event) => event.topicBuckets.includes(biotechProceedingsTopicFilter))
   const biotechProfileCount = new Set(biotechConnections.map((connection) => connection.personId)).size
   const biotechEntryPages = [
     {
@@ -4375,6 +4548,7 @@ function BiotechConnectionsView({
 
   useEffect(() => {
     setExpandedPersonId(null)
+    setBiotechProceedingsTopicFilter('all')
   }, [biotechPage])
 
   const biotechEntryGrid = (
@@ -4459,7 +4633,16 @@ function BiotechConnectionsView({
           <section className="section-card biotech-event-index">
             <div className="section-card__header">
               <div>
-                <p className="eyebrow">{biotechEventRows.length} proceedings</p>
+                <p className="eyebrow">
+                  {populationCountFormatter.format(filteredBiotechEventRows.length)} proceedings
+                  {biotechProceedingsTopicFilter !== 'all'
+                    ? ` • ${
+                        BIOTECH_PROCEEDING_TOPIC_FILTERS.find(
+                          ({ id }) => id === biotechProceedingsTopicFilter,
+                        )?.label
+                      }`
+                    : ''}
+                </p>
                 <h2>Biotech, Healthcare & Biosecurity Proceedings</h2>
               </div>
               <p>
@@ -4473,6 +4656,21 @@ function BiotechConnectionsView({
               </p>
             </div>
 
+            <div aria-label="Proceedings topic filters" className="biotech-event-index__filters">
+              {BIOTECH_PROCEEDING_TOPIC_FILTERS.map((filterOption) => (
+                <button
+                  className={`biotech-event-index__filter-chip${
+                    biotechProceedingsTopicFilter === filterOption.id ? ' is-active' : ''
+                  }`}
+                  key={filterOption.id}
+                  onClick={() => setBiotechProceedingsTopicFilter(filterOption.id)}
+                  type="button"
+                >
+                  {filterOption.label}
+                </button>
+              ))}
+            </div>
+
             <div className="biotech-event-index__table-wrap">
               <table className="biotech-event-index__table">
                 <thead>
@@ -4484,7 +4682,7 @@ function BiotechConnectionsView({
                   </tr>
                 </thead>
                 <tbody>
-                  {biotechEventRows.map((event) => (
+                  {filteredBiotechEventRows.map((event) => (
                     <tr key={event.id}>
                       <td>
                         <div className="biotech-event-index__venue-cell">
