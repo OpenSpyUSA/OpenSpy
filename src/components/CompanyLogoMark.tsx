@@ -1,5 +1,14 @@
 import { useState } from 'react'
 
+const COMPANY_MARKETCAP_LOGO_OVERRIDES: Record<string, string> = {
+  '207940': '207940.KS',
+  '4502': 'TAK',
+  LONN: 'LONN.SW',
+  'NOVO-B': 'NVO',
+  NOVN: 'NVS',
+  SHL: 'SHL.DE',
+}
+
 function getCompanyMarkLabel(name: string) {
   const words = name
     .replace(/[^A-Za-z0-9&.\- ]+/g, ' ')
@@ -21,9 +30,35 @@ function getCompanyMarkLabel(name: string) {
     .join('')
 }
 
-function getCompanyLogoCandidates(websiteUrl?: string | null) {
+function getCompaniesMarketCapLogoCode(ticker?: string | null) {
+  const rawSymbol = ticker?.split(':').pop()?.trim()
+
+  if (!rawSymbol) {
+    return null
+  }
+
+  return COMPANY_MARKETCAP_LOGO_OVERRIDES[rawSymbol] ?? rawSymbol
+}
+
+function getCompanyLogoCandidates({
+  ticker,
+  websiteUrl,
+}: {
+  ticker?: string | null
+  websiteUrl?: string | null
+}) {
+  const candidates: string[] = []
+  const marketCapLogoCode = getCompaniesMarketCapLogoCode(ticker)
+
+  if (marketCapLogoCode) {
+    candidates.push(
+      `https://companiesmarketcap.com/img/company-logos/512/${marketCapLogoCode}.png`,
+      `https://companiesmarketcap.com/img/company-logos/256/${marketCapLogoCode}.png`,
+    )
+  }
+
   if (!websiteUrl) {
-    return []
+    return candidates
   }
 
   try {
@@ -31,25 +66,31 @@ function getCompanyLogoCandidates(websiteUrl?: string | null) {
     const parsed = new URL(normalizedUrl)
     const hostname = parsed.hostname.replace(/^www\./i, '')
 
-    return [
+    candidates.push(
+      `${parsed.origin}/apple-touch-icon.png`,
+      `${parsed.origin}/apple-touch-icon-precomposed.png`,
       `${parsed.origin}/favicon.ico`,
       `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`,
-    ]
+    )
   } catch {
-    return []
+    return candidates
   }
+
+  return candidates
 }
 
 export function CompanyLogoMark({
   className,
   name,
+  ticker,
   websiteUrl,
 }: {
   className: string
   name: string
+  ticker?: string | null
   websiteUrl?: string | null
 }) {
-  const candidates = getCompanyLogoCandidates(websiteUrl)
+  const candidates = getCompanyLogoCandidates({ ticker, websiteUrl })
   const [candidateIndex, setCandidateIndex] = useState(0)
   const currentCandidate = candidates[candidateIndex]
 

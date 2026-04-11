@@ -797,7 +797,7 @@ const BIOTECH_PAGE_META: Record<
   },
   proceedings: {
     eyebrow: 'Biotech page two',
-    title: 'Biotech, Healthcare & Biosecurity Proceedings of the U.S.',
+    title: 'Biotech, Healthcare & Biosecurity Proceedings',
     summary:
       'It includes congressional hearings plus administrative and advisory proceedings across biotech, healthcare, public health, biodefense, food safety, pandemic oversight, and related governance, with a dedicated official-source sweep across HHS agencies and advisory bodies including FDA, CDC, NIH, CMS, USDA, HRSA, AHRQ, SAMHSA, IHS, DHS/CWMD, DoD health and biotech venues, VA research bodies, and OSTP/NSF bioeconomy proceedings.',
   },
@@ -4810,6 +4810,7 @@ function BiotechConnectionsView({
                         <CompanyLogoMark
                           className="biotech-company-card__logo"
                           name={company.name}
+                          ticker={company.ticker}
                           websiteUrl={getCompanyWebsiteUrl(company.sources)}
                         />
                         <h3>{company.name}</h3>
