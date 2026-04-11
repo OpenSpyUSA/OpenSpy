@@ -98,21 +98,6 @@ export const BIOTECH_EVENT_INDEX: BiotechProceeding[] = [
     ),
   },
   {
-    id: 'deepseek-deep-dive-2025-04-08',
-    date: '2025-04-08',
-    type: 'Congress',
-    venue: 'House',
-    title: 'DeepSeek: A Deep Dive',
-    topics: ['AI', 'biosecurity', 'technology risk'],
-    source: makeSource(
-      '2025-04-08',
-      'House opening statement PDF',
-      'https://www.congress.gov/119/meeting/house/118111/documents/HMTG-119-SY15-MState-O000019-20250408.pdf',
-      'DeepSeek: A Deep Dive',
-      { page: 1 },
-    ),
-  },
-  {
     id: 'nsabb-meeting-2024-11-21',
     date: '2024-11-21',
     type: 'Administrative',
