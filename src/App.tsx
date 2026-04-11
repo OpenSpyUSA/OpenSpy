@@ -3836,7 +3836,9 @@ function JudicialBiotechCasesSection() {
 
       <div className="judicial-case-groups">
         {visibleGroups.map((group) => {
-          const groupCases = JUDICIAL_BIOTECH_CASES.filter((caseItem) => caseItem.groupId === group.id)
+          const groupCases = JUDICIAL_BIOTECH_CASES.filter((caseItem) => caseItem.groupId === group.id).sort(
+            (left, right) => right.year - left.year,
+          )
 
           return (
             <section className="judicial-case-group" key={group.id}>
